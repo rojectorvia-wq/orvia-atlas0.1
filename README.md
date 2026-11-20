@@ -1,18 +1,38 @@
-# ORVIA Atlas 0.1
+# ORVIA 0.2 — Nébula
 
-**ORVIA** significa **Organización, Rendimiento, Ventas, Inteligencia y Automatización**. Es un proyecto de plataforma de gestión e inteligencia operativa para restaurantes.
+**ORVIA** significa **Organización, Rendimiento, Ventas, Inteligencia y Automatización**. Plataforma de gestión e inteligencia operativa para restaurantes.
 
-> **Estado actual: documentación inicial.** Esta versión del repositorio todavía no contiene una aplicación ejecutable, backend, base de datos ni agentes funcionales. No debe considerarse lista para producción.
+## Estado de esta entrega
 
-## Objetivo del producto
+Esta rama inicia la primera base de aplicación. Incluye una interfaz web adaptable a móvil y escritorio, registro local de pedidos, actualización de estados, indicadores calculados desde los pedidos entregados y un registro de actividad local.
 
-Construir una plataforma en español que ayude a un restaurante a organizar su operación, entender sus resultados y ejecutar tareas autorizadas desde una interfaz web adaptable a celulares y computadores.
+**Limitación importante:** esta entrega todavía no incluye autenticación real, backend, base de datos compartida, conexión con servicios de IA ni agentes autónomos ejecutables. Los datos se guardan en el almacenamiento local del navegador y no se sincronizan entre dispositivos ni usuarios. No usar con información real de clientes.
 
-## Equipo de nueve agentes autónomos
+## Ejecutar localmente
 
-La arquitectura objetivo de ORVIA contempla **nueve agentes especializados**, capaces de ejecutar de forma autónoma las tareas que tengan asignadas, coordinarse entre sí y comunicar resultados, incidencias y solicitudes de intervención.
+No requiere instalación de dependencias. Sirve los archivos estáticos con cualquier servidor web local. Por ejemplo:
 
-Agentes cuyos nombres ya están definidos:
+```bash
+python -m http.server 8000
+```
+
+Luego abre `http://localhost:8000`.
+
+También puede publicarse como sitio estático. Para producción se requiere conectar un backend y configurar autenticación y almacenamiento seguros antes de gestionar datos reales.
+
+## Funciones implementadas en esta base
+
+- Panel de resumen con ventas entregadas, pedidos del día, pedidos en preparación y valor promedio.
+- Creación de pedidos con cliente, detalle, valor y estado.
+- Búsqueda y filtro de pedidos.
+- Actualización de estado: Nuevo, Preparando, Listo y Entregado.
+- Registro local de actividad.
+- Interfaz en español, diseño oscuro azul y adaptación a pantallas móviles.
+- Centro de equipo que muestra los nueve espacios objetivo sin simular agentes activos.
+
+## Arquitectura objetivo: nueve agentes autónomos
+
+La plataforma deberá incorporar nueve agentes especializados, con tareas, herramientas y permisos delimitados. Los nombres ya definidos son:
 
 - ORVIA LUCY
 - ORVIA LUZ
@@ -22,67 +42,28 @@ Agentes cuyos nombres ya están definidos:
 - ORVIA NANI
 - ORVIA MEMO
 
-La arquitectura reserva dos agentes adicionales para completar el equipo de nueve. Sus nombres y responsabilidades específicas quedan pendientes de incorporar desde la definición aprobada del proyecto; no se inventan en esta documentación.
+Los puestos ocho y nueve quedan reservados hasta recuperar sus nombres y responsabilidades aprobados; no se inventan.
 
-### Funcionamiento autónomo y coordinación
+Los agentes deberán poder completar flujos autorizados, coordinarse, solicitar apoyo entre sí y entregar resultados. Un supervisor deberá detectar fallos, intentar recuperaciones seguras, registrar incidentes y notificar al usuario cuando se requiera intervención. Las operaciones sensibles deberán tener aprobación humana. Todo esto es arquitectura objetivo y aún no está activo.
 
-- Cada agente tendrá una especialidad, objetivos, herramientas y permisos claramente delimitados.
-- Los agentes podrán iniciar y completar flujos de trabajo autorizados sin requerir instrucciones paso a paso del usuario.
-- Podrán solicitar apoyo a otros agentes, intercambiar contexto operativo y devolver resultados al agente coordinador o al panel principal.
-- Un agente supervisor deberá detectar fallos, intentar recuperaciones seguras, registrar el incidente y avisar cuando necesite intervención humana.
-- Las tareas, decisiones, resultados y errores deberán quedar registrados para auditoría.
-- La autonomía estará limitada por permisos: pagos, cambios críticos, cancelaciones y comunicaciones externas sensibles requerirán aprobación humana cuando corresponda.
+## Próximas etapas
 
-La autonomía es un requisito de diseño y desarrollo; no significa que los nueve agentes ya estén implementados o activos en el repositorio.
+1. Backend y persistencia de datos multiusuario.
+2. Autenticación, registro, recuperación de acceso y aislamiento por restaurante.
+3. Flujo completo de pedidos conectado al servidor.
+4. Contratos y herramientas de los nueve agentes.
+5. Orquestador, memoria de trabajo controlada, permisos, reintentos y supervisor de errores.
+6. Notificaciones y pruebas funcionales y de seguridad.
+7. Despliegue de prueba y verificación real desde celular.
 
-## Alcance funcional previsto
+## Seguridad
 
-1. **Acceso y cuentas:** registro, inicio y cierre de sesión, recuperación de acceso y aislamiento de datos por restaurante.
-2. **Panel de control:** indicadores operativos y comerciales con datos verificables.
-3. **Operación del restaurante:** módulos que se definirán y validarán con el negocio de prueba.
-4. **Agentes de IA:** nueve agentes especializados con ejecución autónoma de tareas autorizadas, coordinación entre agentes, registro de actividad y supervisión.
-5. **Alertas:** notificaciones claras cuando ocurra un error o se requiera una decisión humana.
-6. **Diseño adaptable:** experiencia en español para móvil y escritorio.
-
-## Principios técnicos y de seguridad
-
+- No guardar secretos ni claves API en el repositorio.
+- Validar permisos en el servidor.
 - No almacenar contraseñas en texto plano.
-- No subir claves API, contraseñas, tokens ni archivos `.env` al repositorio.
-- Mantener los secretos en variables de entorno del proveedor de despliegue.
-- Validar permisos en el servidor; ocultar un botón en la interfaz no constituye control de acceso.
-- Aislar los datos de cada restaurante y comprobar la autorización en cada operación.
-- Registrar errores y acciones importantes sin exponer datos sensibles.
-- Probar autenticación, autorización, validación de datos y flujos críticos antes de publicar.
-- Tratar las respuestas de IA como propuestas hasta que una operación esté validada y autorizada.
+- Registrar acciones y errores sin exponer datos sensibles.
+- Requerir autorización humana para acciones críticas.
 
-## Plan de trabajo
+## Versionado
 
-- [ ] Confirmar la arquitectura y el stack de la aplicación.
-- [ ] Crear la estructura de frontend y backend.
-- [ ] Configurar autenticación y persistencia segura.
-- [ ] Implementar el primer flujo completo del restaurante de prueba.
-- [ ] Definir contratos, permisos, coordinación y pruebas para los nueve agentes autónomos.
-- [ ] Añadir monitoreo, manejo de errores y notificaciones.
-- [ ] Ejecutar pruebas funcionales y de seguridad.
-- [ ] Desplegar una versión de prueba y verificar registro e inicio de sesión desde móvil.
-
-## Desarrollo
-
-La implementación aún no ha comenzado en este repositorio. Los comandos de instalación y despliegue se documentarán cuando exista un stack real y archivos de proyecto que permitan verificarlos.
-
-## Estado de versiones
-
-Este repositorio corresponde a **ORVIA Atlas 0.1**. Las siguientes entregas deberán identificarse con número y nombre de versión para evitar confusiones.
-
-
-## Auditoría inicial de despliegue (19-11-2026)
-
-Se encontró un proyecto Vercel llamado `orvia-portal-unificado`, independiente de este repositorio:
-
-- Tiene un despliegue de producción marcado como `READY`.
-- El proyecto no muestra un repositorio Git conectado ni un framework detectado.
-- La lista de archivos de origen del despliegue de producción contiene únicamente `src/index.html`.
-- No aparecen variables de entorno configuradas en el proyecto.
-- La protección SSO está habilitada para los dominios gestionados por Vercel, por lo que una URL de vista previa puede pedir autenticación de Vercel antes de mostrar la página.
-
-Un despliegue marcado como `READY` solo confirma que Vercel terminó ese despliegue; no demuestra que exista un backend, que el registro funcione ni que los agentes estén conectados. Esta auditoría debe repetirse cuando se incorpore el código fuente real.
+Cada entrega deberá identificarse con número y nombre, por ejemplo **ORVIA 0.2 — Nébula**. Esta rama es una primera base de desarrollo, no una versión lista para producción.
