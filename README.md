@@ -10,11 +10,11 @@ La interfaz web estática existente sigue siendo una demostración local: sus pe
 
 ## Backend añadido
 
-- `GET /api/health`: estado del servicio y presencia de configuración (nunca expone secretos).
-- `POST /api/onboarding`: crea un restaurante para el usuario autenticado.
+- `GET /api/health`: comprueba la configuración, la conectividad con Neon y la presencia de las seis tablas requeridas por la migración; nunca expone secretos. Devuelve estado degradado si falta alguna condición.
+- `POST /api/onboarding`: crea un restaurante, su membresía de propietario y el evento de auditoría en una sola transacción para evitar registros incompletos.
 - `GET /api/orders?restaurantId=...`: consulta pedidos de un restaurante autorizado.
-- `POST /api/orders`: crea pedidos con validación de datos y control de membresía.
-- `PATCH /api/orders`: actualiza el estado de un pedido con control de membresía.
+- `POST /api/orders`: crea pedidos con validación de datos, control de membresía y registro de auditoría en una sola transacción.
+- `PATCH /api/orders`: actualiza el estado de un pedido con control de membresía y registra el cambio de forma atómica.
 - `GET /api/agents?restaurantId=...`: muestra el estado registrado de los nueve agentes, sin fingir ejecución autónoma.
 
 ## Configuración requerida
