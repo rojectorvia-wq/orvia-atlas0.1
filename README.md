@@ -8,9 +8,11 @@
 
 Construir una plataforma en español que ayude a un restaurante a organizar su operación, entender sus resultados y ejecutar tareas autorizadas desde una interfaz web adaptable a celulares y computadores.
 
-## Equipo de agentes previsto
+## Equipo de nueve agentes autónomos
 
-La visión del producto contempla siete agentes especializados:
+La arquitectura objetivo de ORVIA contempla **nueve agentes especializados**, capaces de ejecutar de forma autónoma las tareas que tengan asignadas, coordinarse entre sí y comunicar resultados, incidencias y solicitudes de intervención.
+
+Agentes cuyos nombres ya están definidos:
 
 - ORVIA LUCY
 - ORVIA LUZ
@@ -20,14 +22,25 @@ La visión del producto contempla siete agentes especializados:
 - ORVIA NANI
 - ORVIA MEMO
 
-Sus responsabilidades, permisos, herramientas y límites deberán definirse antes de activar cada agente. Ningún agente debe ejecutar acciones sensibles (por ejemplo, pagos, cambios de precios, cancelaciones o mensajes externos) sin los permisos y confirmaciones correspondientes.
+La arquitectura reserva dos agentes adicionales para completar el equipo de nueve. Sus nombres y responsabilidades específicas quedan pendientes de incorporar desde la definición aprobada del proyecto; no se inventan en esta documentación.
+
+### Funcionamiento autónomo y coordinación
+
+- Cada agente tendrá una especialidad, objetivos, herramientas y permisos claramente delimitados.
+- Los agentes podrán iniciar y completar flujos de trabajo autorizados sin requerir instrucciones paso a paso del usuario.
+- Podrán solicitar apoyo a otros agentes, intercambiar contexto operativo y devolver resultados al agente coordinador o al panel principal.
+- Un agente supervisor deberá detectar fallos, intentar recuperaciones seguras, registrar el incidente y avisar cuando necesite intervención humana.
+- Las tareas, decisiones, resultados y errores deberán quedar registrados para auditoría.
+- La autonomía estará limitada por permisos: pagos, cambios críticos, cancelaciones y comunicaciones externas sensibles requerirán aprobación humana cuando corresponda.
+
+La autonomía es un requisito de diseño y desarrollo; no significa que los nueve agentes ya estén implementados o activos en el repositorio.
 
 ## Alcance funcional previsto
 
 1. **Acceso y cuentas:** registro, inicio y cierre de sesión, recuperación de acceso y aislamiento de datos por restaurante.
 2. **Panel de control:** indicadores operativos y comerciales con datos verificables.
 3. **Operación del restaurante:** módulos que se definirán y validarán con el negocio de prueba.
-4. **Agentes de IA:** tareas delimitadas, herramientas autorizadas, registro de actividad y supervisión.
+4. **Agentes de IA:** nueve agentes especializados con ejecución autónoma de tareas autorizadas, coordinación entre agentes, registro de actividad y supervisión.
 5. **Alertas:** notificaciones claras cuando ocurra un error o se requiera una decisión humana.
 6. **Diseño adaptable:** experiencia en español para móvil y escritorio.
 
@@ -48,7 +61,7 @@ Sus responsabilidades, permisos, herramientas y límites deberán definirse ante
 - [ ] Crear la estructura de frontend y backend.
 - [ ] Configurar autenticación y persistencia segura.
 - [ ] Implementar el primer flujo completo del restaurante de prueba.
-- [ ] Definir contratos, permisos y pruebas para los siete agentes.
+- [ ] Definir contratos, permisos, coordinación y pruebas para los nueve agentes autónomos.
 - [ ] Añadir monitoreo, manejo de errores y notificaciones.
 - [ ] Ejecutar pruebas funcionales y de seguridad.
 - [ ] Desplegar una versión de prueba y verificar registro e inicio de sesión desde móvil.
