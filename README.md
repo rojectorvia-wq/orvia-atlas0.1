@@ -60,3 +60,16 @@ La implementación aún no ha comenzado en este repositorio. Los comandos de ins
 ## Estado de versiones
 
 Este repositorio corresponde a **ORVIA Atlas 0.1**. Las siguientes entregas deberán identificarse con número y nombre de versión para evitar confusiones.
+
+
+## Auditoría inicial de despliegue (19-11-2026)
+
+Se encontró un proyecto Vercel llamado `orvia-portal-unificado`, independiente de este repositorio:
+
+- Tiene un despliegue de producción marcado como `READY`.
+- El proyecto no muestra un repositorio Git conectado ni un framework detectado.
+- La lista de archivos de origen del despliegue de producción contiene únicamente `src/index.html`.
+- No aparecen variables de entorno configuradas en el proyecto.
+- La protección SSO está habilitada para los dominios gestionados por Vercel, por lo que una URL de vista previa puede pedir autenticación de Vercel antes de mostrar la página.
+
+Un despliegue marcado como `READY` solo confirma que Vercel terminó ese despliegue; no demuestra que exista un backend, que el registro funcione ni que los agentes estén conectados. Esta auditoría debe repetirse cuando se incorpore el código fuente real.
