@@ -2,38 +2,40 @@
 
 **ORVIA** significa **Organización, Rendimiento, Ventas, Inteligencia y Automatización**. Plataforma de gestión e inteligencia operativa para restaurantes.
 
-## Estado de esta entrega
+## Estado de esta rama
 
-Esta rama inicia la primera base de aplicación. Incluye una interfaz web adaptable a móvil y escritorio, registro local de pedidos, actualización de estados, indicadores calculados desde los pedidos entregados y un registro de actividad local.
+La interfaz web estática existente sigue siendo una demostración local: sus pedidos actuales se guardan en el navegador. Se ha añadido una primera base de backend con funciones de Vercel, verificación de sesión Clerk, acceso a Neon, creación de restaurantes, API de pedidos y consulta de estado de agentes.
 
-**Limitación importante:** esta entrega todavía no incluye autenticación real, backend, base de datos compartida, conexión con servicios de IA ni agentes autónomos ejecutables. Los datos se guardan en el almacenamiento local del navegador y no se sincronizan entre dispositivos ni usuarios. No usar con información real de clientes.
+**No está lista para datos reales todavía.** Antes de usarla, deben quedar vinculadas las integraciones al proyecto de Vercel, definidas las variables de entorno de Preview, ejecutada la migración SQL y conectada la interfaz web con los flujos reales de autenticación y API. La autenticación todavía no está integrada en la pantalla estática. No introducir información real de clientes en el prototipo.
 
-## Ejecutar localmente
+## Backend añadido
 
-No requiere instalación de dependencias. Sirve los archivos estáticos con cualquier servidor web local. Por ejemplo:
+- `GET /api/health`: estado del servicio y presencia de configuración (nunca expone secretos).
+- `POST /api/onboarding`: crea un restaurante para el usuario autenticado.
+- `GET /api/orders?restaurantId=...`: consulta pedidos de un restaurante autorizado.
+- `POST /api/orders`: crea pedidos con validación de datos y control de membresía.
+- `PATCH /api/orders`: actualiza el estado de un pedido con control de membresía.
+- `GET /api/agents?restaurantId=...`: muestra el estado registrado de los nueve agentes, sin fingir ejecución autónoma.
 
-```bash
-python -m http.server 8000
-```
+## Configuración requerida
 
-Luego abre `http://localhost:8000`.
+Variables del entorno Preview de Vercel:
+- `CLERK_SECRET_KEY`
+- `DATABASE_URL` (o `POSTGRES_URL`)
 
-También puede publicarse como sitio estático. Para producción se requiere conectar un backend y configurar autenticación y almacenamiento seguros antes de gestionar datos reales.
+Las claves deben configurarse en Vercel, nunca guardarse en Git ni compartirse en el chat. Las integraciones instaladas en el equipo deben vincularse explícitamente a este proyecto para que Vercel genere las variables correspondientes.
 
-## Funciones implementadas en esta base
+### Base de datos
 
-- Panel de resumen con ventas entregadas, pedidos del día, pedidos en preparación y valor promedio.
-- Creación de pedidos con cliente, detalle, valor y estado.
-- Búsqueda y filtro de pedidos.
-- Actualización de estado: Nuevo, Preparando, Listo y Entregado.
-- Registro local de actividad.
-- Interfaz en español, diseño oscuro azul y adaptación a pantallas móviles.
-- Centro de equipo que muestra los nueve espacios objetivo sin simular agentes activos.
+Ejecuta `db/schema.sql` en el SQL Editor de la base de datos Neon vinculada al entorno Preview. La migración crea restaurantes, membresías, pedidos, auditoría, registro de agentes y tareas. Los endpoints comprueban la membresía en el servidor para aislar los datos por restaurante.
 
-## Arquitectura objetivo: nueve agentes autónomos
+### Autenticación
 
-La plataforma deberá incorporar nueve agentes especializados, con tareas, herramientas y permisos delimitados. Los nombres ya definidos son:
+El backend valida tokens de Clerk en cada endpoint privado. Falta integrar Clerk en la interfaz de usuario, rutas de registro/inicio de sesión y el proceso de selección/creación del restaurante. No se almacenan contraseñas en ORVIA.
 
+## Equipo objetivo: nueve agentes
+
+Nombres definidos:
 - ORVIA LUCY
 - ORVIA LUZ
 - ORVIA JOTE
@@ -42,28 +44,27 @@ La plataforma deberá incorporar nueve agentes especializados, con tareas, herra
 - ORVIA NANI
 - ORVIA MEMO
 
-Los puestos ocho y nueve quedan reservados hasta recuperar sus nombres y responsabilidades aprobados; no se inventan.
+Los agentes ocho y nueve permanecen reservados hasta recuperar sus nombres aprobados. No se inventan.
 
-Los agentes deberán poder completar flujos autorizados, coordinarse, solicitar apoyo entre sí y entregar resultados. Un supervisor deberá detectar fallos, intentar recuperaciones seguras, registrar incidentes y notificar al usuario cuando se requiera intervención. Las operaciones sensibles deberán tener aprobación humana. Todo esto es arquitectura objetivo y aún no está activo.
+La tabla de agentes y tareas constituye solo la base de registro. No existe todavía un motor que ejecute tareas. La arquitectura final debe incluir agentes especializados, coordinación, permisos mínimos, trazabilidad, supervisor de fallos, reintentos seguros y aprobación humana para operaciones sensibles.
 
-## Próximas etapas
+## Presentación aprobada
 
-1. Backend y persistencia de datos multiusuario.
-2. Autenticación, registro, recuperación de acceso y aislamiento por restaurante.
-3. Flujo completo de pedidos conectado al servidor.
-4. Contratos y herramientas de los nueve agentes.
-5. Orquestador, memoria de trabajo controlada, permisos, reintentos y supervisor de errores.
-6. Notificaciones y pruebas funcionales y de seguridad.
-7. Despliegue de prueba y verificación real desde celular.
+- Diseño oscuro negro y azul, adaptable a móvil.
+- Interfaz en español.
+- Mensaje: **“Que cada decisión te acerque a la mejor versión de tu negocio”**.
+- Marca: **ORVIA Restaurant Intelligence**.
+- En la interfaz autenticada, “Iniciar sesión” y “Registrarse” deben aparecer en la parte superior derecha.
 
 ## Seguridad
 
-- No guardar secretos ni claves API en el repositorio.
-- Validar permisos en el servidor.
-- No almacenar contraseñas en texto plano.
-- Registrar acciones y errores sin exponer datos sensibles.
-- Requerir autorización humana para acciones críticas.
+- No subir secretos ni claves API al repositorio.
+- Validar identidad y permisos en el servidor.
+- Aislar cada restaurante por membresía.
+- Registrar eventos sin exponer datos sensibles.
+- Requerir aprobación humana para acciones críticas.
+- No activar agentes hasta completar pruebas funcionales y de seguridad.
 
 ## Versionado
 
-Cada entrega deberá identificarse con número y nombre, por ejemplo **ORVIA 0.2 — Nébula**. Esta rama es una primera base de desarrollo, no una versión lista para producción.
+Cada entrega debe tener número y nombre: **ORVIA 0.2 — Nébula**. Esta rama es de desarrollo y Preview. No fusionar con `main` ni publicar a producción sin autorización explícita.
