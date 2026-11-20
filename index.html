@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d18">
+  <meta name="description" content="ORVIA — Organización, Rendimiento, Ventas, Inteligencia y Automatización para restaurantes.">
+  <title>ORVIA | Inteligencia para restaurantes</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="ORVIA inicio"><span class="brand-mark">O</span><span><strong>ORVIA</strong><small>RESTAURANT INTELLIGENCE</small></span></a>
+      <div class="workspace"><span class="workspace-dot"></span><span><b>Restaurante de prueba</b><small>Entorno local de trabajo</small></span></div>
+      <nav class="nav" aria-label="Navegación principal">
+        <button class="nav-link active" data-view="overview"><span>▦</span> Resumen</button>
+        <button class="nav-link" data-view="orders"><span>▤</span> Pedidos <em id="nav-order-count">0</em></button>
+        <button class="nav-link" data-view="agents"><span>✳</span> Centro de agentes</button>
+        <button class="nav-link" data-view="activity"><span>◷</span> Registro de actividad</button>
+      </nav>
+      <div class="sidebar-bottom"><div class="connection"><i></i><span><b>Modo local</b><small>Los datos se guardan en este dispositivo</small></span></div><div class="version">ORVIA 0.2 — NÉBULA · FUNDACIÓN</div></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" id="menu-toggle" aria-label="Abrir menú">☰</button>
+        <div class="crumb">ORVIA <span>/</span> <b id="breadcrumb">Resumen</b></div>
+        <div class="top-actions"><span class="local-pill"><i></i> Entorno de prueba</span><button class="avatar" title="Perfil local">U</button></div>
+      </header>
+
+      <section class="view active" id="view-overview">
+        <div class="welcome">
+          <div><div class="eyebrow">PANEL DE CONTROL · RESTAURANTES</div><h1>Decide con claridad.</h1><p>Que cada decisión te acerque a la mejor versión de tu negocio.</p></div>
+          <div class="date-chip" id="today-label"></div>
+        </div>
+        <div class="notice"><span>ⓘ</span><p><b>Primera versión funcional.</b> Los pedidos y cambios se guardan localmente en este dispositivo. La conexión multiusuario, el inicio de sesión y los agentes autónomos reales se habilitarán en las siguientes etapas.</p></div>
+        <div class="section-heading"><div><h2>Vista general</h2><p>Actividad registrada en este dispositivo</p></div><button class="button primary" id="new-order-top">＋ Nuevo pedido</button></div>
+        <div class="stats-grid">
+          <article class="stat-card"><span>VENTAS REGISTRADAS</span><strong id="sales-total">$ 0</strong><small class="stat-foot">Suma de pedidos guardados</small></article>
+          <article class="stat-card"><span>PEDIDOS DEL DÍA</span><strong id="orders-total">0</strong><small class="stat-foot">Pedidos creados hoy</small></article>
+          <article class="stat-card"><span>EN PREPARACIÓN</span><strong id="preparing-total">0</strong><small class="stat-foot">Pendientes de entregar</small></article>
+          <article class="stat-card"><span>VALOR PROMEDIO</span><strong id="average-total">$ 0</strong><small class="stat-foot">Por pedido registrado</small></article>
+        </div>
+        <div class="content-grid">
+          <section class="panel"><div class="panel-heading"><div><h3>Pedidos recientes</h3><p>Seguimiento operativo</p></div><button class="text-button" data-go="orders">Ver todos →</button></div><div id="recent-orders" class="order-list"></div></section>
+          <section class="panel agent-summary"><div class="panel-heading"><div><h3>Equipo ORVIA</h3><p>Arquitectura objetivo: nueve agentes</p></div><button class="text-button" data-go="agents">Ver equipo →</button></div><div class="agent-count"><strong>09</strong><span>agentes previstos<br>en la arquitectura</span></div><div class="progress-track"><i></i></div><p class="muted small">Estado actual: estructura por implementar. No se muestran agentes como activos hasta que tengan ejecución y pruebas reales.</p></section>
+        </div>
+      </section>
+
+      <section class="view" id="view-orders">
+        <div class="page-heading"><div><div class="eyebrow">OPERACIÓN</div><h1>Pedidos</h1><p>Registra y actualiza los pedidos del restaurante.</p></div><button class="button primary" id="new-order">＋ Crear pedido</button></div>
+        <div class="toolbar"><input id="order-search" type="search" placeholder="Buscar por cliente o producto..." aria-label="Buscar pedidos"><select id="status-filter" aria-label="Filtrar por estado"><option value="all">Todos los estados</option><option value="Nuevo">Nuevo</option><option value="Preparando">Preparando</option><option value="Listo">Listo</option><option value="Entregado">Entregado</option></select></div>
+        <section class="panel"><div id="all-orders" class="order-table-wrap"></div></section>
+      </section>
+
+      <section class="view" id="view-agents">
+        <div class="page-heading"><div><div class="eyebrow">INTELIGENCIA Y AUTOMATIZACIÓN</div><h1>Centro de agentes</h1><p>Nueve especialistas coordinados bajo supervisión y permisos.</p></div></div>
+        <div class="notice"><span>ⓘ</span><p>Esta pantalla define el equipo objetivo. Los agentes todavía no ejecutan tareas ni se comunican entre sí. Cada uno pasará a estado operativo únicamente después de integrar su motor, herramientas, controles y pruebas.</p></div>
+        <div class="agents-grid" id="agents-grid"></div>
+      </section>
+
+      <section class="view" id="view-activity">
+        <div class="page-heading"><div><div class="eyebrow">TRAZABILIDAD</div><h1>Registro de actividad</h1><p>Historial local de acciones realizadas en esta sesión del producto.</p></div><button class="button subtle" id="clear-activity">Limpiar registro</button></div>
+        <section class="panel"><div id="activity-list" class="activity-list"></div></section>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="order-dialog" class="modal">
+    <form id="order-form">
+      <div class="modal-head"><div><div class="eyebrow">OPERACIÓN</div><h2>Crear pedido</h2></div><button type="button" class="close-button" id="close-dialog" aria-label="Cerrar">×</button></div>
+      <label>Nombre del cliente<input name="customer" required maxlength="60" placeholder="Ej. Mesa 4 o Laura"></label>
+      <label>Productos y detalle<input name="items" required maxlength="120" placeholder="Ej. 2 hamburguesas, 1 limonada"></label>
+      <label>Valor total (COP)<input name="amount" required type="number" min="1" step="1" placeholder="45000"></label>
+      <label>Estado inicial<select name="status"><option>Nuevo</option><option>Preparando</option><option>Listo</option><option>Entregado</option></select></label>
+      <div class="modal-actions"><button type="button" class="button subtle" id="cancel-dialog">Cancelar</button><button class="button primary" type="submit">Guardar pedido</button></div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js"></script>
+</body>
+</html>
