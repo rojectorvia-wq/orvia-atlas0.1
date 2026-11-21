@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080d18">
   <meta name="description" content="ORVIA — Organización, Rendimiento, Ventas, Inteligencia y Automatización para restaurantes.">
-  <title>ORVIA 0.3 — KNOWLEDGE | Inteligencia para restaurantes</title>
+  <title>ORVIA 0.6 — IMPULSO | Inteligencia para restaurantes</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <section class="welcome-screen" id="welcome-screen">
     <nav class="welcome-nav"><a class="brand" href="#"><span class="brand-mark">O</span><span><strong>ORVIA</strong><small>RESTAURANT INTELLIGENCE</small></span></a><div><span class="local-pill"><i></i> Demo interactiva</span></div></nav>
-    <div class="hero-wrap"><div class="eyebrow">INTELIGENCIA PARA RESTAURANTES</div><h1>Tu negocio, con una visión más clara.</h1><p>Organización, Rendimiento, Ventas, Inteligencia y Automatización en una sola plataforma.</p><blockquote>Que cada decisión te acerque a la mejor versión de tu negocio.</blockquote><button class="button primary hero-cta" id="enter-demo">Entrar a la demostración →</button><small class="prototype-note">ORVIA 0.3 — KNOWLEDGE · ENTORNO DE DEMOSTRACIÓN</small></div>
+    <div class="hero-wrap"><div class="eyebrow">INTELIGENCIA PARA RESTAURANTES</div><h1>Tu negocio, con una visión más clara.</h1><p>Organización, Rendimiento, Ventas, Inteligencia y Automatización en una sola plataforma.</p><blockquote>Que cada decisión te acerque a la mejor versión de tu negocio.</blockquote><button class="button primary hero-cta" id="enter-demo">Entrar a la demostración →</button><small class="prototype-note">ORVIA 0.6 — IMPULSO · ENTORNO DE DEMOSTRACIÓN</small></div>
     <div class="hero-foot"><span>Operación</span><span>Inteligencia</span><span>Automatización</span><span>Supervisión</span></div>
   </section>
   <dialog id="workspace-dialog" class="modal"><form id="workspace-form"><div class="modal-head"><div><div class="eyebrow">CONFIGURACIÓN INICIAL</div><h2>Registra tu restaurante</h2></div></div><p class="muted small">Este espacio privado permitirá separar los datos y las tareas de tu negocio.</p><label>Nombre del restaurante<input name="name" required minlength="2" maxlength="100" placeholder="Ej. Restaurante Orvia"></label><div class="modal-actions"><button class="button primary" type="submit">Crear espacio</button></div></form></dialog>
@@ -24,10 +24,9 @@
         <button class="nav-link active" data-view="overview"><span>▦</span> Resumen</button>
         <button class="nav-link" data-view="orders"><span>▤</span> Pedidos <em id="nav-order-count">0</em></button>
         <button class="nav-link" data-view="agents"><span>✳</span> Centro de agentes</button>
-        <button class="nav-link" data-view="knowledge"><span>✎</span> Enseñarle a Lucy</button>
         <button class="nav-link" data-view="activity"><span>◷</span> Registro de actividad</button>
       </nav>
-      <div class="sidebar-bottom"><div class="connection"><i></i><span><b>Modo local</b><small>Los datos se guardan en este dispositivo</small></span></div><div class="version">ORVIA 0.3 — KNOWLEDGE · DEMOSTRACIÓN</div></div>
+      <div class="sidebar-bottom"><div class="connection"><i></i><span><b>Modo local</b><small>Los datos se guardan en este dispositivo</small></span></div><div class="version">ORVIA 0.6 — IMPULSO · DEMOSTRACIÓN</div></div>
     </aside>
 
     <main class="main">
@@ -68,13 +67,6 @@
         <div class="agents-grid" id="agents-grid"></div>
       </section>
 
-      <section class="view" id="view-knowledge">
-        <div class="page-heading"><div><div class="eyebrow">LUCY · APRENDIZAJE VALIDADO</div><h1>Enseñarle a Lucy</h1><p>Añade conocimientos, revísalos y aprueba cuáles entran a su biblioteca local.</p></div></div>
-        <div class="notice"><span>ⓘ</span><p>Los nuevos contenidos quedan pendientes hasta que los revises y apruebes. La biblioteca de demostración se guarda en este navegador; no se sincroniza con otros dispositivos ni entrena un modelo externo.</p></div>
-        <section class="panel"><form id="knowledge-form" class="knowledge-form"><label>Tema o pregunta<input name="question" required maxlength="180" placeholder="Ej. ¿Cómo atraer clientes los martes?"></label><label>Respuesta o procedimiento<textarea name="answer" required maxlength="1800" rows="4" placeholder="Escribe una respuesta clara, comprobable y útil..."></textarea></label><label>Fuente o referencia<input name="source" maxlength="180" placeholder="Ej. Manual interno, política del restaurante o fuente consultada"></label><div class="modal-actions"><button class="button primary" type="submit">Guardar para revisión</button></div></form></section>
-        <section class="panel"><div class="panel-heading"><div><h3>Conocimientos pendientes</h3><p>Aprueba solo la información que hayas comprobado.</p></div></div><div id="knowledge-pending" class="order-list"></div></section>
-        <section class="panel"><div class="panel-heading"><div><h3>Biblioteca aprobada por ti</h3><p id="knowledge-approved-count">0 conocimientos propios</p></div></div><div id="knowledge-approved" class="order-list"></div></section>
-      </section>
       <section class="view" id="view-activity">
         <div class="page-heading"><div><div class="eyebrow">TRAZABILIDAD</div><h1>Registro de actividad</h1><p>Historial local de acciones realizadas en esta sesión del producto.</p></div><button class="button subtle" id="clear-activity">Limpiar registro</button></div>
         <section class="panel"><div id="activity-list" class="activity-list"></div></section>
