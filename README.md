@@ -16,14 +16,14 @@ La interfaz web estática existente sigue siendo una demostración local: sus pe
 - `GET /api/orders?restaurantId=...`: consulta pedidos de un restaurante autorizado.
 - `POST /api/orders`: crea pedidos con validación de datos, control de membresía y registro de auditoría en una sola transacción.
 - `PATCH /api/orders`: actualiza el estado de un pedido con control de membresía y registra el cambio de forma atómica.
-- `GET /api/agents?restaurantId=...`: muestra el registro de los nueve agentes para un miembro autorizado.\n- `POST /api/agents`: ejecuta una consulta de análisis con el agente seleccionado mediante AI Gateway, registra la tarea y su resultado en `agent_tasks`, y deja auditoría. No permite ejecutar acciones sobre pedidos, inventario, dinero ni clientes.\n- `GET /api/onboarding`: devuelve los restaurantes a los que pertenece el usuario autenticado; `POST /api/onboarding` crea un espacio y su membresía de propietario.
+- `GET /api/agents?restaurantId=...`: muestra el registro de los nueve agentes para un miembro autorizado.\n- `POST /api/agents`: ejecuta una consulta de análisis con el agente seleccionado mediante AI Gateway, registra la tarea y su resultado en `agent_tasks`, y deja auditoría. No permite ejecutar acciones sobre pedidos, inventario, dinero ni clientes.\n- `POST /api/orchestrate`: Lucy selecciona hasta tres especialistas según la solicitud, delega análisis en paralelo, DARI revisa riesgos y Lucy sintetiza una respuesta. Usa un resumen agregado de pedidos sin nombres de clientes. Límite de dos coordinaciones por usuario y restaurante cada diez minutos.\n- `GET /api/onboarding`: devuelve los restaurantes a los que pertenece el usuario autenticado; `POST /api/onboarding` crea un espacio y su membresía de propietario.
 
 ## Configuración requerida
 
 Variables del entorno Preview de Vercel:
 - `CLERK_SECRET_KEY` (solo servidor)
 - `CLERK_PUBLISHABLE_KEY` (clave pública de Clerk; se entrega al navegador mediante `/api/auth-config`)
-- `ORVIA_PREVIEW_DATABASE_URL` (obligatoria para Preview: conexión Neon aislada, distinta de producción)\n- `DATABASE_URL` (o `POSTGRES_URL`, solo para producción/local; Preview no usa estas variables como alternativa)\n- `AI_GATEWAY_MODEL` (ID exacto de modelo existente en el catálogo de AI Gateway)\n- `VERCEL_OIDC_TOKEN` (preferido en despliegues Vercel; lo proporciona Vercel) o `AI_GATEWAY_API_KEY` (alternativa secreta configurada directamente en Vercel)
+- `ORVIA_PREVIEW_DATABASE_URL` (obligatoria para Preview: conexión Neon aislada, distinta de producción)\n- `DATABASE_URL` (o `POSTGRES_URL`, solo para producción/local; Preview no usa estas variables como alternativa)\n- `AI_GATEWAY_MODEL` (ID exacto de modelo existente en el catálogo de AI Gateway; Preview de esta rama usa inicialmente `openai/gpt-4.1-mini`)\n- `VERCEL_OIDC_TOKEN` (preferido en despliegues Vercel; lo proporciona Vercel) o `AI_GATEWAY_API_KEY` (alternativa secreta configurada directamente en Vercel)
 
 Las claves deben configurarse en Vercel, nunca guardarse en Git ni compartirse en el chat. Las integraciones instaladas en el equipo deben vincularse explícitamente a este proyecto para que Vercel genere las variables correspondientes.
 
@@ -50,7 +50,7 @@ Nombres definidos:
 
 Los agentes ocho y nueve son ORVIA JHOA y ORVIA DARI, respectivamente. JHOA se enfoca en diagnóstico técnico y preparación de correcciones; DARI en supervisión operativa, revisión de tareas y escalamiento a Lucy. Sus funciones siguen sujetas a implementación y pruebas.
 
-La API ya contiene una primera ruta de consultas de análisis para los nueve agentes a través de AI Gateway. Solo funciona cuando la base de datos, la autenticación, el token de Gateway y un modelo válido están configurados en Preview. El endpoint no ofrece herramientas para modificar datos ni realizar acciones externas. Las respuestas se registran como tareas y eventos de auditoría. La interfaz permite seleccionar al especialista y enviar una consulta. Esta primera integración no equivale todavía a agentes autónomos que colaboren entre sí: Lucy no delega tareas automáticamente, DARI no reinicia procesos y no se realizan operaciones sobre pedidos, inventario, pagos o clientes. Todo eso requiere herramientas específicas, permisos mínimos, pruebas y aprobación humana.
+La API ofrece consultas individuales y una primera coordinación multiagente en Preview. En `/api/orchestrate`, Lucy enruta la solicitud hacia hasta tres especialistas mediante reglas de selección, los consulta en paralelo, DARI revisa sus informes y Lucy entrega una síntesis. El endpoint lee solo agregados de pedidos, no nombres ni teléfonos de clientes. Se registran las tareas y eventos de auditoría. La coordinación requiere base de datos, autenticación, token de AI Gateway y modelo configurados; no se ha ejecutado aún una prueba de extremo a extremo con consumo de IA. No hay herramientas para modificar pedidos, inventario, dinero, cuentas o contactar clientes. La autonomía está limitada a análisis, delegación, revisión y síntesis; las acciones sensibles requieren aprobación humana.
 
 ## Presentación aprobada
 
