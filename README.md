@@ -6,7 +6,7 @@
 
 La interfaz web estática existente sigue siendo una demostración local: sus pedidos actuales se guardan en el navegador. Se ha añadido una primera base de backend con funciones de Vercel, verificación de sesión Clerk, acceso a Neon, creación de restaurantes, API de pedidos y consulta de estado de agentes.
 
-**No está lista para datos reales todavía.** Antes de usarla, deben quedar vinculadas las integraciones al proyecto de Vercel, definidas las variables de entorno de Preview, ejecutada la migración SQL y conectada la interfaz web con los flujos reales de autenticación y API. La interfaz carga ClerkJS desde su CDN y utiliza componentes de inicio de sesión/registro. Para habilitarla hay que configurar `CLERK_PUBLISHABLE_KEY` en Preview y habilitar Google como proveedor social en Clerk. El registro público está presentado como registro de propietario; la invitación segura de personal autorizado y el alta automática del restaurante siguen pendientes de la siguiente etapa. No introducir información real de clientes en el prototipo.
+**No está lista para datos reales todavía.** Antes de usarla, deben quedar vinculadas las integraciones al proyecto de Vercel, definidas las variables de entorno de Preview, ejecutada la migración SQL y conectada la interfaz web con los flujos reales de autenticación y API. La interfaz carga ClerkJS desde su CDN y utiliza componentes de inicio de sesión/registro. Para habilitarla hay que configurar `CLERK_PUBLISHABLE_KEY` en Preview y habilitar Google como proveedor social en Clerk. El registro público está presentado como registro de propietario; la invitación segura de personal autorizado y el alta automática del restaurante siguen pendientes de la siguiente etapa. La interfaz oculta el panel hasta detectar una sesión Clerk y vuelve a la presentación al cerrar sesión. No introducir información real de clientes en el prototipo.
 
 ## Backend añadido
 
@@ -33,7 +33,7 @@ Ejecuta `db/schema.sql` en el SQL Editor de la base de datos Neon vinculada al e
 
 ### Autenticación
 
-El backend valida tokens de Clerk en cada endpoint privado. Falta integrar Clerk en la interfaz de usuario, rutas de registro/inicio de sesión y el proceso de selección/creación del restaurante. No se almacenan contraseñas en ORVIA.
+La interfaz carga ClerkJS y presenta componentes de inicio de sesión y registro. El panel se muestra solo al detectar una sesión autenticada y vuelve a ocultarse al cerrar sesión. El backend valida tokens de Clerk en cada endpoint privado. El proceso de alta del restaurante, invitaciones seguras al personal y selección de restaurante aún requieren integración. No se almacenan contraseñas en ORVIA.
 
 ## Equipo objetivo: nueve agentes
 
