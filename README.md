@@ -1,4 +1,4 @@
-# ORVIA 0.5 — Autopiloto
+# ORVIA 0.6 — Impulso
 
 **ORVIA** significa **Organización, Rendimiento, Ventas, Inteligencia y Automatización**. Plataforma de gestión e inteligencia operativa para restaurantes.
 
@@ -8,7 +8,7 @@ Se incorpora `knowledge.js`, una biblioteca local de **1.008 preguntas e intenci
 
 **Alcance actual:** esta biblioteca no es un modelo entrenado ni un motor de IA generativa. Las 1.008 entradas son preguntas y variaciones indexables; las respuestas se construyen con reglas y guías operativas. La proyección de ventas se abstiene de dar cifras cuando faltan series históricas. No se conectan acciones reales ni se envían pedidos, pagos o campañas.
 
-## ORVIA 0.5 — Autopiloto
+## ORVIA 0.6 — Impulso
 
 Esta versión incorpora un ciclo autónomo de demostración para Bistró Bahía Azul. Al entrar al restaurante ficticio, Lucy inicia el autopiloto: NANI registra pedidos de ejemplo, KIKE avanza su preparación y entrega, JOTE descuenta ingredientes ficticios, LUZ actualiza los indicadores ilustrativos y MEMO/DARI participan en la supervisión y el análisis del equipo. El autopiloto puede pausarse desde el Centro de autonomía. Los pedidos se guardan únicamente en el navegador y se generan con datos inventados. No se conectan clientes, cocinas, inventarios, proveedores, pagos ni campañas reales. Es una simulación interactiva, no una operación comercial autónoma.
 
@@ -43,7 +43,7 @@ Ejecuta `db/schema.sql` únicamente en la base Neon de desarrollo aislada que us
 
 La interfaz carga ClerkJS y presenta componentes de inicio de sesión y registro. El panel se muestra solo al detectar una sesión autenticada y vuelve a ocultarse al cerrar sesión. El backend valida tokens de Clerk en cada endpoint privado. El proceso de alta del restaurante, invitaciones seguras al personal y selección de restaurante aún requieren integración. No se almacenan contraseñas en ORVIA.
 
-## Equipo objetivo: nueve agentes
+## Equipo objetivo: once agentes
 
 Nombres definidos:
 - ORVIA LUCY
@@ -53,7 +53,7 @@ Nombres definidos:
 - ORVIA XEL
 - ORVIA NANI
 - ORVIA MEMO
-- ORVIA JHOA
+- ORVIA LETI (ID interno jhoa)
 - ORVIA DARI
 
 Los agentes ocho y nueve son ORVIA JHOA y ORVIA DARI, respectivamente. JHOA se enfoca en diagnóstico técnico y preparación de correcciones; DARI en supervisión operativa, revisión de tareas y escalamiento a Lucy. Sus funciones siguen sujetas a implementación y pruebas.
@@ -80,3 +80,18 @@ La API ofrece consultas individuales y una primera coordinación multiagente en 
 ## Versionado
 
 Cada entrega debe tener número y nombre. Esta entrega es **ORVIA 0.5 — Autopiloto**. Esta rama es de desarrollo y Preview. No fusionar con `main` ni publicar a producción sin autorización explícita.
+
+
+## ORVIA 0.6 — Impulso: cambios de esta rama
+
+- El equipo visual pasa a once agentes. El nombre visible JHOA cambia a **LETI**; se conserva el identificador técnico interno `jhoa` para evitar romper referencias existentes. **DARI no cambia**.
+- **LEX** audita los informes generados durante una coordinación multiagente y entrega su revisión a Lucy. No es un monitor continuo en segundo plano ni puede reparar código o ejecutar acciones por sí solo.
+- **MAX** aporta análisis empresarial sobre los datos que se le proporcionen.
+- La maqueta acelera la cadencia de la simulación: el ciclo de cocina avanza cada 4,5 segundos y genera pedidos ficticios cada 18 segundos. El ciclo visual de agentes se distribuye más rápido.
+- Se añade **Enseñarle a Lucy**. Los aportes se guardan como pendientes y solo entran a la biblioteca local tras aprobación manual. Se almacenan en el navegador de este dispositivo; no entrenan un modelo externo ni se sincronizan con otros equipos.
+- La biblioteca base mantiene 1.008 preguntas e intenciones indexadas. Los nuevos aportes aprobados se incorporan como conocimiento local adicional.
+- Se mantiene el modo demostración. No se publican promociones, no se contacta a clientes y no se ejecutan operaciones reales.
+- La migración de `db/schema.sql` debe ejecutarse únicamente en la base aislada de Preview para registrar los once agentes. No ejecutar en producción.
+- El futuro conector con el software personal queda como integración pendiente; no hay webhook activo ni envío automático de incidentes todavía.
+
+La rama `orvia-0.6-impulso` es de Preview/desarrollo. No se fusiona con `main` ni se publica a producción sin autorización explícita.
