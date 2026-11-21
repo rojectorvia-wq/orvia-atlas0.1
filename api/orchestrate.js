@@ -153,7 +153,7 @@ export default async function handler(req, res) {
         user: JSON.stringify({ solicitud: message, informes: specialistResults.map(({ name, answer }) => ({ name, answer })) })
       });
 
-      const dariTask = await sql`INSERT INTO agent_tasks (restaurant_id, agent_id, requested_by, task_type, input, status, result) VALUES (${restaurantId}, 'lex', ${user.userId}, 'quality_review', ${JSON.stringify({ parentTaskId: taskId })}::jsonb, 'completed', ${JSON.stringify({ answer: review.answer })}::jsonb) RETURNING id`;
+      const lexTask = await sql`INSERT INTO agent_tasks (restaurant_id, agent_id, requested_by, task_type, input, status, result) VALUES (${restaurantId}, 'lex', ${user.userId}, 'quality_review', ${JSON.stringify({ parentTaskId: taskId })}::jsonb, 'completed', ${JSON.stringify({ answer: review.answer })}::jsonb) RETURNING id`;
 
       const final = await askModel({
         token, model,
@@ -171,7 +171,7 @@ export default async function handler(req, res) {
       return json(res, 200, {
         taskId, status: "completed", coordinator: TEAM.lucy.name,
         participatingAgents: [...selected.map(id => TEAM[id].name), TEAM.lex.name, TEAM.lucy.name],
-        specialistResults, qualityReviewTaskId: dariTask[0].id, qualityReview: review.answer, answer: final.answer,
+        specialistResults, qualityReviewTaskId: lexTask[0].id, qualityReview: review.answer, answer: final.answer,
         actionsExecuted: false, approvalRequiredForSensitiveActions: true
       });
     } catch (error) {
