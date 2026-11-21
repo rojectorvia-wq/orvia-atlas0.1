@@ -344,6 +344,112 @@
     $("#lucy-panel").classList.add("open");
     $("#lucy-input").focus();
   });
+
+  // ORVIA 0.2 — Nébula: módulos ampliados de demostración.
+  const extraModules = [
+    ["finance","Finanzas","◈"],["inventory","Inventario","▦"],["marketing","Marketing","✦"],
+    ["customers","Clientes","♙"],["purchases","Compras","⇄"],["staff","Personal","♧"],
+    ["restaurant","Restaurante","⌂"],["analytics","Analítica","⌁"],["settings","Configuración","⚙"]
+  ];
+  const moduleNames = {finance:"Finanzas",inventory:"Inventario",marketing:"Marketing",customers:"Clientes",purchases:"Compras",staff:"Personal",restaurant:"Restaurante",analytics:"Analítica",settings:"Configuración"};
+  const nav = $(".nav");
+  const main = $(".main");
+  extraModules.forEach(([id,label,icon])=>{
+    const button=document.createElement("button");
+    button.className="nav-link";button.dataset.view=id;button.innerHTML="<span>"+icon+"</span> "+label;
+    button.addEventListener("click",()=>showView(id));
+    nav.append(button);
+    const section=document.createElement("section");
+    section.className="view";section.id="view-"+id;
+    section.innerHTML='<div class="page-heading"><div><div class="eyebrow">ORVIA · MÓDULO DE DEMOSTRACIÓN</div><h1>'+label+'</h1><p>Información ficticia de Bistró Bahía Azul · entorno de prueba</p></div></div><div class="module-content" id="module-'+id+'"></div>';
+    main.append(section);
+  });
+  const agentRuntime = Object.fromEntries(agents.map(a=>[a[3],{status:"En espera",task:"Disponible para una tarea de demostración",runs:0}]));
+  const agentSequence = ["lucy","luz","jote","kike","xel","nani","memo","jhoa","dari"];
+  let pulseIndex=0;
+  const inventoryItems = [
+    {name:"Carne de res",qty:8,unit:"kg",min:5},{name:"Pan de hamburguesa",qty:24,unit:"unidades",min:12},
+    {name:"Queso mozzarella",qty:3,unit:"kg",min:4},{name:"Tomate",qty:11,unit:"kg",min:5},
+    {name:"Lechuga",qty:6,unit:"unidades",min:4},{name:"Papas",qty:14,unit:"kg",min:6},
+    {name:"Limón",qty:4,unit:"kg",min:5},{name:"Gaseosa",qty:30,unit:"unidades",min:10}
+  ];
+  const financeExpenses = [{name:"Compra de ingredientes",amount:720000},{name:"Nómina de demostración",amount:430000},{name:"Servicios",amount:120000},{name:"Publicidad",amount:80000}];
+  const campaigns = [{name:"Combo Bahía",channel:"Redes sociales",status:"Borrador",budget:90000,reach:0}];
+  const customers = ["Laura M.","Andrés P.","Sofía R.","Mesa 2","Mesa 5"];
+  function moduleCard(label,value,foot){return '<article class="stat-card"><span>'+label+'</span><strong>'+value+'</strong><small class="stat-foot">'+foot+'</small></article>';}
+  function renderFinance(){
+    const income=state.orders.filter(o=>o.status==="Entregado").reduce((s,o)=>s+o.amount,0);
+    const expenses=financeExpenses.reduce((s,e)=>s+e.amount,0);
+    $("#module-finance").innerHTML='<div class="notice"><span>ⓘ</span><p><b>ORVIA FINANCE · COP.</b> Cifras de ejemplo calculadas con los pedidos ficticios y gastos ilustrativos. No representa una cuenta bancaria ni dinero real.</p></div><div class="stats-grid">'+moduleCard("INGRESOS REGISTRADOS",money(income),"Pedidos entregados")+moduleCard("EGRESOS DE EJEMPLO",money(expenses),"Gastos ficticios")+moduleCard("RESULTADO ESTIMADO",money(income-expenses),"Ingresos menos gastos")+moduleCard("MOVIMIENTOS",state.orders.length+financeExpenses.length,"Ventas y gastos de muestra")+'</div><section class="panel"><div class="panel-heading"><div><h3>Movimientos financieros</h3><p>Registro ilustrativo en pesos colombianos</p></div></div><div class="order-table-wrap"><table class="order-table"><thead><tr><th>CONCEPTO</th><th>TIPO</th><th>VALOR</th></tr></thead><tbody>'+state.orders.filter(o=>o.status==="Entregado").map(o=>'<tr><td>Venta '+escapeHtml(o.id)+'</td><td>Ingreso</td><td>'+money(o.amount)+'</td></tr>').join("")+financeExpenses.map(e=>'<tr><td>'+e.name+'</td><td>Egreso</td><td>− '+money(e.amount)+'</td></tr>').join("")+'</tbody></table></div></section>';
+  }
+  function renderInventory(){
+    $("#module-inventory").innerHTML='<div class="notice"><span>ⓘ</span><p>Existencias ficticias para mostrar alertas de JOTE. No se envían compras ni pedidos a proveedores.</p></div><section class="panel"><div class="panel-heading"><div><h3>Existencias del restaurante</h3><p>Alerta cuando el nivel llega al mínimo</p></div><button class="button primary" id="inventory-restock">Simular reposición</button></div><div class="order-table-wrap"><table class="order-table"><thead><tr><th>PRODUCTO</th><th>EXISTENCIA</th><th>MÍNIMO</th><th>ESTADO</th></tr></thead><tbody>'+inventoryItems.map((x,i)=>'<tr><td>'+x.name+'</td><td>'+x.qty+' '+x.unit+'</td><td>'+x.min+' '+x.unit+'</td><td>'+(x.qty<=x.min?'<span class="status prep">Reponer</span>':'<span class="status done">Disponible</span>')+'</td></tr>').join("")+'</tbody></table></div></section>';
+    $("#inventory-restock").addEventListener("click",()=>{inventoryItems.forEach(x=>{if(x.qty<=x.min)x.qty+=x.min*2;});record("JOTE · Reposición simulada","Se actualizaron existencias ficticias del inventario.");renderInventory();pulseAgent("jote","Revisó niveles y simuló reposición");notify("Reposición de demostración completada.");});
+  }
+  function renderMarketing(){
+    $("#module-marketing").innerHTML='<div class="notice"><span>ⓘ</span><p>XEL prepara campañas de ejemplo. No se publica contenido ni se contactan clientes reales.</p></div><section class="panel"><div class="panel-heading"><div><h3>Campañas de marketing</h3><p>Ideas y estado de cada campaña</p></div><button class="button primary" id="marketing-launch">Activar campaña demo</button></div><div class="order-list">'+campaigns.map((c,i)=>'<div class="order-row"><div><b>'+escapeHtml(c.name)+'</b><small>'+escapeHtml(c.channel)+' · Presupuesto ilustrativo: '+money(c.budget)+'</small></div><div class="order-right"><strong>'+c.status+'</strong><small>'+c.reach+' alcance simulado</small></div></div>').join("")+'</div></section><div class="content-grid"><section class="panel"><h3>Oportunidad detectada</h3><p class="muted small">Promocionar un combo de hamburguesa y limonada en horas de menor demanda, midiendo pedidos antes y después.</p></section><section class="panel"><h3>Recomendación de XEL</h3><p class="muted small">Probar una campaña pequeña, comparar resultados y ajustar el presupuesto según el rendimiento.</p></section></div>';
+    $("#marketing-launch").addEventListener("click",()=>{campaigns[0].status="Activa · demo";campaigns[0].reach=240;record("XEL · Campaña activada en demostración","Combo Bahía · alcance ficticio de 240 personas.");pulseAgent("xel","Activó la campaña Combo Bahía en modo demo");renderMarketing();notify("Campaña de demostración activada.");});
+  }
+  function renderSimpleModule(id){
+    const data={
+      customers:['Directorio de clientes',customers.map((n,i)=>({a:n,b:"Cliente de ejemplo · "+(i+1)+" visitas",c:"Activo"}))],
+      purchases:['Abastecimiento y proveedores',[{a:"Distribuidora Bahía",b:"Ingredientes y frescos",c:"Proveedor demo"},{a:"Bebidas del Caribe",b:"Bebidas",c:"Proveedor demo"},{a:"Empaques Costa",b:"Empaques",c:"Proveedor demo"}]],
+      staff:['Equipo del restaurante',[{a:"María · Cocina",b:"Turno de mañana",c:"Programado"},{a:"Carlos · Servicio",b:"Turno de tarde",c:"Programado"},{a:"Elena · Caja",b:"Turno de tarde",c:"Programado"}]],
+      restaurant:['Salón y mesas',[{a:"Mesa 1",b:"En servicio",c:"Ocupada"},{a:"Mesa 2",b:"Disponible",c:"Libre"},{a:"Mesa 3",b:"Disponible",c:"Libre"},{a:"Mesa 4",b:"En servicio",c:"Ocupada"},{a:"Mesa 5",b:"Preparando cuenta",c:"Atención"}]],
+      analytics:['Indicadores de operación',[{a:"Producto destacado",b:"Hamburguesa clásica",c:"Más solicitado en demo"},{a:"Franja activa",b:"12:00–14:00",c:"Mayor movimiento de ejemplo"},{a:"Ticket promedio",b:money(state.orders.length?Math.round(state.orders.reduce((s,o)=>s+o.amount,0)/state.orders.length):0),c:"Calculado sobre pedidos"}]],
+      settings:['Preferencias de la maqueta',[{a:"Idioma",b:"Español",c:"Activo"},{a:"Moneda",b:"Peso colombiano (COP)",c:"Demostración"},{a:"Restaurante",b:"Bistró Bahía Azul",c:"Ficticio"},{a:"Modo de datos",b:"Local y simulado",c:"Activo"}]]
+    };
+    const [title,rows]=data[id];
+    $("#module-"+id).innerHTML='<section class="panel"><div class="panel-heading"><div><h3>'+title+'</h3><p>Datos ficticios para recorrer el módulo</p></div></div><div class="order-list">'+rows.map(r=>'<div class="order-row"><div><b>'+escapeHtml(r.a)+'</b><small>'+escapeHtml(r.b)+'</small></div><div class="order-right"><span class="status">'+escapeHtml(r.c)+'</span></div></div>').join("")+'</div></section>';
+  }
+  function pulseAgent(id,task){
+    const item=agentRuntime[id];if(!item)return;
+    item.status="Trabajando";item.task=task;item.runs++;
+    record(agents.find(a=>a[3]===id)[0]+" · tarea iniciada",task+" · simulación");
+    renderAgents();
+    setTimeout(()=>{item.status="En espera";item.task="Última tarea: "+task;renderAgents();},2200);
+  }
+  function renderLiveAgents(){
+    const live=$("#agent-live-feed");
+    if(live)live.innerHTML=agentSequence.map(id=>{const a=agents.find(x=>x[3]===id),r=agentRuntime[id];return '<div class="activity-item"><i class="activity-dot '+(r.status==="Trabajando"?"live-dot":"")+'"></i><div><b>'+a[0]+' · '+r.status+'</b><p>'+escapeHtml(r.task)+' · '+r.runs+' tareas demo</p></div></div>';}).join("");
+  }
+  const baseRenderAgents=renderAgents;
+  renderAgents=function(){
+    $("#agents-grid").innerHTML=agents.map((agent,i)=>{const r=agentRuntime[agent[3]];return '<article class="agent-card '+(r.status==="Trabajando"?"agent-working":"")+'"><div class="agent-top"><div class="agent-icon">'+String(i+1).padStart(2,"0")+'</div><span class="agent-state '+(r.status==="Trabajando"?"agent-state-live":"")+'">'+r.status+'</span></div><h3>'+escapeHtml(agent[0])+'</h3><b class="agent-role">'+escapeHtml(agent[1])+'</b><p>'+escapeHtml(agent[2])+'</p><small>'+escapeHtml(r.task)+'</small><button class="text-button agent-ask" type="button" data-agent-id="'+escapeHtml(agent[3])+'">Consultar agente →</button></article>';}).join("");
+    renderLiveAgents();
+  };
+  function buildLivePanel(){
+    const section=$("#view-agents");
+    const panel=document.createElement("section");panel.className="panel agent-live-panel";
+    panel.innerHTML='<div class="panel-heading"><div><h3>Actividad del equipo en vivo</h3><p>Estados animados de un ciclo de demostración · no son operaciones reales</p></div><button class="button primary" id="run-agent-cycle">Ejecutar ciclo demo</button></div><div id="agent-live-feed" class="activity-list"></div>';
+    section.append(panel);
+    $("#run-agent-cycle").addEventListener("click",runAgentCycle);
+  }
+  function runAgentCycle(){
+    const tasks=["Coordina el turno y distribuye tareas","Calcula el resumen financiero ilustrativo","Comprueba ingredientes y alertas de stock","Revisa pedidos y tiempos de preparación","Prepara una propuesta de promoción","Clasifica una consulta de cliente ficticia","Analiza productos y horarios populares","Comprueba el estado técnico de la maqueta","Supervisa resultados y señala aprobaciones necesarias"];
+    agentSequence.forEach((id,i)=>setTimeout(()=>pulseAgent(id,tasks[i]),i*420));
+    record("LUCY · Ciclo de equipo iniciado","Nueve agentes recorren tareas demostrativas en secuencia.");
+    notify("Ciclo de demostración de nueve agentes iniciado.");
+  }
+  function renderExtraModules(){
+    renderFinance();renderInventory();renderMarketing();
+    ["customers","purchases","staff","restaurant","analytics","settings"].forEach(renderSimpleModule);
+  }
+  const originalShowView=showView;
+  showView=function(name){
+    originalShowView(name);
+    $("#breadcrumb").textContent=moduleNames[name]||({overview:"Resumen",orders:"Pedidos",agents:"Centro de agentes",activity:"Registro de actividad"})[name]||"Resumen";
+    if(name==="finance")renderFinance();
+    if(name==="inventory")renderInventory();
+    if(name==="marketing")renderMarketing();
+    if(["customers","purchases","staff","restaurant","analytics","settings"].includes(name))renderSimpleModule(name);
+  };
+  buildLivePanel();
+  renderExtraModules();
+  const originalEnterDemo=enterDemoMode;
+  enterDemoMode=function(){originalEnterDemo();runAgentCycle();};
+  setInterval(()=>{pulseIndex=(pulseIndex+1)%agentSequence.length;const id=agentSequence[pulseIndex];if(agentRuntime[id].status!=="Trabajando"){agentRuntime[id].status="Trabajando";agentRuntime[id].task="Revisión periódica de demostración";renderAgents();setTimeout(()=>{agentRuntime[id].status="En espera";renderAgents();},1700);}},6500);
+
   $("#today-label").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   renderAgents();
   renderAll();
