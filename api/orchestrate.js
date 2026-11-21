@@ -1,4 +1,5 @@
 import { requireUser } from "./_lib/auth.js";
+import { getVercelOidcToken } from "@vercel/oidc";
 import { db } from "./_lib/db.js";
 import { json, methodNotAllowed } from "./_lib/http.js";
 import { researchWeb } from "./_lib/research.js";
@@ -33,8 +34,10 @@ function bodyOf(req) {
   return {};
 }
 
-function gatewayToken() {
-  return process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN || "";
+async function gatewayToken() {
+  if (process.env.AI_GATEWAY_API_KEY) return process.env.AI_GATEWAY_API_KEY;
+  try { return await getVercelOidcToken(); }
+  catch { return process.env.VERCEL_OIDC_TOKEN || ""; }
 }
 
 function chooseTeam(message) {
@@ -145,7 +148,7 @@ export default async function handler(req, res) {
   if (!restaurantId || restaurantId.length > 80) return json(res, 400, { error: "Selecciona un restaurante válido." });
   if (!message || message.length > MAX_MESSAGE) return json(res, 400, { error: `Escribe una solicitud de 1 a ${MAX_MESSAGE} caracteres.` });
 
-  const token = gatewayToken();
+  const token = await gatewayToken();
   const model = process.env.AI_GATEWAY_MODEL || "";
   if (!token || !model) return json(res, 503, {
     code: "AI_NOT_CONFIGURED",
