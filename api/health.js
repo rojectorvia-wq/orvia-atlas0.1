@@ -1,6 +1,8 @@
 import { db } from "./_lib/db.js";
 import { json, methodNotAllowed } from "./_lib/http.js";
 
+const EXPECTED_AGENT_COUNT = 11;
+
 export default async function handler(req, res) {
   if (req.method !== "GET") return methodNotAllowed(res, ["GET"]);
 
@@ -16,6 +18,7 @@ export default async function handler(req, res) {
     schemaReady: false,
     knowledgeMemoryReady: false
   };
+  let registeredAgents = 0;
 
   if (databaseConfigured) {
     try {
@@ -28,7 +31,8 @@ export default async function handler(req, res) {
           to_regclass('public.activity_log') IS NOT NULL AS activity_log,
           to_regclass('public.agent_registry') IS NOT NULL AS agent_registry,
           to_regclass('public.agent_tasks') IS NOT NULL AS agent_tasks,
-          to_regclass('public.lucy_research_knowledge') IS NOT NULL AS lucy_research_knowledge
+          to_regclass('public.lucy_research_knowledge') IS NOT NULL AS lucy_research_knowledge,
+          (SELECT count(*)::int FROM public.agent_registry) AS registered_agents
       `;
       database.reachable = true;
       const schema = rows[0] || {};
@@ -41,15 +45,18 @@ export default async function handler(req, res) {
         schema.agent_tasks
       ].every(Boolean);
       database.knowledgeMemoryReady = schema.lucy_research_knowledge === true;
+      registeredAgents = Number(schema.registered_agents) || 0;
     } catch {
       // Never return connection strings or provider errors.
     }
   }
 
+  const agentRegistryReady = registeredAgents === EXPECTED_AGENT_COUNT;
   const ready = clerkConfigured
     && database.reachable
     && database.schemaReady
     && database.knowledgeMemoryReady
+    && agentRegistryReady
     && aiGatewayConfigured;
   return json(res, ready ? 200 : 503, {
     service: "ORVIA API",
@@ -63,8 +70,10 @@ export default async function handler(req, res) {
     },
     database,
     agents: {
-      teamDefined: 11,
-      executionEnabled: aiGatewayConfigured && database.reachable && database.schemaReady,
+      registered: registeredAgents,
+      expected: EXPECTED_AGENT_COUNT,
+      registryReady: agentRegistryReady,
+      executionEnabled: aiGatewayConfigured && database.reachable && database.schemaReady && agentRegistryReady,
       autonomousActions: false
     }
   });
