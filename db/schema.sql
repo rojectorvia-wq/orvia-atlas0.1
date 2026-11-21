@@ -66,5 +66,6 @@ CREATE INDEX IF NOT EXISTS agent_tasks_restaurant_created_idx ON agent_tasks(res
 INSERT INTO agent_registry (id, display_name) VALUES
  ('lucy','ORVIA LUCY'),('luz','ORVIA LUZ'),('jote','ORVIA JOTE'),
  ('kike','ORVIA KIKE'),('xel','ORVIA XEL'),('nani','ORVIA NANI'),
- ('memo','ORVIA MEMO'),('jhoa','ORVIA JHOA'),('dari','ORVIA DARI')
-ON CONFLICT (id) DO NOTHING;
+ ('memo','ORVIA MEMO'),('jhoa','ORVIA LETI'),('dari','ORVIA DARI'),
+ ('lex','ORVIA LEX'),('max','ORVIA MAX')
+ON CONFLICT (id) DO UPDATE SET display_name = EXCLUDED.display_name;
