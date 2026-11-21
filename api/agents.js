@@ -31,7 +31,7 @@ function bodyOf(req) {
 }
 
 function knowledgeQuery(message) {
-  const terms = String(message || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().match(/[a-z0-9]{4,}/g) || [];
+  const terms = String(message || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().match(/[a-z0-9]{4,}/g) || [];
   return [...new Set(terms)].slice(0, 8).map(term => `${term}:*`).join(" | ");
 }
 
