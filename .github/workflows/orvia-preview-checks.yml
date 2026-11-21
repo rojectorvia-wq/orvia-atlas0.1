@@ -6,11 +6,13 @@ on:
       - orvia-0.2-nebula
       - orvia-0.4-autonomia-preview
       - orvia-0.5-autopiloto
+      - orvia-0.6-impulso
   pull_request:
     branches:
       - orvia-0.2-nebula
       - orvia-0.4-autonomia-preview
       - orvia-0.5-autopiloto
+      - orvia-0.6-impulso
 
 jobs:
   syntax:
