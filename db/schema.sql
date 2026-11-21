@@ -63,6 +63,25 @@ CREATE TABLE IF NOT EXISTS agent_tasks (
 );
 CREATE INDEX IF NOT EXISTS agent_tasks_restaurant_created_idx ON agent_tasks(restaurant_id, created_at DESC);
 
+
+-- Memoria investigativa de LUCY: solo almacena resúmenes aprobados por LEX.
+-- Los registros siempre pertenecen a un restaurante y se consultan con su restaurant_id.
+CREATE TABLE IF NOT EXISTS lucy_research_knowledge (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+  search_query TEXT NOT NULL,
+  validated_summary TEXT NOT NULL,
+  sources JSONB NOT NULL DEFAULT '[]'::jsonb,
+  lex_review TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'approved' CHECK (status IN ('approved','superseded')),
+  reviewed_by TEXT NOT NULL DEFAULT 'lex',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS lucy_research_restaurant_created_idx
+  ON lucy_research_knowledge(restaurant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS lucy_research_fts_idx
+  ON lucy_research_knowledge USING GIN (to_tsvector('simple', search_query || ' ' || validated_summary));
+
 INSERT INTO agent_registry (id, display_name) VALUES
  ('lucy','ORVIA LUCY'),('luz','ORVIA LUZ'),('jote','ORVIA JOTE'),
  ('kike','ORVIA KIKE'),('xel','ORVIA XEL'),('nani','ORVIA NANI'),
