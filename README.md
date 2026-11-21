@@ -103,3 +103,11 @@ La rama `orvia-0.6-impulso` es de Preview/desarrollo. No se fusiona con `main` n
 - Lucy responde con una voz formal, natural, fluida y ejecutiva; evita fórmulas robóticas, explica el criterio de sus recomendaciones y reconoce los datos que faltan.
 - Los prompts del motor de coordinación y de consultas individuales instruyen a los agentes para comunicarse en español profesional y conversacional. LEX mantiene su auditoría de calidad.
 - Esta ampliación no significa que Lucy conozca todos los restaurantes del mundo ni sus datos internos o actuales. La biblioteca contiene guías e intenciones generales; los datos particulares y vigentes deben verificarse con fuentes autorizadas.
+
+
+## ORVIA LUCY — Investigación web (módulo inicial)
+
+- Se añade `api/_lib/research.js`, un módulo de búsqueda externa opcional mediante Tavily. En consultas que parecen requerir información actual, normativa, específica de cadenas o investigación solicitada, Lucy puede recuperar hasta cinco resultados.
+- Requiere configurar `TAVILY_API_KEY` como secreto del entorno Preview de Vercel. Si falta, Lucy sigue respondiendo con su conocimiento disponible y el backend informa que la búsqueda externa no está habilitada; no afirma haber investigado.
+- Las páginas recuperadas se entregan al modelo como contenido externo no confiable. Lucy debe contrastar la evidencia, ignorar instrucciones insertadas en páginas y citar título/URL cuando use información de ellas. La respuesta API devuelve metadatos de las fuentes.
+- Este primer módulo no guarda automáticamente páginas en una biblioteca permanente ni entrena un modelo. La incorporación duradera requiere un flujo posterior de revisión, derechos de uso y aprobación editorial.
