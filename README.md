@@ -56,7 +56,7 @@ Nombres definidos:
 - ORVIA LETI (ID interno jhoa)
 - ORVIA DARI
 
-Los agentes ocho y nueve son ORVIA LETI y ORVIA DARI, respectivamente. LETI se enfoca en diagnóstico técnico y preparación de correcciones; DARI en supervisión operativa, revisión de tareas y escalamiento a Lucy. Sus funciones siguen sujetas a implementación y pruebas.
+Los agentes ocho y nueve son ORVIA LETI y ORVIA DARI, respectivamente. LETI conserva el rol de diagnóstico técnico; DARI mantiene la supervisión operativa. ORVIA LEX supervisa la calidad de los informes durante la coordinación y comunica su auditoría a Lucy. ORVIA MAX analiza tendencias y oportunidades empresariales.
 
 La API ofrece consultas individuales y una coordinación multiagente en Preview. En `/api/orchestrate`, Lucy enruta la solicitud hacia hasta tres especialistas mediante reglas de selección, los consulta en paralelo, LEX audita los informes y Lucy entrega una síntesis con los hallazgos y la revisión de calidad. El endpoint lee solo agregados de pedidos, no nombres ni teléfonos de clientes. Se registran las tareas y eventos de auditoría. La coordinación requiere base de datos, autenticación, token de AI Gateway y modelo configurados; no se ha ejecutado aún una prueba de extremo a extremo con consumo de IA. No hay herramientas para modificar pedidos, inventario, dinero, cuentas o contactar clientes. La autonomía está limitada a análisis, delegación, revisión y síntesis; las acciones sensibles requieren aprobación humana.
 
