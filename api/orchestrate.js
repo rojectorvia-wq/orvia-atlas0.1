@@ -85,7 +85,7 @@ async function decideResearchNeed({ token, model, message }) {
       system: "Determina si para responder con rigor a la consulta de un restaurante hace falta información externa actual, especializada o que no pueda inferirse de conocimiento general. Devuelve exclusivamente JSON válido: {\\"needsResearch\\":true|false,\\"query\\":\\"consulta breve de búsqueda\\"}. Busca cuando falten datos, se pregunten hechos concretos de restaurantes/cadenas, normas vigentes, cifras actuales o fuentes. No busques para explicaciones generales estables.",
       user: message
     });
-    const parsed = JSON.parse(decision.answer.replace(/^\`\`\`json\s*|\`\`\`$/g, "").trim());
+    const parsed = JSON.parse(decision.answer.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, ""));
     return { needsResearch: parsed.needsResearch === true, query: String(parsed.query || message).slice(0, 500) };
   } catch {
     return { needsResearch: shouldResearchFallback(message), query: message };
