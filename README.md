@@ -24,7 +24,7 @@ La interfaz web estática existente sigue siendo una demostración local: sus pe
 - `GET /api/orders?restaurantId=...`: consulta pedidos de un restaurante autorizado.
 - `POST /api/orders`: crea pedidos con validación de datos, control de membresía y registro de auditoría en una sola transacción.
 - `PATCH /api/orders`: actualiza el estado de un pedido con control de membresía y registra el cambio de forma atómica.
-- `GET /api/agents?restaurantId=...`: muestra el registro de los nueve agentes para un miembro autorizado.\n- `POST /api/agents`: ejecuta una consulta de análisis con el agente seleccionado mediante AI Gateway, registra la tarea y su resultado en `agent_tasks`, y deja auditoría. No permite ejecutar acciones sobre pedidos, inventario, dinero ni clientes.\n- `POST /api/orchestrate`: Lucy selecciona hasta tres especialistas según la solicitud, delega análisis en paralelo, DARI revisa riesgos y Lucy sintetiza una respuesta. Usa un resumen agregado de pedidos sin nombres de clientes. Límite de dos coordinaciones por usuario y restaurante cada diez minutos.\n- `GET /api/onboarding`: devuelve los restaurantes a los que pertenece el usuario autenticado; `POST /api/onboarding` crea un espacio y su membresía de propietario.
+- `GET /api/agents?restaurantId=...`: muestra el registro de los once agentes para un miembro autorizado.\n- `POST /api/agents`: ejecuta una consulta de análisis con el agente seleccionado mediante AI Gateway, registra la tarea y su resultado en `agent_tasks`, y deja auditoría. No permite ejecutar acciones sobre pedidos, inventario, dinero ni clientes.\n- `POST /api/orchestrate`: Lucy selecciona hasta tres especialistas según la solicitud, delega análisis en paralelo, DARI revisa riesgos y Lucy sintetiza una respuesta. Usa un resumen agregado de pedidos sin nombres de clientes. Límite de dos coordinaciones por usuario y restaurante cada diez minutos.\n- `GET /api/onboarding`: devuelve los restaurantes a los que pertenece el usuario autenticado; `POST /api/onboarding` crea un espacio y su membresía de propietario.
 
 ## Configuración requerida
 
@@ -56,9 +56,9 @@ Nombres definidos:
 - ORVIA LETI (ID interno jhoa)
 - ORVIA DARI
 
-Los agentes ocho y nueve son ORVIA JHOA y ORVIA DARI, respectivamente. JHOA se enfoca en diagnóstico técnico y preparación de correcciones; DARI en supervisión operativa, revisión de tareas y escalamiento a Lucy. Sus funciones siguen sujetas a implementación y pruebas.
+Los agentes ocho y nueve son ORVIA LETI y ORVIA DARI, respectivamente. LETI se enfoca en diagnóstico técnico y preparación de correcciones; DARI en supervisión operativa, revisión de tareas y escalamiento a Lucy. Sus funciones siguen sujetas a implementación y pruebas.
 
-La API ofrece consultas individuales y una primera coordinación multiagente en Preview. En `/api/orchestrate`, Lucy enruta la solicitud hacia hasta tres especialistas mediante reglas de selección, los consulta en paralelo, DARI revisa sus informes y Lucy entrega una síntesis. El endpoint lee solo agregados de pedidos, no nombres ni teléfonos de clientes. Se registran las tareas y eventos de auditoría. La coordinación requiere base de datos, autenticación, token de AI Gateway y modelo configurados; no se ha ejecutado aún una prueba de extremo a extremo con consumo de IA. No hay herramientas para modificar pedidos, inventario, dinero, cuentas o contactar clientes. La autonomía está limitada a análisis, delegación, revisión y síntesis; las acciones sensibles requieren aprobación humana.
+La API ofrece consultas individuales y una coordinación multiagente en Preview. En `/api/orchestrate`, Lucy enruta la solicitud hacia hasta tres especialistas mediante reglas de selección, los consulta en paralelo, LEX audita los informes y Lucy entrega una síntesis con los hallazgos y la revisión de calidad. El endpoint lee solo agregados de pedidos, no nombres ni teléfonos de clientes. Se registran las tareas y eventos de auditoría. La coordinación requiere base de datos, autenticación, token de AI Gateway y modelo configurados; no se ha ejecutado aún una prueba de extremo a extremo con consumo de IA. No hay herramientas para modificar pedidos, inventario, dinero, cuentas o contactar clientes. La autonomía está limitada a análisis, delegación, revisión y síntesis; las acciones sensibles requieren aprobación humana.
 
 ## Presentación aprobada
 
@@ -84,7 +84,7 @@ Cada entrega debe tener número y nombre. Esta entrega es **ORVIA 0.5 — Autopi
 
 ## ORVIA 0.6 — Impulso: cambios de esta rama
 
-- El equipo visual pasa a once agentes. El nombre visible JHOA cambia a **LETI**; se conserva el identificador técnico interno `jhoa` para evitar romper referencias existentes. **DARI no cambia**.
+- El equipo visual pasa a once agentes. El nombre visible LETI cambia a **LETI**; se conserva el identificador técnico interno `jhoa` para evitar romper referencias existentes. **DARI no cambia**.
 - **LEX** audita los informes generados durante una coordinación multiagente y entrega su revisión a Lucy. No es un monitor continuo en segundo plano ni puede reparar código o ejecutar acciones por sí solo.
 - **MAX** aporta análisis empresarial sobre los datos que se le proporcionen.
 - La maqueta acelera la cadencia de la simulación: el ciclo de cocina avanza cada 4,5 segundos y genera pedidos ficticios cada 18 segundos. El ciclo visual de agentes se distribuye más rápido.
