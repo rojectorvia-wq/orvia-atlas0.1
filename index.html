@@ -14,7 +14,7 @@
     <div class="hero-wrap"><div class="eyebrow">INTELIGENCIA PARA RESTAURANTES</div><h1>Tu negocio, con una visión más clara.</h1><p>Organización, Rendimiento, Ventas, Inteligencia y Automatización en una sola plataforma.</p><blockquote>Que cada decisión te acerque a la mejor versión de tu negocio.</blockquote><button class="button primary hero-cta" id="enter-demo">Explorar maqueta funcional →</button><small class="prototype-note">ORVIA 0.2 — NÉBULA · ENTORNO DE DEMOSTRACIÓN</small></div>
     <div class="hero-foot"><span>Operación</span><span>Inteligencia</span><span>Automatización</span><span>Supervisión</span></div>
   </section>
-  <dialog id="auth-dialog" class="modal auth-modal"><form id="auth-form"><div class="modal-head"><div><div class="eyebrow">ACCESO A ORVIA</div><h2 id="auth-title">Iniciar sesión</h2></div><button type="button" class="close-button" id="close-auth">×</button></div><label>Correo electrónico<input name="email" type="email" required placeholder="tu@restaurante.com"></label><label>Contraseña<input name="password" type="password" required minlength="6" placeholder="Mínimo 6 caracteres"></label><p class="muted small">Acceso de demostración: esta pantalla todavía no crea cuentas ni autentica usuarios.</p><button class="button primary" type="submit">Continuar en la maqueta</button></form></dialog>
+  <dialog id="auth-dialog" class="modal auth-modal"><div class="modal-head"><div><div class="eyebrow">ACCESO SEGURO A ORVIA</div><h2 id="auth-title">Iniciar sesión</h2></div><button type="button" class="close-button" id="close-auth" aria-label="Cerrar">×</button></div><p class="muted small auth-guidance" id="auth-guidance">Accede con tu correo, contraseña o Google.</p><div id="clerk-auth-mount"></div><p class="muted small auth-footnote">El registro público es para propietarios. El personal autorizado debe ingresar mediante una invitación del restaurante.</p></dialog>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#" aria-label="ORVIA inicio"><span class="brand-mark">O</span><span><strong>ORVIA</strong><small>RESTAURANT INTELLIGENCE</small></span></a>
@@ -32,7 +32,7 @@
       <header class="topbar">
         <button class="mobile-menu" id="menu-toggle" aria-label="Abrir menú">☰</button>
         <div class="crumb">ORVIA <span>/</span> <b id="breadcrumb">Resumen</b></div>
-        <div class="top-actions"><span class="local-pill"><i></i> Entorno de prueba</span><button class="avatar" title="Perfil local">U</button></div>
+        <div class="top-actions"><span class="local-pill"><i></i> Entorno de prueba</span><span id="auth-user-label" class="auth-user-label">Modo demostración</span><button class="avatar" id="auth-account-button" title="Cuenta y cerrar sesión">U</button></div>
       </header>
 
       <section class="view active" id="view-overview">
