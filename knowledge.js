@@ -72,7 +72,7 @@ function answer(q,team=false){
  return out;
 }
 function handle(message,team){
- const reply=add(team?"Lucy está consultando la biblioteca y organizando el equipo…":"Lucy está buscando en ORVIA KNOWLEDGE…");
+ const reply=add(team?"Voy a revisar la información disponible y coordinar el análisis con los especialistas pertinentes.":"Permíteme revisar tu consulta y la información disponible para darte una orientación concreta.");
  setTimeout(()=>{reply.textContent=answer(message,team);},220);
 }
 $("#lucy-form")?.addEventListener("submit",e=>{
