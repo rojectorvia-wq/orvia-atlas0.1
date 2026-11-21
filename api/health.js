@@ -9,10 +9,12 @@ export default async function handler(req, res) {
     ? Boolean(process.env.ORVIA_PREVIEW_DATABASE_URL)
     : Boolean(process.env.DATABASE_URL || process.env.POSTGRES_URL);
   const aiGatewayConfigured = Boolean((process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN) && process.env.AI_GATEWAY_MODEL);
+  const searchConfigured = Boolean(process.env.TAVILY_API_KEY);
   const database = {
     configured: databaseConfigured,
     reachable: false,
-    schemaReady: false
+    schemaReady: false,
+    knowledgeMemoryReady: false
   };
 
   if (databaseConfigured) {
@@ -25,16 +27,30 @@ export default async function handler(req, res) {
           to_regclass('public.orders') IS NOT NULL AS orders,
           to_regclass('public.activity_log') IS NOT NULL AS activity_log,
           to_regclass('public.agent_registry') IS NOT NULL AS agent_registry,
-          to_regclass('public.agent_tasks') IS NOT NULL AS agent_tasks
+          to_regclass('public.agent_tasks') IS NOT NULL AS agent_tasks,
+          to_regclass('public.lucy_research_knowledge') IS NOT NULL AS lucy_research_knowledge
       `;
       database.reachable = true;
-      database.schemaReady = Object.values(rows[0] || {}).every(Boolean);
+      const schema = rows[0] || {};
+      database.schemaReady = [
+        schema.restaurants,
+        schema.restaurant_members,
+        schema.orders,
+        schema.activity_log,
+        schema.agent_registry,
+        schema.agent_tasks
+      ].every(Boolean);
+      database.knowledgeMemoryReady = schema.lucy_research_knowledge === true;
     } catch {
-      // Keep diagnostics safe: never return connection strings or provider errors.
+      // Never return connection strings or provider errors.
     }
   }
 
-  const ready = clerkConfigured && database.reachable && database.schemaReady;
+  const ready = clerkConfigured
+    && database.reachable
+    && database.schemaReady
+    && database.knowledgeMemoryReady
+    && aiGatewayConfigured;
   return json(res, ready ? 200 : 503, {
     service: "ORVIA API",
     version: "0.6.0",
@@ -42,9 +58,14 @@ export default async function handler(req, res) {
     integrations: {
       clerkConfigured,
       databaseConfigured,
-      aiGatewayConfigured
+      aiGatewayConfigured,
+      searchConfigured
     },
     database,
-    agents: { registered: 11, executionEnabled: aiGatewayConfigured, autonomousActions: false }
+    agents: {
+      teamDefined: 11,
+      executionEnabled: aiGatewayConfigured && database.reachable && database.schemaReady,
+      autonomousActions: false
+    }
   });
 }
