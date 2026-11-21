@@ -11,14 +11,14 @@
 <body>
   <section class="welcome-screen" id="welcome-screen">
     <nav class="welcome-nav"><a class="brand" href="#"><span class="brand-mark">O</span><span><strong>ORVIA</strong><small>RESTAURANT INTELLIGENCE</small></span></a><div><button class="button subtle" id="show-login">Iniciar sesión</button><button class="button primary" id="show-register">Registrarse</button></div></nav>
-    <div class="hero-wrap"><div class="eyebrow">INTELIGENCIA PARA RESTAURANTES</div><h1>Tu negocio, con una visión más clara.</h1><p>Organización, Rendimiento, Ventas, Inteligencia y Automatización en una sola plataforma.</p><blockquote>Que cada decisión te acerque a la mejor versión de tu negocio.</blockquote><button class="button primary hero-cta" id="enter-demo">Explorar maqueta funcional →</button><small class="prototype-note">ORVIA 0.2 — NÉBULA · ENTORNO DE DEMOSTRACIÓN</small></div>
+    <div class="hero-wrap"><div class="eyebrow">INTELIGENCIA PARA RESTAURANTES</div><h1>Tu negocio, con una visión más clara.</h1><p>Organización, Rendimiento, Ventas, Inteligencia y Automatización en una sola plataforma.</p><blockquote>Que cada decisión te acerque a la mejor versión de tu negocio.</blockquote><button class="button primary hero-cta" id="enter-demo">Iniciar sesión para continuar →</button><small class="prototype-note">ORVIA 0.2 — NÉBULA · ENTORNO DE DEMOSTRACIÓN</small></div>
     <div class="hero-foot"><span>Operación</span><span>Inteligencia</span><span>Automatización</span><span>Supervisión</span></div>
   </section>
   <dialog id="auth-dialog" class="modal auth-modal"><div class="modal-head"><div><div class="eyebrow">ACCESO SEGURO A ORVIA</div><h2 id="auth-title">Iniciar sesión</h2></div><button type="button" class="close-button" id="close-auth" aria-label="Cerrar">×</button></div><p class="muted small auth-guidance" id="auth-guidance">Accede con tu correo, contraseña o Google.</p><div id="clerk-auth-mount"></div><p class="muted small auth-footnote">El registro público es para propietarios. El personal autorizado debe ingresar mediante una invitación del restaurante.</p></dialog>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#" aria-label="ORVIA inicio"><span class="brand-mark">O</span><span><strong>ORVIA</strong><small>RESTAURANT INTELLIGENCE</small></span></a>
-      <div class="workspace"><span class="workspace-dot"></span><span><b>Restaurante de prueba</b><small>Entorno local de trabajo</small></span></div>
+      <div class="workspace"><span class="workspace-dot"></span><span><b>Espacio de demostración</b><small>Configuración inicial pendiente</small></span></div>
       <nav class="nav" aria-label="Navegación principal">
         <button class="nav-link active" data-view="overview"><span>▦</span> Resumen</button>
         <button class="nav-link" data-view="orders"><span>▤</span> Pedidos <em id="nav-order-count">0</em></button>
@@ -40,7 +40,7 @@
           <div><div class="eyebrow">PANEL DE CONTROL · RESTAURANTES</div><h1>Decide con claridad.</h1><p>Que cada decisión te acerque a la mejor versión de tu negocio.</p></div>
           <div class="date-chip" id="today-label"></div>
         </div>
-        <div class="notice"><span>ⓘ</span><p><b>Primera versión funcional.</b> Los pedidos y cambios se guardan localmente en este dispositivo. La conexión multiusuario, el inicio de sesión y los agentes autónomos reales se habilitarán en las siguientes etapas.</p></div>
+        <div class="notice"><span>ⓘ</span><p><b>Sesión protegida.</b> El acceso se valida con Clerk. Esta maqueta todavía guarda los pedidos localmente en este dispositivo; la conexión multiusuario, la creación del restaurante y los agentes autónomos reales se habilitarán en siguientes etapas.</p></div>
         <div class="section-heading"><div><h2>Vista general</h2><p>Actividad registrada en este dispositivo</p></div><button class="button primary" id="new-order-top">＋ Nuevo pedido</button></div>
         <div class="stats-grid">
           <article class="stat-card"><span>VENTAS REGISTRADAS</span><strong id="sales-total">$ 0</strong><small class="stat-foot">Suma de pedidos guardados</small></article>
