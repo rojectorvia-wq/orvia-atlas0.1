@@ -108,7 +108,7 @@ export default async function handler(req, res) {
       return json(res, 200, {
         agents,
         executionEnabled: Boolean(gatewayAuth() && process.env.AI_GATEWAY_MODEL),
-        supervisor: { status: "configured", autonomousActions: false, humanApprovalRequired: true }
+        supervisor: { status: "testing", delegationEnabled: true, autonomousActions: false, humanApprovalRequired: true }
       });
     }
 
