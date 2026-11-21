@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vercel dev",
-    "check": "node --check app.js && node --check api/health.js && node --check api/onboarding.js && node --check api/orders.js && node --check api/agents.js"
+    "check": "node --check app.js && node --check api/health.js && node --check api/onboarding.js && node --check api/orders.js && node --check api/agents.js && node --check api/auth-config.js"
   },
   "dependencies": {
     "@clerk/backend": "^2.20.0",
