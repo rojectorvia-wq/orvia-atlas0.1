@@ -31,7 +31,8 @@ La interfaz web estática existente sigue siendo una demostración local: sus pe
 Variables del entorno Preview de Vercel:
 - `CLERK_SECRET_KEY` (solo servidor)
 - `CLERK_PUBLISHABLE_KEY` (clave pública de Clerk; se entrega al navegador mediante `/api/auth-config`)
-- `ORVIA_PREVIEW_DATABASE_URL` (obligatoria para Preview: conexión Neon aislada, distinta de producción)\n- `DATABASE_URL` (o `POSTGRES_URL`, solo para producción/local; Preview no usa estas variables como alternativa)\n- `AI_GATEWAY_MODEL` (ID exacto de modelo existente en el catálogo de AI Gateway; Preview de esta rama usa inicialmente `openai/gpt-4.1-mini`)\n- `VERCEL_OIDC_TOKEN` (preferido en despliegues Vercel; lo proporciona Vercel) o `AI_GATEWAY_API_KEY` (alternativa secreta configurada directamente en Vercel)
+- `ORVIA_PREVIEW_DATABASE_URL` (obligatoria para Preview: conexión Neon aislada, distinta de producción)\n- `DATABASE_URL` (o `POSTGRES_URL`, solo para producción/local; Preview no usa estas variables como alternativa)\n- `AI_GATEWAY_MODEL` (ID exacto de modelo existente en el catálogo de AI Gateway; Preview de esta rama usa inicialmente `openai/gpt-4.1-mini`)
+- `TAVILY_API_KEY` (opcional, secreto de Preview para habilitar la búsqueda web de Lucy; sin esta clave no se realizan búsquedas externas)\n- `VERCEL_OIDC_TOKEN` (preferido en despliegues Vercel; lo proporciona Vercel) o `AI_GATEWAY_API_KEY` (alternativa secreta configurada directamente en Vercel)
 
 Las claves deben configurarse en Vercel, nunca guardarse en Git ni compartirse en el chat. Las integraciones instaladas en el equipo deben vincularse explícitamente a este proyecto para que Vercel genere las variables correspondientes.
 
