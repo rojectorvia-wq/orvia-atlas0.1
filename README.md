@@ -1,19 +1,43 @@
-# ORVIA Atlas 0.1
+# ORVIA 0.2 — Nébula
 
-**ORVIA** significa **Organización, Rendimiento, Ventas, Inteligencia y Automatización**. Es un proyecto de plataforma de gestión e inteligencia operativa para restaurantes.
+**ORVIA** significa **Organización, Rendimiento, Ventas, Inteligencia y Automatización**. Plataforma de gestión e inteligencia operativa para restaurantes.
 
-> **Estado actual: documentación inicial.** Esta versión del repositorio todavía no contiene una aplicación ejecutable, backend, base de datos ni agentes funcionales. No debe considerarse lista para producción.
+## Estado de esta rama
 
-## Objetivo del producto
+La interfaz web estática existente sigue siendo una demostración local: sus pedidos actuales se guardan en el navegador. Se ha añadido una primera base de backend con funciones de Vercel, verificación de sesión Clerk, acceso a Neon, creación de restaurantes, API de pedidos y consulta de estado de agentes.
 
-Construir una plataforma en español que ayude a un restaurante a organizar su operación, entender sus resultados y ejecutar tareas autorizadas desde una interfaz web adaptable a celulares y computadores.
+**No está lista para datos reales todavía.** Antes de usar datos reales, deben quedar vinculadas las integraciones al proyecto de Vercel, definidas las variables de entorno de Preview, ejecutada la migración SQL en una base de desarrollo y probados los flujos de autenticación, onboarding y API. La interfaz carga ClerkJS desde su CDN y utiliza componentes de inicio de sesión/registro. Para habilitarla hay que configurar `CLERK_PUBLISHABLE_KEY` en Preview y habilitar Google como proveedor social en Clerk. El registro público está presentado como registro de propietario; la invitación segura de personal autorizado y el alta automática del restaurante siguen pendientes de la siguiente etapa. La interfaz oculta el panel hasta detectar una sesión Clerk y vuelve a la presentación al cerrar sesión. No introducir información real de clientes en el prototipo.
 
-## Equipo de nueve agentes autónomos
+## Backend añadido
 
-La arquitectura objetivo de ORVIA contempla **nueve agentes especializados**, capaces de ejecutar de forma autónoma las tareas que tengan asignadas, coordinarse entre sí y comunicar resultados, incidencias y solicitudes de intervención.
+- `GET /api/auth-config`: entrega únicamente la clave pública de Clerk para inicializar la interfaz; nunca expone la clave secreta.
+- `GET /api/health`: comprueba la configuración, la conectividad con Neon y la presencia de las seis tablas requeridas por la migración; nunca expone secretos. Devuelve estado degradado si falta alguna condición.
+- `POST /api/onboarding`: crea un restaurante, su membresía de propietario y el evento de auditoría en una sola transacción para evitar registros incompletos.
+- `GET /api/orders?restaurantId=...`: consulta pedidos de un restaurante autorizado.
+- `POST /api/orders`: crea pedidos con validación de datos, control de membresía y registro de auditoría en una sola transacción.
+- `PATCH /api/orders`: actualiza el estado de un pedido con control de membresía y registra el cambio de forma atómica.
+- `GET /api/agents?restaurantId=...`: muestra el registro de los nueve agentes para un miembro autorizado.\n- `POST /api/agents`: ejecuta una consulta de análisis con el agente seleccionado mediante AI Gateway, registra la tarea y su resultado en `agent_tasks`, y deja auditoría. No permite ejecutar acciones sobre pedidos, inventario, dinero ni clientes.\n- `POST /api/orchestrate`: Lucy selecciona hasta tres especialistas según la solicitud, delega análisis en paralelo, DARI revisa riesgos y Lucy sintetiza una respuesta. Usa un resumen agregado de pedidos sin nombres de clientes. Límite de dos coordinaciones por usuario y restaurante cada diez minutos.\n- `GET /api/onboarding`: devuelve los restaurantes a los que pertenece el usuario autenticado; `POST /api/onboarding` crea un espacio y su membresía de propietario.
 
-Agentes cuyos nombres ya están definidos:
+## Configuración requerida
 
+Variables del entorno Preview de Vercel:
+- `CLERK_SECRET_KEY` (solo servidor)
+- `CLERK_PUBLISHABLE_KEY` (clave pública de Clerk; se entrega al navegador mediante `/api/auth-config`)
+- `ORVIA_PREVIEW_DATABASE_URL` (obligatoria para Preview: conexión Neon aislada, distinta de producción)\n- `DATABASE_URL` (o `POSTGRES_URL`, solo para producción/local; Preview no usa estas variables como alternativa)\n- `AI_GATEWAY_MODEL` (ID exacto de modelo existente en el catálogo de AI Gateway; Preview de esta rama usa inicialmente `openai/gpt-4.1-mini`)\n- `VERCEL_OIDC_TOKEN` (preferido en despliegues Vercel; lo proporciona Vercel) o `AI_GATEWAY_API_KEY` (alternativa secreta configurada directamente en Vercel)
+
+Las claves deben configurarse en Vercel, nunca guardarse en Git ni compartirse en el chat. Las integraciones instaladas en el equipo deben vincularse explícitamente a este proyecto para que Vercel genere las variables correspondientes.
+
+### Base de datos
+
+Ejecuta `db/schema.sql` únicamente en la base Neon de desarrollo aislada que uses para Preview. No ejecutes esta migración en la base de producción. El backend bloquea escrituras en Preview si no existe `ORVIA_PREVIEW_DATABASE_URL`; no utiliza las credenciales compartidas de producción como alternativa. La migración crea restaurantes, membresías, pedidos, auditoría, registro de agentes y tareas. Los endpoints comprueban la membresía en el servidor para aislar los datos por restaurante.
+
+### Autenticación
+
+La interfaz carga ClerkJS y presenta componentes de inicio de sesión y registro. El panel se muestra solo al detectar una sesión autenticada y vuelve a ocultarse al cerrar sesión. El backend valida tokens de Clerk en cada endpoint privado. El proceso de alta del restaurante, invitaciones seguras al personal y selección de restaurante aún requieren integración. No se almacenan contraseñas en ORVIA.
+
+## Equipo objetivo: nueve agentes
+
+Nombres definidos:
 - ORVIA LUCY
 - ORVIA LUZ
 - ORVIA JOTE
@@ -21,68 +45,30 @@ Agentes cuyos nombres ya están definidos:
 - ORVIA XEL
 - ORVIA NANI
 - ORVIA MEMO
+- ORVIA JHOA
+- ORVIA DARI
 
-La arquitectura reserva dos agentes adicionales para completar el equipo de nueve. Sus nombres y responsabilidades específicas quedan pendientes de incorporar desde la definición aprobada del proyecto; no se inventan en esta documentación.
+Los agentes ocho y nueve son ORVIA JHOA y ORVIA DARI, respectivamente. JHOA se enfoca en diagnóstico técnico y preparación de correcciones; DARI en supervisión operativa, revisión de tareas y escalamiento a Lucy. Sus funciones siguen sujetas a implementación y pruebas.
 
-### Funcionamiento autónomo y coordinación
+La API ofrece consultas individuales y una primera coordinación multiagente en Preview. En `/api/orchestrate`, Lucy enruta la solicitud hacia hasta tres especialistas mediante reglas de selección, los consulta en paralelo, DARI revisa sus informes y Lucy entrega una síntesis. El endpoint lee solo agregados de pedidos, no nombres ni teléfonos de clientes. Se registran las tareas y eventos de auditoría. La coordinación requiere base de datos, autenticación, token de AI Gateway y modelo configurados; no se ha ejecutado aún una prueba de extremo a extremo con consumo de IA. No hay herramientas para modificar pedidos, inventario, dinero, cuentas o contactar clientes. La autonomía está limitada a análisis, delegación, revisión y síntesis; las acciones sensibles requieren aprobación humana.
 
-- Cada agente tendrá una especialidad, objetivos, herramientas y permisos claramente delimitados.
-- Los agentes podrán iniciar y completar flujos de trabajo autorizados sin requerir instrucciones paso a paso del usuario.
-- Podrán solicitar apoyo a otros agentes, intercambiar contexto operativo y devolver resultados al agente coordinador o al panel principal.
-- Un agente supervisor deberá detectar fallos, intentar recuperaciones seguras, registrar el incidente y avisar cuando necesite intervención humana.
-- Las tareas, decisiones, resultados y errores deberán quedar registrados para auditoría.
-- La autonomía estará limitada por permisos: pagos, cambios críticos, cancelaciones y comunicaciones externas sensibles requerirán aprobación humana cuando corresponda.
+## Presentación aprobada
 
-La autonomía es un requisito de diseño y desarrollo; no significa que los nueve agentes ya estén implementados o activos en el repositorio.
+- Diseño oscuro negro y azul, adaptable a móvil.
+- Interfaz en español.
+- Mensaje: **“Que cada decisión te acerque a la mejor versión de tu negocio”**.
+- Marca: **ORVIA Restaurant Intelligence**.
+- En la interfaz autenticada, “Iniciar sesión” y “Registrarse” deben aparecer en la parte superior derecha.
 
-## Alcance funcional previsto
+## Seguridad
 
-1. **Acceso y cuentas:** registro, inicio y cierre de sesión, recuperación de acceso y aislamiento de datos por restaurante.
-2. **Panel de control:** indicadores operativos y comerciales con datos verificables.
-3. **Operación del restaurante:** módulos que se definirán y validarán con el negocio de prueba.
-4. **Agentes de IA:** nueve agentes especializados con ejecución autónoma de tareas autorizadas, coordinación entre agentes, registro de actividad y supervisión.
-5. **Alertas:** notificaciones claras cuando ocurra un error o se requiera una decisión humana.
-6. **Diseño adaptable:** experiencia en español para móvil y escritorio.
+- No subir secretos ni claves API al repositorio.
+- Validar identidad y permisos en el servidor.
+- Aislar cada restaurante por membresía.
+- Registrar eventos sin exponer datos sensibles.
+- Requerir aprobación humana para acciones críticas.
+- No activar agentes hasta completar pruebas funcionales y de seguridad.
 
-## Principios técnicos y de seguridad
+## Versionado
 
-- No almacenar contraseñas en texto plano.
-- No subir claves API, contraseñas, tokens ni archivos `.env` al repositorio.
-- Mantener los secretos en variables de entorno del proveedor de despliegue.
-- Validar permisos en el servidor; ocultar un botón en la interfaz no constituye control de acceso.
-- Aislar los datos de cada restaurante y comprobar la autorización en cada operación.
-- Registrar errores y acciones importantes sin exponer datos sensibles.
-- Probar autenticación, autorización, validación de datos y flujos críticos antes de publicar.
-- Tratar las respuestas de IA como propuestas hasta que una operación esté validada y autorizada.
-
-## Plan de trabajo
-
-- [ ] Confirmar la arquitectura y el stack de la aplicación.
-- [ ] Crear la estructura de frontend y backend.
-- [ ] Configurar autenticación y persistencia segura.
-- [ ] Implementar el primer flujo completo del restaurante de prueba.
-- [ ] Definir contratos, permisos, coordinación y pruebas para los nueve agentes autónomos.
-- [ ] Añadir monitoreo, manejo de errores y notificaciones.
-- [ ] Ejecutar pruebas funcionales y de seguridad.
-- [ ] Desplegar una versión de prueba y verificar registro e inicio de sesión desde móvil.
-
-## Desarrollo
-
-La implementación aún no ha comenzado en este repositorio. Los comandos de instalación y despliegue se documentarán cuando exista un stack real y archivos de proyecto que permitan verificarlos.
-
-## Estado de versiones
-
-Este repositorio corresponde a **ORVIA Atlas 0.1**. Las siguientes entregas deberán identificarse con número y nombre de versión para evitar confusiones.
-
-
-## Auditoría inicial de despliegue (19-11-2026)
-
-Se encontró un proyecto Vercel llamado `orvia-portal-unificado`, independiente de este repositorio:
-
-- Tiene un despliegue de producción marcado como `READY`.
-- El proyecto no muestra un repositorio Git conectado ni un framework detectado.
-- La lista de archivos de origen del despliegue de producción contiene únicamente `src/index.html`.
-- No aparecen variables de entorno configuradas en el proyecto.
-- La protección SSO está habilitada para los dominios gestionados por Vercel, por lo que una URL de vista previa puede pedir autenticación de Vercel antes de mostrar la página.
-
-Un despliegue marcado como `READY` solo confirma que Vercel terminó ese despliegue; no demuestra que exista un backend, que el registro funcione ni que los agentes estén conectados. Esta auditoría debe repetirse cuando se incorpore el código fuente real.
+Cada entrega debe tener número y nombre: **ORVIA 0.2 — Nébula**. Esta rama es de desarrollo y Preview. No fusionar con `main` ni publicar a producción sin autorización explícita.

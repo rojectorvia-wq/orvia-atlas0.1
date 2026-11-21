@@ -1,0 +1,17 @@
+{
+  "name": "orvia-nebula",
+  "version": "0.2.0",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "check": "node --check app.js && node --check api/health.js && node --check api/onboarding.js && node --check api/orders.js && node --check api/agents.js && node --check api/auth-config.js && node --check api/_lib/auth.js && node --check api/_lib/db.js && node --check api/_lib/http.js && node --check api/orchestrate.js"
+  },
+  "dependencies": {
+    "@clerk/backend": "^2.20.0",
+    "@neondatabase/serverless": "^1.0.2",
+    "zod": "^4.1.0"
+  }
+}
