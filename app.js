@@ -179,7 +179,7 @@
     return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\n"+names[agentId]+": "+(tips[agentId]||tips.lucy)+"\\n\\nSolicitud recibida: "+message+"\\n\\nEsta respuesta es una simulación con información ficticia de Bistró Bahía Azul; no consulta ni modifica sistemas reales.";
   }
   function demoTeamReply(message){
-    const q=String(message||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
+    const q=String(message||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
     const selected=new Set();
     const rules=[
       ["xel",/marketing|promocion|campana|publicidad|atraer|conseguir clientes|redes sociales|mas clientes/],
@@ -206,10 +206,10 @@
       dari:"DARI revisaría riesgos operativos, tareas pendientes y decisiones que requieren aprobación.",
       max:"MAX evaluaría oportunidades de crecimiento y compararía el resultado de la campaña con metas medibles, sin inventar ventas."
     };
-    return "【ORVIA · COORDINACIÓN DE DEMOSTRACIÓN】\\n\\nLUCY: Entendí tu solicitud y asigné el análisis a "+[...selected].map(id=>labels[id]).join(", ")+".\\n\\n"+
-      [...selected].map(id=>labels[id]+": "+advice[id]).join("\\n\\n")+
-      "\\n\\nLEX: Auditoría de calidad. Las recomendaciones son propuestas; deben contrastarse con costos, inventario y datos reales antes de aplicarse. No se detecta ni corrige un error de producción desde esta maqueta.\\n\\n"+
-      "LUCY: Mi recomendación es empezar con una prueba pequeña, definir presupuesto y responsable, medir resultados y pedir tu aprobación antes de publicar o gastar.\\n\\n"+
+    return "【ORVIA · COORDINACIÓN DE DEMOSTRACIÓN】\n\nLUCY: Entendí tu solicitud y asigné el análisis a "+[...selected].map(id=>labels[id]).join(", ")+".\n\n"+
+      [...selected].map(id=>labels[id]+": "+advice[id]).join("\n\n")+
+      "\n\nLEX: Auditoría de calidad. Las recomendaciones son propuestas; deben contrastarse con costos, inventario y datos reales antes de aplicarse. No se detecta ni corrige un error de producción desde esta maqueta.\n\n"+
+      "LUCY: Mi recomendación es empezar con una prueba pequeña, definir presupuesto y responsable, medir resultados y pedir tu aprobación antes de publicar o gastar.\n\n"+
       "Nota: respuesta simulada para Bistró Bahía Azul; no se publicaron campañas ni se contactó a clientes.";
   }
   let workspaceLoading=false;
