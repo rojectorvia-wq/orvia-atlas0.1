@@ -6,6 +6,14 @@ import { json, methodNotAllowed } from "./_lib/http.js";
 
 const schema = z.object({ name: z.string().trim().min(2).max(100) });
 
+function bodyOf(req) {
+  if (req.body && typeof req.body === "object") return req.body;
+  if (typeof req.body === "string") {
+    try { return JSON.parse(req.body); } catch { return {}; }
+  }
+  return {};
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET" && req.method !== "POST") return methodNotAllowed(res, ["GET", "POST"]);
   const user = await requireUser(req);
@@ -24,7 +32,7 @@ export default async function handler(req, res) {
       return json(res, 200, { restaurants });
     }
 
-    const parsed = schema.safeParse(req.body);
+    const parsed = schema.safeParse(bodyOf(req));
     if (!parsed.success) return json(res, 400, { error: "Nombre de restaurante no válido." });
     const restaurantId = randomUUID();
     const [restaurants] = await sql.transaction([
