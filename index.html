@@ -9,6 +9,12 @@
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
+  <section class="welcome-screen" id="welcome-screen">
+    <nav class="welcome-nav"><a class="brand" href="#"><span class="brand-mark">O</span><span><strong>ORVIA</strong><small>RESTAURANT INTELLIGENCE</small></span></a><div><button class="button subtle" id="show-login">Iniciar sesión</button><button class="button primary" id="show-register">Registrarse</button></div></nav>
+    <div class="hero-wrap"><div class="eyebrow">INTELIGENCIA PARA RESTAURANTES</div><h1>Tu negocio, con una visión más clara.</h1><p>Organización, Rendimiento, Ventas, Inteligencia y Automatización en una sola plataforma.</p><blockquote>Que cada decisión te acerque a la mejor versión de tu negocio.</blockquote><button class="button primary hero-cta" id="enter-demo">Explorar maqueta funcional →</button><small class="prototype-note">ORVIA 0.2 — NÉBULA · ENTORNO DE DEMOSTRACIÓN</small></div>
+    <div class="hero-foot"><span>Operación</span><span>Inteligencia</span><span>Automatización</span><span>Supervisión</span></div>
+  </section>
+  <dialog id="auth-dialog" class="modal auth-modal"><form id="auth-form"><div class="modal-head"><div><div class="eyebrow">ACCESO A ORVIA</div><h2 id="auth-title">Iniciar sesión</h2></div><button type="button" class="close-button" id="close-auth">×</button></div><label>Correo electrónico<input name="email" type="email" required placeholder="tu@restaurante.com"></label><label>Contraseña<input name="password" type="password" required minlength="6" placeholder="Mínimo 6 caracteres"></label><p class="muted small">Acceso de demostración: esta pantalla todavía no crea cuentas ni autentica usuarios.</p><button class="button primary" type="submit">Continuar en la maqueta</button></form></dialog>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#" aria-label="ORVIA inicio"><span class="brand-mark">O</span><span><strong>ORVIA</strong><small>RESTAURANT INTELLIGENCE</small></span></a>
@@ -77,6 +83,7 @@
       <div class="modal-actions"><button type="button" class="button subtle" id="cancel-dialog">Cancelar</button><button class="button primary" type="submit">Guardar pedido</button></div>
     </form>
   </dialog>
+  <aside class="lucy-widget" id="lucy-widget"><button class="lucy-toggle" id="lucy-toggle"><span class="lucy-orb">L</span><span><b>Hablar con Lucy</b><small>Asistente de demostración</small></span><span class="lucy-chevron">⌃</span></button><div class="lucy-panel" id="lucy-panel"><div class="lucy-head"><div><b>ORVIA LUCY</b><small>Coordinación · modo demostración</small></div><button id="lucy-close" aria-label="Cerrar chat">×</button></div><div class="lucy-messages" id="lucy-messages"><div class="lucy-message">Hola. Soy Lucy, el punto de contacto de ORVIA en esta maqueta. Puedo orientarte sobre los módulos visibles; todavía no estoy conectada a un modelo de IA ni coordino agentes reales.</div></div><form id="lucy-form" class="lucy-compose"><input id="lucy-input" maxlength="500" placeholder="Escribe a Lucy..." aria-label="Mensaje para Lucy"><button type="submit">Enviar</button></form></div></aside>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./app.js"></script>
 </body>
