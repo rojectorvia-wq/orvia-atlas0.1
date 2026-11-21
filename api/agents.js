@@ -130,7 +130,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const recent = await sql`SELECT count(*)::int AS total FROM agent_tasks WHERE restaurant_id = ${restaurantId} AND requested_by = ${user.userId} AND created_at > now() - (${RATE_WINDOW_MINUTES} || ' minutes')::interval`;
+    const recent = await sql`SELECT count(*)::int AS total FROM agent_tasks WHERE restaurant_id = ${restaurantId} AND requested_by = ${user.userId} AND created_at > now() - (${RATE_WINDOW_MINUTES} * interval '1 minute')`;
     if ((recent[0]?.total || 0) >= RATE_LIMIT) {
       return json(res, 429, { code: "AGENT_RATE_LIMIT", error: "Alcanzaste el límite temporal de consultas. Espera unos minutos." });
     }
