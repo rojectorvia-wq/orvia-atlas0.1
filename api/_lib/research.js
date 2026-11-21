@@ -7,9 +7,10 @@ export function shouldResearch(message) {
     || /\b(quien|cual|que)\b.*\b(restaurante|cadena|franquicia|proveedor|norma|ley)\b/.test(q);
 }
 
-export async function researchWeb(message) {
+export async function researchWeb(message, decision = null) {
   const apiKey = process.env.TAVILY_API_KEY || "";
-  if (!apiKey || !shouldResearch(message)) {
+  const needsSearch = decision?.needsResearch === true || (!decision && shouldResearch(message));
+  if (!apiKey || !needsSearch) {
     return { attempted: false, available: Boolean(apiKey), reason: apiKey ? "No se detectó necesidad clara de información externa." : "Falta configurar TAVILY_API_KEY en Preview.", sources: [] };
   }
   const controller = new AbortController();
@@ -20,7 +21,7 @@ export async function researchWeb(message) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         api_key: apiKey,
-        query: String(message).slice(0, 500),
+        query: String(decision?.query || message).slice(0, 500),
         search_depth: "basic",
         topic: "general",
         max_results: 5,
