@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - orvia-0.2-nebula
+      - orvia-0.4-autonomia-preview
+      - orvia-0.5-autopiloto
   pull_request:
     branches:
       - orvia-0.2-nebula
+      - orvia-0.4-autonomia-preview
+      - orvia-0.5-autopiloto
 
 jobs:
   syntax:
