@@ -11,6 +11,14 @@ const createSchema = z.object({
   amount: z.number().int().positive().max(1000000000),
   status: z.enum(["Nuevo","Preparando","Listo","Entregado"]).default("Nuevo")
 });
+function bodyOf(req) {
+  if (req.body && typeof req.body === "object") return req.body;
+  if (typeof req.body === "string") {
+    try { return JSON.parse(req.body); } catch { return {}; }
+  }
+  return {};
+}
+
 const updateSchema = z.object({
   restaurantId: z.string().uuid(),
   orderId: z.string().uuid(),
@@ -42,7 +50,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
-      const parsed = createSchema.safeParse(req.body);
+      const parsed = createSchema.safeParse(bodyOf(req));
       if (!parsed.success) return json(res, 400, { error: "Revisa los datos del pedido." });
       const v = parsed.data;
       if (!await member(sql, v.restaurantId, user.userId)) return json(res, 403, { error: "No tienes acceso a este restaurante." });
@@ -55,7 +63,7 @@ export default async function handler(req, res) {
       return json(res, 201, { order: orders[0] });
     }
 
-    const parsed = updateSchema.safeParse(req.body);
+    const parsed = updateSchema.safeParse(bodyOf(req));
     if (!parsed.success) return json(res, 400, { error: "Actualización no válida." });
     const v = parsed.data;
     if (!await member(sql, v.restaurantId, user.userId)) return json(res, 403, { error: "No tienes acceso a este restaurante." });
