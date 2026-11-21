@@ -6,6 +6,7 @@ export default async function handler(req, res) {
 
   const clerkConfigured = Boolean(process.env.CLERK_SECRET_KEY);
   const databaseConfigured = Boolean(process.env.DATABASE_URL || process.env.POSTGRES_URL);
+  const aiGatewayConfigured = Boolean((process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN) && process.env.AI_GATEWAY_MODEL);
   const database = {
     configured: databaseConfigured,
     reachable: false,
@@ -38,7 +39,8 @@ export default async function handler(req, res) {
     status: ready ? "online" : "degraded",
     integrations: {
       clerkConfigured,
-      databaseConfigured
+      databaseConfigured,
+      aiGatewayConfigured
     },
     database,
     agents: { planned: 9, operational: 0 }
