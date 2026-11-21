@@ -32,3 +32,7 @@
 .auth-user-label{color:#9aabc1;font-size:10px}
 @media(max-width:1050px){.sidebar{width:220px}.main{margin-left:220px}.view{padding:26px}.agents-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.sidebar{transform:translateX(-100%);transition:transform .2s;width:270px}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.topbar{padding:0 16px}.mobile-menu{display:block;background:transparent;border:0;color:#dce9fb;font-size:21px}.crumb{margin-right:auto;margin-left:12px}.top-actions{gap:8px}.top-actions .local-pill{display:none}.view{padding:22px 15px}.welcome,.page-heading{align-items:flex-start;flex-direction:column}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.content-grid{grid-template-columns:1fr}.agents-grid{grid-template-columns:1fr}.toolbar{flex-direction:column}.toolbar select{width:100%}.section-heading{gap:10px;align-items:flex-end}.agent-live-panel{padding:14px}}
+
+/* ORVIA 0.3 — biblioteca de conocimiento */
+.knowledge-badge{padding:8px 12px;border-top:1px solid #203149;background:#0b1422;color:#8fb8e9;font-size:9px;letter-spacing:.3px;text-align:center}
+.lucy-message{white-space:pre-wrap;overflow-wrap:anywhere}
