@@ -413,7 +413,7 @@
     item.status="Trabajando";item.task=task;item.runs++;
     record(agents.find(a=>a[3]===id)[0]+" · tarea iniciada",task+" · simulación");
     renderAgents();
-    setTimeout(()=>{item.status="En espera";item.task="Última tarea: "+task;renderAgents();},2200);
+    setTimeout(()=>{item.status="En espera";item.task="Última tarea: "+task;renderAgents();},1500);
   }
   function renderLiveAgents(){
     const live=$("#agent-live-feed");
