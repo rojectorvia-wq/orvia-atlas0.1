@@ -1,4 +1,4 @@
-# ORVIA 0.3 — Knowledge
+# ORVIA 0.5 — Autopiloto
 
 **ORVIA** significa **Organización, Rendimiento, Ventas, Inteligencia y Automatización**. Plataforma de gestión e inteligencia operativa para restaurantes.
 
@@ -8,7 +8,9 @@ Se incorpora `knowledge.js`, una biblioteca local de **1.008 preguntas e intenci
 
 **Alcance actual:** esta biblioteca no es un modelo entrenado ni un motor de IA generativa. Las 1.008 entradas son preguntas y variaciones indexables; las respuestas se construyen con reglas y guías operativas. La proyección de ventas se abstiene de dar cifras cuando faltan series históricas. No se conectan acciones reales ni se envían pedidos, pagos o campañas.
 
-## Estado de esta rama
+## ORVIA 0.5 — Autopiloto
+
+Esta versión incorpora un ciclo autónomo de demostración para Bistró Bahía Azul. Al entrar al restaurante ficticio, Lucy inicia el autopiloto: NANI registra pedidos de ejemplo, KIKE avanza su preparación y entrega, JOTE descuenta ingredientes ficticios, LUZ actualiza los indicadores ilustrativos y MEMO/DARI participan en la supervisión y el análisis del equipo. El autopiloto puede pausarse desde el Centro de autonomía. Los pedidos se guardan únicamente en el navegador y se generan con datos inventados. No se conectan clientes, cocinas, inventarios, proveedores, pagos ni campañas reales. Es una simulación interactiva, no una operación comercial autónoma.
 
 La interfaz web estática existente sigue siendo una demostración local: sus pedidos actuales se guardan en el navegador. Se ha añadido una primera base de backend con funciones de Vercel, verificación de sesión Clerk, acceso a Neon, creación de restaurantes, API de pedidos y consulta de estado de agentes.
 
@@ -77,4 +79,4 @@ La API ofrece consultas individuales y una primera coordinación multiagente en 
 
 ## Versionado
 
-Cada entrega debe tener número y nombre: **ORVIA 0.2 — Nébula**. Esta rama es de desarrollo y Preview. No fusionar con `main` ni publicar a producción sin autorización explícita.
+Cada entrega debe tener número y nombre. Esta entrega es **ORVIA 0.5 — Autopiloto**. Esta rama es de desarrollo y Preview. No fusionar con `main` ni publicar a producción sin autorización explícita.
