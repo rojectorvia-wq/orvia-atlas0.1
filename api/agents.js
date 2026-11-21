@@ -1,4 +1,5 @@
 import { requireUser } from "./_lib/auth.js";
+import { getVercelOidcToken } from "@vercel/oidc";
 import { db } from "./_lib/db.js";
 import { json, methodNotAllowed } from "./_lib/http.js";
 import { researchWeb } from "./_lib/research.js";
@@ -35,8 +36,10 @@ function knowledgeQuery(message) {
   return [...new Set(terms)].slice(0, 8).map(term => `${term}:*`).join(" | ");
 }
 
-function gatewayAuth() {
-  return process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN || "";
+async function gatewayAuth() {
+  if (process.env.AI_GATEWAY_API_KEY) return process.env.AI_GATEWAY_API_KEY;
+  try { return await getVercelOidcToken(); }
+  catch { return process.env.VERCEL_OIDC_TOKEN || ""; }
 }
 
 async function generateAgentReply({ token, model, agent, message }) {
@@ -119,7 +122,7 @@ export default async function handler(req, res) {
       const agents = await sql`SELECT id, display_name AS name, status, capabilities, updated_at FROM agent_registry ORDER BY id`;
       return json(res, 200, {
         agents,
-        executionEnabled: Boolean(gatewayAuth() && process.env.AI_GATEWAY_MODEL),
+        executionEnabled: Boolean(await gatewayAuth() && process.env.AI_GATEWAY_MODEL),
         supervisor: { status: "testing", delegationEnabled: true, autonomousActions: false, humanApprovalRequired: true }
       });
     }
@@ -132,7 +135,7 @@ export default async function handler(req, res) {
       return json(res, 400, { error: `Escribe una consulta de 1 a ${MAX_MESSAGE_LENGTH} caracteres.` });
     }
 
-    const token = gatewayAuth();
+    const token = await gatewayAuth();
     const model = process.env.AI_GATEWAY_MODEL || "";
     if (!token || !model) {
       return json(res, 503, {
