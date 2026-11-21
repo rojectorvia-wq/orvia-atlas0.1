@@ -367,6 +367,10 @@
   const agentRuntime = Object.fromEntries(agents.map(a=>[a[3],{status:"En espera",task:"Disponible para una tarea de demostración",runs:0}]));
   const agentSequence = ["lucy","luz","jote","kike","xel","nani","memo","jhoa","dari"];
   let pulseIndex=0;
+  let autopilotStarted=false;
+  let autopilotStepTimer=null;
+  let autopilotOrderTimer=null;
+  let autopilotSequence=100;
   const inventoryItems = [
     {name:"Carne de res",qty:8,unit:"kg",min:5},{name:"Pan de hamburguesa",qty:24,unit:"unidades",min:12},
     {name:"Queso mozzarella",qty:3,unit:"kg",min:4},{name:"Tomate",qty:11,unit:"kg",min:5},
@@ -421,15 +425,100 @@
   function buildLivePanel(){
     const section=$("#view-agents");
     const panel=document.createElement("section");panel.className="panel agent-live-panel";
-    panel.innerHTML='<div class="panel-heading"><div><h3>Actividad del equipo en vivo</h3><p>Estados animados de un ciclo de demostración · no son operaciones reales</p></div><button class="button primary" id="run-agent-cycle">Ejecutar ciclo demo</button></div><div id="agent-live-feed" class="activity-list"></div>';
+    panel.innerHTML='<div class="panel-heading"><div><h3>Centro de autonomía</h3><p id="autopilot-status">Restaurante en espera · simulación local</p></div><div class="panel-actions"><button class="button subtle" id="run-agent-cycle">Ciclo de agentes</button><button class="button primary" id="toggle-autopilot">Iniciar autopiloto</button></div></div><div id="agent-live-feed" class="activity-list"></div>';
     section.append(panel);
     $("#run-agent-cycle").addEventListener("click",runAgentCycle);
+    $("#toggle-autopilot").addEventListener("click",()=>autopilotStarted?stopDemoAutopilot():startDemoAutopilot());
   }
   function runAgentCycle(){
     const tasks=["Coordina el turno y distribuye tareas","Calcula el resumen financiero ilustrativo","Comprueba ingredientes y alertas de stock","Revisa pedidos y tiempos de preparación","Prepara una propuesta de promoción","Clasifica una consulta de cliente ficticia","Analiza productos y horarios populares","Comprueba el estado técnico de la maqueta","Supervisa resultados y señala aprobaciones necesarias"];
     agentSequence.forEach((id,i)=>setTimeout(()=>pulseAgent(id,tasks[i]),i*420));
     record("LUCY · Ciclo de equipo iniciado","Nueve agentes recorren tareas demostrativas en secuencia.");
     notify("Ciclo de demostración de nueve agentes iniciado.");
+  }
+  function consumeDemoIngredients(order){
+    const text=String(order.items||"").toLowerCase();
+    if(text.includes("hamburguesa")){
+      const bread=inventoryItems.find(x=>x.name==="Pan de hamburguesa");
+      const beef=inventoryItems.find(x=>x.name==="Carne de res");
+      if(bread) bread.qty=Math.max(0,bread.qty-1);
+      if(beef) beef.qty=Math.max(0,beef.qty-0.2);
+    }
+    if(text.includes("pizza")){
+      const cheese=inventoryItems.find(x=>x.name==="Queso mozzarella");
+      if(cheese) cheese.qty=Math.max(0,cheese.qty-0.25);
+    }
+    if(text.includes("limonada")||text.includes("limón")){
+      const lemon=inventoryItems.find(x=>x.name==="Limón");
+      if(lemon) lemon.qty=Math.max(0,lemon.qty-0.15);
+    }
+    renderInventory();
+  }
+  function advanceDemoKitchen(){
+    if(!autopilotStarted) return;
+    const order=state.orders.filter(o=>["Nuevo","Preparando","Listo"].includes(o.status)).sort((a,b)=>a.createdAt.localeCompare(b.createdAt))[0];
+    if(!order) return;
+    const previous=order.status;
+    if(previous==="Nuevo"){
+      order.status="Preparando";
+      consumeDemoIngredients(order);
+      pulseAgent("kike","KIKE envió el pedido #"+order.id+" a preparación");
+      pulseAgent("jote","JOTE actualizó consumo ficticio de ingredientes");
+      record("Cocina · pedido #"+order.id+" en preparación",order.items+" · ingredientes de demostración descontados");
+    }else if(previous==="Preparando"){
+      order.status="Listo";
+      pulseAgent("kike","KIKE confirmó que el pedido #"+order.id+" está listo");
+      record("Cocina · pedido #"+order.id+" listo","Preparación de demostración finalizada");
+    }else{
+      order.status="Entregado";
+      pulseAgent("nani","NANI registró la entrega del pedido #"+order.id);
+      pulseAgent("luz","LUZ actualizó las ventas ilustrativas");
+      record("Servicio · pedido #"+order.id+" entregado","Venta ficticia registrada: "+money(order.amount));
+    }
+    persist();
+    renderAll();
+    renderFinance();
+    renderMarketing();
+  }
+  function createAutopilotOrder(){
+    const examples=[
+      ["Mesa 3","Hamburguesa clásica · limonada",42000],
+      ["Camila R.","Pizza personal · gaseosa",39000],
+      ["Mesa 6","Hamburguesa BBQ · papas",46000],
+      ["Daniel G.","Pasta Alfredo · limonada",44000]
+    ];
+    const sample=examples[autopilotSequence%examples.length];
+    const id="AUTO-"+String(autopilotSequence++).padStart(3,"0");
+    const order={id,customer:sample[0],items:sample[1],amount:sample[2],status:"Nuevo",date:todayKey(),createdAt:new Date().toISOString(),demoAutopilot:true};
+    state.orders.push(order);
+    persist();
+    record("NANI · nuevo pedido recibido","#"+id+" · "+sample[0]+" · "+money(sample[2])+" · enviado a KIKE");
+    pulseAgent("nani","Registró el pedido ficticio #"+id);
+    pulseAgent("lucy","Coordinó el nuevo pedido #"+id);
+    renderAll();
+  }
+  function startDemoAutopilot(){
+    if(autopilotStarted) return;
+    autopilotStarted=true;
+    $("#autopilot-status").textContent="Autopiloto activo · pedidos, cocina e inventario simulados";
+    $("#toggle-autopilot").textContent="Pausar autopiloto";
+    record("LUCY · autopiloto iniciado","ORVIA coordina pedidos ficticios, preparación, inventario y entrega en modo demostración.");
+    createAutopilotOrder();
+    advanceDemoKitchen();
+    autopilotStepTimer=setInterval(advanceDemoKitchen,6500);
+    autopilotOrderTimer=setInterval(createAutopilotOrder,24000);
+    notify("Autopiloto del restaurante iniciado. Todo ocurre con datos ficticios.");
+  }
+  function stopDemoAutopilot(){
+    autopilotStarted=false;
+    clearInterval(autopilotStepTimer);
+    clearInterval(autopilotOrderTimer);
+    autopilotStepTimer=null;
+    autopilotOrderTimer=null;
+    $("#autopilot-status").textContent="Autopiloto pausado · puedes reanudarlo cuando quieras";
+    $("#toggle-autopilot").textContent="Reanudar autopiloto";
+    record("LUCY · autopiloto pausado","La simulación dejó de crear pedidos y avanzar la cocina.");
+    notify("Autopiloto pausado.");
   }
   function renderExtraModules(){
     renderFinance();renderInventory();renderMarketing();
@@ -451,7 +540,7 @@
   buildLivePanel();
   renderExtraModules();
   const originalEnterDemo=enterDemoMode;
-  enterDemoMode=function(){originalEnterDemo();runAgentCycle();};
+  enterDemoMode=function(){originalEnterDemo();runAgentCycle();startDemoAutopilot();};
   setInterval(()=>{pulseIndex=(pulseIndex+1)%agentSequence.length;const id=agentSequence[pulseIndex];if(agentRuntime[id].status!=="Trabajando"){agentRuntime[id].status="Trabajando";agentRuntime[id].task="Revisión periódica de demostración";renderAgents();setTimeout(()=>{agentRuntime[id].status="En espera";renderAgents();},1700);}},6500);
 
   $("#today-label").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
