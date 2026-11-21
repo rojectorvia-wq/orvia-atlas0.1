@@ -5,7 +5,9 @@ export default async function handler(req, res) {
   if (req.method !== "GET") return methodNotAllowed(res, ["GET"]);
 
   const clerkConfigured = Boolean(process.env.CLERK_SECRET_KEY);
-  const databaseConfigured = process.env.VERCEL_ENV === "preview"\n    ? Boolean(process.env.ORVIA_PREVIEW_DATABASE_URL)\n    : Boolean(process.env.DATABASE_URL || process.env.POSTGRES_URL);
+  const databaseConfigured = process.env.VERCEL_ENV === "preview"
+    ? Boolean(process.env.ORVIA_PREVIEW_DATABASE_URL)
+    : Boolean(process.env.DATABASE_URL || process.env.POSTGRES_URL);
   const aiGatewayConfigured = Boolean((process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN) && process.env.AI_GATEWAY_MODEL);
   const database = {
     configured: databaseConfigured,
@@ -35,7 +37,7 @@ export default async function handler(req, res) {
   const ready = clerkConfigured && database.reachable && database.schemaReady;
   return json(res, ready ? 200 : 503, {
     service: "ORVIA API",
-    version: "0.2.0",
+    version: "0.4.0",
     status: ready ? "online" : "degraded",
     integrations: {
       clerkConfigured,
