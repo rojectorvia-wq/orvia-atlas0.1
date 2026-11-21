@@ -137,11 +137,76 @@
   function renderAll() { renderOverview(); renderOrders(); renderActivity(); }
   $("#enter-demo").addEventListener("click",()=>$("#welcome-screen").classList.add("hidden"));
   let authMode="login";
-  function openAuth(mode){authMode=mode;$("#auth-title").textContent=mode==="login"?"Iniciar sesión":"Crear cuenta";$("#auth-dialog").showModal();}
+  let clerkInstance=null;
+  let clerkLoaded=false;
+  let authLoading=false;
+  async function loadClerk(){
+    if(clerkLoaded && clerkInstance) return clerkInstance;
+    if(authLoading) {
+      while(authLoading) await new Promise(resolve=>setTimeout(resolve,100));
+      return clerkInstance;
+    }
+    authLoading=true;
+    try {
+      const configResponse=await fetch("/api/auth-config",{headers:{"Accept":"application/json"},cache:"no-store"});
+      const config=await configResponse.json();
+      if(!config.configured || !config.publishableKey) throw new Error("Falta configurar CLERK_PUBLISHABLE_KEY en el entorno Preview de Vercel.");
+      await new Promise((resolve,reject)=>{
+        const script=document.createElement("script");
+        script.src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
+        script.async=true;
+        script.crossOrigin="anonymous";
+        script.onload=resolve;
+        script.onerror=()=>reject(new Error("No se pudo cargar el servicio de autenticación."));
+        document.head.appendChild(script);
+      });
+      if(!window.Clerk) throw new Error("El servicio de autenticación no está disponible.");
+      clerkInstance=window.Clerk;
+      await clerkInstance.load({publishableKey:config.publishableKey});
+      clerkInstance.addListener(({user})=>{
+        if(user) activateAuthenticatedView(user);
+        else {
+          $("#auth-user-label").textContent="Modo demostración";
+          $("#auth-account-button").textContent="U";
+        }
+      });
+      clerkLoaded=true;
+      if(clerkInstance.user) activateAuthenticatedView(clerkInstance.user);
+      return clerkInstance;
+    } finally { authLoading=false; }
+  }
+  function activateAuthenticatedView(user){
+    const displayName=user.fullName || user.firstName || user.primaryEmailAddress?.emailAddress || "Usuario ORVIA";
+    $("#auth-user-label").textContent=displayName;
+    $("#auth-account-button").textContent=(displayName.trim()[0] || "U").toUpperCase();
+    $("#auth-dialog").close();
+    $("#welcome-screen").classList.add("hidden");
+    notify("Sesión iniciada. Tu cuenta está autenticada.");
+  }
+  async function openAuth(mode){
+    authMode=mode;
+    $("#auth-title").textContent=mode==="login"?"Iniciar sesión":"Crear cuenta de propietario";
+    $("#auth-guidance").textContent=mode==="login"?"Accede con tu correo, contraseña o Google.":"Crea tu cuenta de propietario con correo, contraseña o Google.";
+    $("#auth-dialog").showModal();
+    const mount=$("#clerk-auth-mount");
+    mount.innerHTML='<div class="auth-loading">Conectando el acceso seguro…</div>';
+    try{
+      const clerk=await loadClerk();
+      mount.innerHTML="";
+      const appearance={variables:{colorPrimary:"#3988ff",colorBackground:"#0d1726",colorText:"#eef4ff",colorInputBackground:"#091321",colorInputText:"#eef4ff",borderRadius:"8px"},elements:{card:{background:"transparent",boxShadow:"none",border:"0"},headerTitle:{color:"#eef4ff"},headerSubtitle:{color:"#9aabc1"},formFieldLabel:{color:"#b4c3d8"},formFieldInput:{background:"#091321",border:"1px solid #26374f",color:"#eef4ff"},footer:{display:"none"}}};
+      if(mode==="login") clerk.mountSignIn(mount,{appearance,signUpUrl:"#"});
+      else clerk.mountSignUp(mount,{appearance,signInUrl:"#"});
+    }catch(error){
+      mount.innerHTML='<div class="auth-error" role="alert">'+escapeHtml(error.message || "No se pudo preparar el acceso.")+'</div><p class="muted small">La autenticación real requiere configurar la clave pública de Clerk en Vercel Preview. No compartas claves privadas en el chat.</p>';
+    }
+  }
   $("#show-login").addEventListener("click",()=>openAuth("login"));
   $("#show-register").addEventListener("click",()=>openAuth("register"));
   $("#close-auth").addEventListener("click",()=>$("#auth-dialog").close());
-  $("#auth-form").addEventListener("submit",e=>{e.preventDefault();$("#auth-dialog").close();notify("Acceso visual de demostración. La autenticación real aún no está conectada.");});
+  $("#auth-account-button").addEventListener("click",async()=>{
+    if(!clerkInstance || !clerkInstance.user){notify("Estás en modo demostración.");return;}
+    if(confirm("¿Quieres cerrar tu sesión de ORVIA?")) await clerkInstance.signOut();
+  });
   $("#lucy-toggle").addEventListener("click",()=>$("#lucy-panel").classList.toggle("open"));
   $("#lucy-close").addEventListener("click",()=>$("#lucy-panel").classList.remove("open"));
   $("#lucy-form").addEventListener("submit",e=>{
