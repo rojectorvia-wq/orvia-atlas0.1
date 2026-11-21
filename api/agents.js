@@ -1,6 +1,7 @@
 import { requireUser } from "./_lib/auth.js";
 import { db } from "./_lib/db.js";
 import { json, methodNotAllowed } from "./_lib/http.js";
+import { researchWeb } from "./_lib/research.js";
 
 const AGENTS = {
   lucy: { name: "ORVIA LUCY", role: "Directora general y coordinadora", scope: "Comprender la solicitud, organizar prioridades y orientar al propietario." },
@@ -142,10 +143,11 @@ export default async function handler(req, res) {
     const inserted = await sql`INSERT INTO agent_tasks (restaurant_id, agent_id, requested_by, task_type, input, status) VALUES (${restaurantId}, ${agentId}, ${user.userId}, 'analysis', ${JSON.stringify({ message })}::jsonb, 'running') RETURNING id`;
     const taskId = inserted[0]?.id;
     try {
-      const result = await generateAgentReply({ token, model, agent, message });
+      const research = agentId === "lucy" ? await researchWeb(message) : { attempted: false, available: Boolean(process.env.TAVILY_API_KEY), reason: "La investigación web se gestiona desde Lucy.", sources: [] };
+      const result = await generateAgentReply({ token, model, agent, message: research.sources.length ? JSON.stringify({ consulta: message, fuentesExternas: research.sources }) : message });
       await sql`UPDATE agent_tasks SET status = 'completed', result = ${JSON.stringify({ answer: result.answer, usage: result.usage })}::jsonb, updated_at = now() WHERE id = ${taskId} AND restaurant_id = ${restaurantId}`;
       await sql`INSERT INTO activity_log (restaurant_id, actor_user_id, event_type, detail) VALUES (${restaurantId}, ${user.userId}, 'agent.analysis.completed', ${JSON.stringify({ agentId, taskId })}::jsonb)`;
-      return json(res, 200, { taskId, agentId, agentName: agent.name, status: "completed", answer: result.answer, usage: result.usage, actionsExecuted: false });
+      return json(res, 200, { taskId, agentId, agentName: agent.name, status: "completed", answer: result.answer, usage: result.usage, research: { attempted: research.attempted, available: research.available, reason: research.reason, sources: research.sources.map(({ title, url, publishedDate }) => ({ title, url, publishedDate })) }, actionsExecuted: false });
     } catch (error) {
       const safe = safeGatewayError(error);
       await sql`UPDATE agent_tasks SET status = 'failed', error_code = ${safe.code}, updated_at = now() WHERE id = ${taskId} AND restaurant_id = ${restaurantId}`;
