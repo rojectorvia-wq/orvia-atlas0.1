@@ -135,7 +135,7 @@
     notify("Registro local limpiado.");
   });
   function renderAll() { renderOverview(); renderOrders(); renderActivity(); }
-  $("#enter-demo").addEventListener("click",()=>$("#welcome-screen").classList.add("hidden"));
+  $("#enter-demo").addEventListener("click",()=>openAuth("login"));
   let authMode="login";
   let clerkInstance=null;
   let clerkLoaded=false;
@@ -217,4 +217,5 @@
   $("#today-label").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   renderAgents();
   renderAll();
+  loadClerk().catch(() => {});
 })();
