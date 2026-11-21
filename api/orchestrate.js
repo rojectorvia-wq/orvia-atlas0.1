@@ -77,6 +77,26 @@ async function askModel({ token, model, system, user }) {
   } finally { clearTimeout(timeout); }
 }
 
+async function decideResearchNeed({ token, model, message }) {
+  if (!process.env.TAVILY_API_KEY) return null;
+  try {
+    const decision = await askModel({
+      token, model,
+      system: "Determina si para responder con rigor a la consulta de un restaurante hace falta información externa actual, especializada o que no pueda inferirse de conocimiento general. Devuelve exclusivamente JSON válido: {\\"needsResearch\\":true|false,\\"query\\":\\"consulta breve de búsqueda\\"}. Busca cuando falten datos, se pregunten hechos concretos de restaurantes/cadenas, normas vigentes, cifras actuales o fuentes. No busques para explicaciones generales estables.",
+      user: message
+    });
+    const parsed = JSON.parse(decision.answer.replace(/^\`\`\`json\\s*|\`\`\`$/g, "").trim());
+    return { needsResearch: parsed.needsResearch === true, query: String(parsed.query || message).slice(0, 500) };
+  } catch {
+    return { needsResearch: shouldResearchFallback(message), query: message };
+  }
+}
+
+function shouldResearchFallback(message) {
+  const q = String(message || "").toLowerCase();
+  return /actual|hoy|vigente|normativa|ley|2026|reciente|investiga|consulta|fuente|cadena|franquicia|precio actual|tendencia/.test(q);
+}
+
 function safeError(error) {
   if (error?.name === "AbortError") return { status: 504, code: "AI_TIMEOUT", message: "El equipo tardó demasiado. Inténtalo de nuevo." };
   if ([401, 403].includes(error?.gatewayStatus)) return { status: 503, code: "AI_AUTH_UNAVAILABLE", message: "El motor de inteligencia no está autorizado en Preview." };
@@ -122,7 +142,8 @@ export default async function handler(req, res) {
       note: "Snapshot agregado de pedidos. No incluye nombres, teléfonos ni datos personales de clientes. La maqueta guarda algunos pedidos solo en el navegador, por lo que podrían no aparecer aquí."
     };
 
-    const research = await researchWeb(message);
+    const researchDecision = await decideResearchNeed({ token, model, message });
+    const research = await researchWeb(message, researchDecision);
     const researchContext = research.sources.length ? research.sources : [];
     const selected = chooseTeam(message);
     const created = await sql`INSERT INTO agent_tasks (restaurant_id, agent_id, requested_by, task_type, input, status) VALUES (${restaurantId}, 'lucy', ${user.userId}, 'team_orchestration', ${JSON.stringify({ message, selectedAgents: selected })}::jsonb, 'running') RETURNING id`;
