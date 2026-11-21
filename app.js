@@ -267,6 +267,23 @@
   }
   $("#lucy-toggle").addEventListener("click",()=>$("#lucy-panel").classList.toggle("open"));
   $("#lucy-close").addEventListener("click",()=>$("#lucy-panel").classList.remove("open"));
+
+  $("#team-orchestrate").addEventListener("click",async()=>{
+    const input=$("#lucy-input");const message=input.value.trim();
+    if(!message){notify("Escribe primero qué necesitas analizar.");input.focus();return;}
+    const box=$("#lucy-messages");const userBubble=document.createElement("div");userBubble.className="lucy-message user";userBubble.textContent=message;box.append(userBubble);
+    const reply=document.createElement("div");reply.className="lucy-message";reply.textContent="Lucy está coordinando a los especialistas y a DARI…";box.append(reply);input.value="";
+    if(!activeRestaurantId){reply.textContent="Primero debes conectar o registrar el restaurante.";return;}
+    try{
+      const token=await clerkInstance.getToken();
+      const response=await fetch("/api/orchestrate",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({restaurantId:activeRestaurantId,message})});
+      const data=await response.json();
+      if(!response.ok) throw new Error(data.error || "No se pudo coordinar al equipo.");
+      reply.textContent=data.answer+"\\n\\nEquipo participante: "+data.participatingAgents.join(", ")+".\\n\\nDARI: "+data.supervision+"\\n\\nNinguna acción externa o cambio de datos fue ejecutado.";
+      record("Equipo ORVIA coordinado","Participaron: "+data.participatingAgents.join(", "));
+    }catch(error){reply.textContent=error.message || "No se pudo conectar con el equipo ORVIA.";}
+    box.scrollTop=box.scrollHeight;
+  });
   $("#lucy-form").addEventListener("submit",async e=>{
     e.preventDefault();
     const input=$("#lucy-input");const message=input.value.trim();if(!message)return;
