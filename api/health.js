@@ -37,7 +37,7 @@ export default async function handler(req, res) {
   const ready = clerkConfigured && database.reachable && database.schemaReady;
   return json(res, ready ? 200 : 503, {
     service: "ORVIA API",
-    version: "0.4.0",
+    version: "0.6.0",
     status: ready ? "online" : "degraded",
     integrations: {
       clerkConfigured,
@@ -45,6 +45,6 @@ export default async function handler(req, res) {
       aiGatewayConfigured
     },
     database,
-    agents: { planned: 9, operational: 0 }
+    agents: { registered: 11, executionEnabled: aiGatewayConfigured, autonomousActions: false }
   });
 }
