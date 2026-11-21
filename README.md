@@ -6,7 +6,7 @@
 
 Se incorpora `knowledge.js`, una biblioteca local de **1.440 preguntas e intenciones** organizada en catorce áreas: inventario, finanzas, marketing, operaciones y pedidos, clientes y atención, personal y administración, analítica y estrategia, higiene/seguridad/tecnología, gastronomía internacional, técnicas culinarias, diseño de menú, modelos de restaurantes y cadenas, hospitalidad, y compras/proveedores/sostenibilidad. Lucy recupera referencias por coincidencia semántica ligera y construye respuestas orientativas usando el estado local de pedidos y los datos ficticios del inventario.
 
-**Alcance actual:** esta biblioteca no es un modelo entrenado ni un motor de IA generativa. Las 1.008 entradas son preguntas y variaciones indexables; las respuestas se construyen con reglas y guías operativas. La proyección de ventas se abstiene de dar cifras cuando faltan series históricas. No se conectan acciones reales ni se envían pedidos, pagos o campañas.
+**Alcance actual:** esta biblioteca no es un modelo entrenado ni un motor de IA generativa. Las 1.440 entradas son preguntas e intenciones indexables; las respuestas se construyen con reglas y guías operativas. La proyección de ventas se abstiene de dar cifras cuando faltan series históricas. No se conectan acciones reales ni se envían pedidos, pagos o campañas.
 
 ## ORVIA 0.6 — Impulso
 
@@ -24,7 +24,7 @@ La interfaz web estática existente sigue siendo una demostración local: sus pe
 - `GET /api/orders?restaurantId=...`: consulta pedidos de un restaurante autorizado.
 - `POST /api/orders`: crea pedidos con validación de datos, control de membresía y registro de auditoría en una sola transacción.
 - `PATCH /api/orders`: actualiza el estado de un pedido con control de membresía y registra el cambio de forma atómica.
-- `GET /api/agents?restaurantId=...`: muestra el registro de los once agentes para un miembro autorizado.\n- `POST /api/agents`: ejecuta una consulta de análisis con el agente seleccionado mediante AI Gateway, registra la tarea y su resultado en `agent_tasks`, y deja auditoría. No permite ejecutar acciones sobre pedidos, inventario, dinero ni clientes.\n- `POST /api/orchestrate`: Lucy selecciona hasta tres especialistas según la solicitud, delega análisis en paralelo, DARI revisa riesgos y Lucy sintetiza una respuesta. Usa un resumen agregado de pedidos sin nombres de clientes. Límite de dos coordinaciones por usuario y restaurante cada diez minutos.\n- `GET /api/onboarding`: devuelve los restaurantes a los que pertenece el usuario autenticado; `POST /api/onboarding` crea un espacio y su membresía de propietario.
+- `GET /api/agents?restaurantId=...`: muestra el registro de los once agentes para un miembro autorizado.\n- `POST /api/agents`: ejecuta una consulta de análisis con el agente seleccionado mediante AI Gateway, registra la tarea y su resultado en `agent_tasks`, y deja auditoría. No permite ejecutar acciones sobre pedidos, inventario, dinero ni clientes.\n- `POST /api/orchestrate`: Lucy selecciona hasta tres especialistas según la solicitud, delega análisis en paralelo, LEX audita la calidad de los informes y Lucy sintetiza una respuesta. Usa un resumen agregado de pedidos sin nombres de clientes. Límite de dos coordinaciones por usuario y restaurante cada diez minutos.\n- `GET /api/onboarding`: devuelve los restaurantes a los que pertenece el usuario autenticado; `POST /api/onboarding` crea un espacio y su membresía de propietario.
 
 ## Configuración requerida
 
@@ -80,7 +80,7 @@ La API ofrece consultas individuales y una coordinación multiagente en Preview.
 
 ## Versionado
 
-Cada entrega debe tener número y nombre. Esta entrega es **ORVIA 0.5 — Autopiloto**. Esta rama es de desarrollo y Preview. No fusionar con `main` ni publicar a producción sin autorización explícita.
+Cada entrega debe tener número y nombre. Esta entrega es **ORVIA 0.6 — Impulso**. Esta rama es de desarrollo y Preview. No fusionar con `main` ni publicar a producción sin autorización explícita.
 
 
 ## ORVIA 0.6 — Impulso: cambios de esta rama
