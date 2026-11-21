@@ -10,8 +10,10 @@ const TEAM = {
   xel: { name: "ORVIA XEL", role: "Especialista de marketing", scope: "Promociones, campañas, posicionamiento y comunicación comercial." },
   nani: { name: "ORVIA NANI", role: "Especialista de atención al cliente", scope: "Consultas, quejas, experiencia del cliente y respuestas respetuosas." },
   memo: { name: "ORVIA MEMO", role: "Analista de inteligencia comercial", scope: "Tendencias, productos, horarios y oportunidades basadas en datos." },
-  jhoa: { name: "ORVIA JHOA", role: "Analista de diagnóstico técnico", scope: "Incidencias técnicas, diagnóstico y comprobaciones seguras." },
-  dari: { name: "ORVIA DARI", role: "Supervisora operativa", scope: "Revisa coherencia, riesgos, resultados y asuntos que requieren aprobación." }
+  jhoa: { name: "ORVIA LETI", role: "Analista de diagnóstico técnico", scope: "Incidencias técnicas, diagnóstico y comprobaciones seguras." },
+  dari: { name: "ORVIA DARI", role: "Supervisora operativa", scope: "Revisa coherencia, riesgos, resultados y asuntos que requieren aprobación." },
+  lex: { name: "ORVIA LEX", role: "Supervisora de calidad de agentes", scope: "Audita las respuestas de los especialistas, detecta errores, contradicciones, afirmaciones no respaldadas y riesgos; reporta a Lucy." },
+  max: { name: "ORVIA MAX", role: "Analista de inteligencia empresarial", scope: "Analiza ventas, márgenes, tendencias y oportunidades de crecimiento con datos disponibles." }
 };
 
 const MAX_MESSAGE = 1200;
@@ -39,7 +41,8 @@ function chooseTeam(message) {
     ["xel", /marketing|publicidad|promoci|campaña|redes|atraer|venta|cliente nuevo/],
     ["nani", /queja|reclamo|cliente|atención|atencion|reseña|respuesta|experiencia/],
     ["memo", /tendencia|popular|producto|horario|crecimiento|competencia|oportunidad|análisis|analisis/],
-    ["jhoa", /error|fallo|técnic|tecnic|sistema|problema|incidencia/]
+    ["jhoa", /error|fallo|técnic|tecnic|sistema|problema|incidencia/],
+    ["max", /crecimiento|rentabilidad|tendencia|oportunidad|competencia|estrategia empresarial/]
   ];
   for (const [id, pattern] of rules) if (pattern.test(q)) chosen.add(id);
   if (!chosen.size) ["luz", "kike", "memo"].forEach(id => chosen.add(id));
@@ -143,32 +146,32 @@ export default async function handler(req, res) {
       const review = await askModel({
         token, model,
         system: [
-          "Eres ORVIA DARI, supervisora operativa.",
-          "Revisa los análisis de especialistas: detecta contradicciones, riesgos, datos faltantes y recomendaciones que necesiten aprobación humana.",
+          "Eres ORVIA LEX, supervisora de calidad de los agentes.",
+          "Audita los análisis de especialistas: detecta errores, contradicciones, afirmaciones sin respaldo, omisiones y riesgos. Señala qué agente requiere corrección. No inventes ni ocultes fallos.",
           "No inventes datos ni ejecutes acciones. Sé breve y claro."
         ].join("\n"),
         user: JSON.stringify({ solicitud: message, informes: specialistResults.map(({ name, answer }) => ({ name, answer })) })
       });
 
-      const dariTask = await sql`INSERT INTO agent_tasks (restaurant_id, agent_id, requested_by, task_type, input, status, result) VALUES (${restaurantId}, 'dari', ${user.userId}, 'supervision_review', ${JSON.stringify({ parentTaskId: taskId })}::jsonb, 'completed', ${JSON.stringify({ answer: review.answer })}::jsonb) RETURNING id`;
+      const dariTask = await sql`INSERT INTO agent_tasks (restaurant_id, agent_id, requested_by, task_type, input, status, result) VALUES (${restaurantId}, 'lex', ${user.userId}, 'quality_review', ${JSON.stringify({ parentTaskId: taskId })}::jsonb, 'completed', ${JSON.stringify({ answer: review.answer })}::jsonb) RETURNING id`;
 
       const final = await askModel({
         token, model,
         system: [
           "Eres ORVIA LUCY, directora general y coordinadora.",
-          "Integra los informes de especialistas y la revisión de DARI en una respuesta única, práctica y priorizada.",
+          "Integra los informes de especialistas y la auditoría de calidad de LEX en una respuesta única, práctica y priorizada.",
           "Separa hechos, hipótesis y datos faltantes. Indica qué agente aportó cada hallazgo cuando sea útil.",
           "No afirmes que una acción fue ejecutada. Cualquier cambio de dinero, pedidos, inventario, cuentas o contacto con clientes requiere aprobación explícita del propietario."
         ].join("\n"),
-        user: JSON.stringify({ solicitud: message, snapshot, informes: specialistResults.map(({ name, answer }) => ({ name, answer })), supervisionDari: review.answer })
+        user: JSON.stringify({ solicitud: message, snapshot, informes: specialistResults.map(({ name, answer }) => ({ name, answer })), qualityReviewLex: review.answer })
       });
 
       await sql`UPDATE agent_tasks SET status = 'completed', result = ${JSON.stringify({ answer: final.answer, selectedAgents: selected, specialistResults, dariReview: review.answer, snapshot })}::jsonb, updated_at = now() WHERE id = ${taskId} AND restaurant_id = ${restaurantId}`;
       await sql`INSERT INTO activity_log (restaurant_id, actor_user_id, event_type, detail) VALUES (${restaurantId}, ${user.userId}, 'agent.team.completed', ${JSON.stringify({ taskId, selectedAgents: selected })}::jsonb)`;
       return json(res, 200, {
         taskId, status: "completed", coordinator: TEAM.lucy.name,
-        participatingAgents: [...selected.map(id => TEAM[id].name), TEAM.dari.name, TEAM.lucy.name],
-        specialistResults, supervisionTaskId: dariTask[0].id, supervision: review.answer, answer: final.answer,
+        participatingAgents: [...selected.map(id => TEAM[id].name), TEAM.lex.name, TEAM.lucy.name],
+        specialistResults, qualityReviewTaskId: dariTask[0].id, qualityReview: review.answer, answer: final.answer,
         actionsExecuted: false, approvalRequiredForSensitiveActions: true
       });
     } catch (error) {
