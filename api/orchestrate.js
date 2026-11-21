@@ -22,6 +22,11 @@ const MAX_OUTPUT_TOKENS = 520;
 const RATE_LIMIT = 2;
 const WINDOW_MINUTES = 10;
 
+function knowledgeQuery(message) {
+  const terms = String(message || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().match(/[a-z0-9]{4,}/g) || [];
+  return [...new Set(terms)].slice(0, 8).map(term => `${term}:*`).join(" | ");
+}
+
 function bodyOf(req) {
   if (req.body && typeof req.body === "object") return req.body;
   if (typeof req.body === "string") { try { return JSON.parse(req.body); } catch { return {}; } }
@@ -167,9 +172,15 @@ export default async function handler(req, res) {
     };
 
     let priorKnowledge = [];
-    try {
-      priorKnowledge = await sql`SELECT search_query, validated_summary, sources, created_at FROM lucy_research_knowledge WHERE restaurant_id = ${restaurantId} AND status = 'approved' AND to_tsvector('simple', search_query || ' ' || validated_summary) @@ plainto_tsquery('simple', ${message}) ORDER BY created_at DESC LIMIT 4`;
-    } catch { /* La migración de conocimiento puede estar pendiente en Preview. */ }
+    const tsQuery = knowledgeQuery(message);
+    if (tsQuery) {
+      try {
+        priorKnowledge = await sql`SELECT search_query, validated_summary, sources, created_at FROM lucy_research_knowledge
+          WHERE restaurant_id = ${restaurantId} AND status = 'approved'
+          AND to_tsvector('simple', search_query || ' ' || validated_summary) @@ to_tsquery('simple', ${tsQuery})
+          ORDER BY created_at DESC LIMIT 4`;
+      } catch { /* La migración de conocimiento puede estar pendiente en Preview. */ }
+    }
 
     const researchDecision = await decideResearchNeed({ token, model, message });
     const research = await researchWeb(message, researchDecision);
