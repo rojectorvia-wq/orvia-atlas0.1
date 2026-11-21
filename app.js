@@ -173,15 +173,44 @@
     notify("Bienvenido a Bistró Bahía Azul, nuestro restaurante de demostración.");
   }
   function demoAgentReply(agentId,message){
+    if(agentId==="lucy") return demoTeamReply(message);
     const names={lucy:"LUCY",luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"LETI",dari:"DARI",lex:"LEX",max:"MAX"};
     const tips={luz:"Revisaría ventas, costos y margen por producto antes de recomendar cambios de precio.",jote:"Conviene comparar existencias actuales con el consumo promedio y definir alertas de reposición.",kike:"Analizaría tiempos de preparación, pedidos pendientes y distribución de tareas del turno.",xel:"Propondría una promoción medible y probaría su resultado antes de ampliar la campaña.",nani:"Clasificaría la consulta del cliente, respondería con empatía y registraría el motivo para detectar patrones.",memo:"Compararía productos más solicitados, franjas horarias y tendencias de ventas disponibles.",jhoa:"Revisaría el estado del sistema, reproduciría el inconveniente y documentaría el diagnóstico.",lex:"Validaría la coherencia de los resultados, señalaría errores y los escalaría a Lucy.",max:"Analizaría ventas, márgenes y oportunidades de crecimiento con los datos disponibles.",dari:"Verificaría la coherencia de los datos, los riesgos y qué decisiones necesitan autorización.",lucy:"Coordinaría a los especialistas adecuados y resumiría sus hallazgos en un plan priorizado."};
     return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\n"+names[agentId]+": "+(tips[agentId]||tips.lucy)+"\\n\\nSolicitud recibida: "+message+"\\n\\nEsta respuesta es una simulación con información ficticia de Bistró Bahía Azul; no consulta ni modifica sistemas reales.";
   }
   function demoTeamReply(message){
-    const selected=["luz","jote","kike"].filter((id)=>/venta|ingreso|costo|precio|dinero|finanz|inventario|stock|ingrediente|pedido|cocina|operaci|turno/i.test(message));
-    const team=[...new Set(selected.length?selected:["luz","kike","memo"])];
-    const labels={luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"JHOA"};
-    return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\nLUCY coordinaría a: "+team.map(id=>labels[id]).join(", ")+".\\n\\n"+team.map(id=>labels[id]+": "+(id==="luz"?"Revisaría indicadores financieros y márgenes.":id==="jote"?"Comprobaría existencias y necesidades de reposición.":"Analizaría el flujo operativo y los tiempos del servicio.")).join("\\n\\n")+"\\n\\nLEX: Revisaría coherencia, errores y resultados de los agentes.\\n\\nDARI: Revisaría riesgos operativos y decisiones que necesitan aprobación.\\n\\nLUCY: Integraría los resultados y propondría los siguientes pasos.\\n\\nNo se ejecutó ninguna acción. Los resultados son ficticios y muestran cómo trabajaría el equipo en Bistró Bahía Azul.";
+    const q=String(message||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
+    const selected=new Set();
+    const rules=[
+      ["xel",/marketing|promocion|campana|publicidad|atraer|conseguir clientes|redes sociales|mas clientes/],
+      ["luz",/venta|ingreso|gasto|costo|precio|margen|rentabilidad|finanz|presupuesto|utilidad/],
+      ["jote",/inventario|stock|existencia|ingrediente|insumo|desperdicio|proveedor|abastecimiento/],
+      ["kike",/pedido|cocina|preparacion|operacion|turno|demora|tiempo de servicio/],
+      ["nani",/queja|reclamo|cliente|atencion|resena|experiencia|fidelizar/],
+      ["memo",/tendencia|producto|horario|analisis|datos|competencia|demanda/],
+      ["jhoa",/error|fallo|tecnico|sistema|problema|incidencia/],
+      ["max",/crecimiento|oportunidad|estrategia empresarial|rentabilidad|expandir/],
+      ["dari",/supervision|riesgo|control|revision|incidente/]
+    ];
+    for(const [id,pattern] of rules) if(pattern.test(q)) selected.add(id);
+    if(!selected.size) ["memo","kike"].forEach(id=>selected.add(id));
+    const labels={luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"LETI",dari:"DARI",max:"MAX"};
+    const advice={
+      xel:"XEL propone: 1) elegir un producto atractivo con margen y stock comprobados; 2) lanzar una oferta sencilla en una franja de baja demanda; 3) publicar una pieza clara en Instagram y WhatsApp Business; 4) medir clientes nuevos, pedidos adicionales, costo por cliente y margen final. No recomiendo descuentos sin revisar costos.",
+      luz:"LUZ revisaría el costo real del producto, margen de contribución, presupuesto máximo y punto de equilibrio antes de aprobar una promoción.",
+      jote:"JOTE comprobaría existencias, consumo esperado y capacidad de abastecimiento para no promocionar productos que puedan agotarse.",
+      kike:"KIKE revisaría capacidad de cocina, tiempos de preparación, horarios y coordinación del personal antes de atraer más pedidos.",
+      nani:"NANI prepararía respuestas para consultas frecuentes y un seguimiento respetuoso para convertir consultas en visitas, sin enviar mensajes sin autorización.",
+      memo:"MEMO compararía días y horas de mayor y menor demanda, productos populares y tendencias. Se necesitan datos históricos para afirmar qué horario conviene.",
+      jhoa:"LETI revisaría incidencias técnicas descritas y documentaría una comprobación segura; no modificaría el sistema automáticamente.",
+      dari:"DARI revisaría riesgos operativos, tareas pendientes y decisiones que requieren aprobación.",
+      max:"MAX evaluaría oportunidades de crecimiento y compararía el resultado de la campaña con metas medibles, sin inventar ventas."
+    };
+    return "【ORVIA · COORDINACIÓN DE DEMOSTRACIÓN】\\n\\nLUCY: Entendí tu solicitud y asigné el análisis a "+[...selected].map(id=>labels[id]).join(", ")+".\\n\\n"+
+      [...selected].map(id=>labels[id]+": "+advice[id]).join("\\n\\n")+
+      "\\n\\nLEX: Auditoría de calidad. Las recomendaciones son propuestas; deben contrastarse con costos, inventario y datos reales antes de aplicarse. No se detecta ni corrige un error de producción desde esta maqueta.\\n\\n"+
+      "LUCY: Mi recomendación es empezar con una prueba pequeña, definir presupuesto y responsable, medir resultados y pedir tu aprobación antes de publicar o gastar.\\n\\n"+
+      "Nota: respuesta simulada para Bistró Bahía Azul; no se publicaron campañas ni se contactó a clientes.";
   }
   let workspaceLoading=false;
   async function loadClerk(){
