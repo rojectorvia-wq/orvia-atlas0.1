@@ -18,7 +18,30 @@
   function loadState() {
     try {
       const saved = JSON.parse(localStorage.getItem(storeKey) || "{}");
-      return { orders: Array.isArray(saved.orders) ? saved.orders : [], activity: Array.isArray(saved.activity) ? saved.activity : [] };
+      let orders = Array.isArray(saved.orders) ? saved.orders : [];
+      let activity = Array.isArray(saved.activity) ? saved.activity : [];
+      if (!orders.length && !saved.demoSeeded) {
+        const now = Date.now();
+        const sample = [
+          ["Mesa 2","2 hamburguesas clásicas · 2 limonadas",56000,"Entregado",0],
+          ["Laura M.","Pasta Alfredo · agua mineral",42000,"Preparando",1],
+          ["Mesa 5","Pizza familiar · gaseosa",68000,"Listo",2],
+          ["Andrés P.","2 bowls de pollo · jugo natural",49000,"Nuevo",3],
+          ["Mesa 1","Ensalada César · limonada",31000,"Entregado",5],
+          ["Sofía R.","Hamburguesa BBQ · papas",38000,"Entregado",7]
+        ];
+        orders = sample.map((item,index) => {
+          const createdAt = new Date(now - item[4]*3600000).toISOString();
+          return { id:"DEMO-"+String(index+1).padStart(3,"0"), customer:item[0], items:item[1], amount:item[2], status:item[3], date:todayKey(), createdAt };
+        });
+        activity = [
+          { title:"Turno de demostración iniciado", detail:"Bistró Bahía Azul · datos ficticios", at:new Date(now-8*60000).toISOString() },
+          { title:"Pedido DEMO-004 recibido", detail:"Andrés P. · $ 49.000 · Estado: Nuevo", at:new Date(now-12*60000).toISOString() },
+          { title:"Pedido DEMO-002 en preparación", detail:"Laura M. · $ 42.000", at:new Date(now-25*60000).toISOString() }
+        ];
+        try { localStorage.setItem(storeKey, JSON.stringify({ orders, activity, demoSeeded:true })); } catch {}
+      }
+      return { orders, activity };
     } catch { return { orders: [], activity: [] }; }
   }
   function persist() {
@@ -74,7 +97,7 @@
     $("#all-orders").innerHTML = orders.length ? '<table class="order-table"><thead><tr><th>PEDIDO</th><th>CLIENTE</th><th>DETALLE</th><th>VALOR</th><th>ESTADO</th></tr></thead><tbody>' + orders.slice().sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).map(o => '<tr><td><strong>#'+escapeHtml(o.id)+'</strong><br><small>'+new Date(o.createdAt).toLocaleString("es-CO")+'</small></td><td>'+escapeHtml(o.customer)+'</td><td>'+escapeHtml(o.items)+'</td><td>'+money(o.amount)+'</td><td><select data-order-status="'+escapeHtml(o.id)+'" aria-label="Estado del pedido '+escapeHtml(o.id)+'">'+["Nuevo","Preparando","Listo","Entregado"].map(s=>'<option '+(o.status===s?'selected':'')+'>'+s+'</option>').join("")+'</select></td></tr>').join("") + '</tbody></table>' : '<div class="empty">No hay pedidos que coincidan con la búsqueda.</div>';
   }
   function renderAgents() {
-    $("#agents-grid").innerHTML = agents.map((agent,i) => '<article class="agent-card"><div class="agent-top"><div class="agent-icon">'+String(i+1).padStart(2,"0")+'</div><span class="agent-state">En pruebas</span></div><h3>'+escapeHtml(agent[0])+'</h3><b class="agent-role">'+escapeHtml(agent[1])+'</b><p>'+escapeHtml(agent[2])+'</p><small>Equipo coordinado en pruebas · Acciones sensibles protegidas</small><button class="text-button agent-ask" type="button" data-agent-id="'+escapeHtml(agent[3])+'">Consultar agente →</button></article>').join("");
+    $("#agents-grid").innerHTML = agents.map((agent,i) => '<article class="agent-card"><div class="agent-top"><div class="agent-icon">'+String(i+1).padStart(2,"0")+'</div><span class="agent-state">Demo</span></div><h3>'+escapeHtml(agent[0])+'</h3><b class="agent-role">'+escapeHtml(agent[1])+'</b><p>'+escapeHtml(agent[2])+'</p><small>Equipo coordinado en pruebas · Acciones sensibles protegidas</small><button class="text-button agent-ask" type="button" data-agent-id="'+escapeHtml(agent[3])+'">Consultar agente →</button></article>').join("");
   }
   function renderActivity() {
     $("#activity-list").innerHTML = state.activity.length ? state.activity.map(a => '<div class="activity-item"><i class="activity-dot"></i><div><b>'+escapeHtml(a.title)+'</b><p>'+escapeHtml(a.detail)+'</p><time>'+new Date(a.at).toLocaleString("es-CO")+'</time></div></div>').join("") : '<div class="empty">Todavía no hay actividad registrada.</div>';
@@ -145,18 +168,18 @@
   function enterDemoMode(){
     $("#welcome-screen").classList.add("hidden");
     $(".app-shell").classList.remove("hidden");
-    notify("Estás explorando la demostración interactiva de ORVIA.");
+    notify("Bienvenido a Bistró Bahía Azul, nuestro restaurante de demostración.");
   }
   function demoAgentReply(agentId,message){
     const names={lucy:"LUCY",luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"JHOA",dari:"DARI"};
     const tips={luz:"Revisaría ventas, costos y margen por producto antes de recomendar cambios de precio.",jote:"Conviene comparar existencias actuales con el consumo promedio y definir alertas de reposición.",kike:"Analizaría tiempos de preparación, pedidos pendientes y distribución de tareas del turno.",xel:"Propondría una promoción medible y probaría su resultado antes de ampliar la campaña.",nani:"Clasificaría la consulta del cliente, respondería con empatía y registraría el motivo para detectar patrones.",memo:"Compararía productos más solicitados, franjas horarias y tendencias de ventas disponibles.",jhoa:"Revisaría el estado del sistema, reproduciría el inconveniente y documentaría el diagnóstico.",dari:"Verificaría la coherencia de los datos, los riesgos y qué decisiones necesitan autorización.",lucy:"Coordinaría a los especialistas adecuados y resumiría sus hallazgos en un plan priorizado."};
-    return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\n"+names[agentId]+": "+(tips[agentId]||tips.lucy)+"\\n\\nSolicitud recibida: "+message+"\\n\\nEsta respuesta es ilustrativa y usa datos ficticios; no consulta ni modifica sistemas reales.";
+    return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\n"+names[agentId]+": "+(tips[agentId]||tips.lucy)+"\\n\\nSolicitud recibida: "+message+"\\n\\nEsta respuesta es una simulación con información ficticia de Bistró Bahía Azul; no consulta ni modifica sistemas reales.";
   }
   function demoTeamReply(message){
     const selected=["luz","jote","kike"].filter((id)=>/venta|ingreso|costo|precio|dinero|finanz|inventario|stock|ingrediente|pedido|cocina|operaci|turno/i.test(message));
     const team=[...new Set(selected.length?selected:["luz","kike","memo"])];
     const labels={luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"JHOA"};
-    return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\nLUCY coordinaría a: "+team.map(id=>labels[id]).join(", ")+".\\n\\n"+team.map(id=>labels[id]+": "+(id==="luz"?"Revisaría indicadores financieros y márgenes.":id==="jote"?"Comprobaría existencias y necesidades de reposición.":"Analizaría el flujo operativo y los tiempos del servicio.")).join("\\n\\n")+"\\n\\nDARI: Revisaría riesgos, coherencia y decisiones que necesitan aprobación.\\n\\nLUCY: Integraría los resultados y propondría los siguientes pasos.\\n\\nNo se ejecutó ninguna acción. Los resultados son ficticios y sirven para mostrar el flujo de trabajo.";
+    return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\nLUCY coordinaría a: "+team.map(id=>labels[id]).join(", ")+".\\n\\n"+team.map(id=>labels[id]+": "+(id==="luz"?"Revisaría indicadores financieros y márgenes.":id==="jote"?"Comprobaría existencias y necesidades de reposición.":"Analizaría el flujo operativo y los tiempos del servicio.")).join("\\n\\n")+"\\n\\nDARI: Revisaría riesgos, coherencia y decisiones que necesitan aprobación.\\n\\nLUCY: Integraría los resultados y propondría los siguientes pasos.\\n\\nNo se ejecutó ninguna acción. Los resultados son ficticios y muestran cómo trabajaría el equipo en Bistró Bahía Azul.";
   }
   let workspaceLoading=false;
   async function loadClerk(){
@@ -324,5 +347,5 @@
   $("#today-label").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   renderAgents();
   renderAll();
-  if(DEMO_MODE) enterDemoMode();
+  // La presentación se conserva: el usuario entra a la demo al pulsar el CTA.
 })();
