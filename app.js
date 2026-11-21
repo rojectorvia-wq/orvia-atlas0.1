@@ -3,15 +3,15 @@
   const $ = (s) => document.querySelector(s);
   const storeKey = "orvia.nebula.v1";
   const agents = [
-    ["ORVIA LUCY","Coordinación y comunicación","Punto de contacto para recibir solicitudes, organizar informes y solicitar autorizaciones."],
-    ["ORVIA LUZ","Especialidad por documentar","Responsabilidades pendientes de confirmar con el diseño aprobado."],
-    ["ORVIA JOTE","Especialidad por documentar","Responsabilidades pendientes de confirmar con el diseño aprobado."],
-    ["ORVIA KIKE","Especialidad por documentar","Responsabilidades pendientes de confirmar con el diseño aprobado."],
-    ["ORVIA XEL","Especialidad por documentar","Responsabilidades pendientes de confirmar con el diseño aprobado."],
-    ["ORVIA NANI","Especialidad por documentar","Responsabilidades pendientes de confirmar con el diseño aprobado."],
-    ["ORVIA MEMO","Especialidad por documentar","Responsabilidades pendientes de confirmar con el diseño aprobado."],
-    ["ORVIA JHOA","Diagnóstico técnico","Análisis de errores y preparación de posibles correcciones; cualquier cambio sensible requiere autorización."],
-    ["ORVIA DARI","Supervisión operativa","Revisión de tareas, resultados y alertas; escala a Lucy lo que requiere intervención humana."]
+    ["ORVIA LUCY","Directora general","Coordina el equipo, recibe solicitudes, presenta informes y solicita autorización humana para decisiones sensibles."],
+    ["ORVIA LUZ","Directora financiera","Analiza ingresos, gastos, costos, márgenes y rentabilidad del restaurante."],
+    ["ORVIA JOTE","Jefe de inventario","Controla ingredientes, existencias, desperdicios y necesidades de abastecimiento."],
+    ["ORVIA KIKE","Gerente operativo","Supervisa pedidos, preparación, cocina y operación diaria del restaurante."],
+    ["ORVIA XEL","Director de marketing","Propone promociones, campañas y publicidad para atraer clientes."],
+    ["ORVIA NANI","Directora de atención al cliente","Gestiona consultas, solicitudes, quejas y seguimiento de la experiencia del cliente."],
+    ["ORVIA MEMO","Director de inteligencia comercial","Analiza tendencias, productos populares, horarios y oportunidades de crecimiento."],
+    ["ORVIA JHOA","Diagnóstico técnico","Analiza errores, revisa incidencias y prepara posibles correcciones; los cambios sensibles requieren autorización."],
+    ["ORVIA DARI","Supervisión operativa","Revisa tareas, resultados y alertas; escala a Lucy los asuntos que requieren intervención humana."]
   ];
   const state = loadState();
   let toastTimer;
@@ -207,12 +207,26 @@
     if(!clerkInstance || !clerkInstance.user){notify("Estás en modo demostración.");return;}
     if(confirm("¿Quieres cerrar tu sesión de ORVIA?")) await clerkInstance.signOut();
   });
+  function lucyDemoReply(message){
+    const q=message.toLowerCase();
+    if(/hola|buenas|buenos días|buenas tardes/.test(q)) return "Hola. Soy Lucy, directora general de ORVIA. Puedo orientarte sobre los módulos y el equipo previsto. Esta versión es una demostración: todavía no consulto datos reales ni ejecuto tareas.";
+    if(/venta|ingreso|gasto|costo|margen|rentabilidad|finanza/.test(q)) return "Para el análisis financiero, ORVIA cuenta con LUZ. Su especialidad prevista es revisar ingresos, gastos, costos, márgenes y rentabilidad. En esta maqueta aún no está conectada a datos contables.";
+    if(/inventario|ingrediente|existencia|desperdicio|abastecimiento/.test(q)) return "JOTE es el responsable previsto de inventario: ingredientes, existencias, desperdicios y abastecimiento. Su conexión operativa todavía está pendiente.";
+    if(/pedido|cocina|preparación|operación/.test(q)) return "KIKE está diseñado para supervisar pedidos, preparación, cocina y operación diaria. Puedes probar el módulo Pedidos con información ficticia.";
+    if(/marketing|promoción|campaña|publicidad|cliente nuevo/.test(q)) return "XEL se encargará de marketing, promociones, campañas y publicidad para atraer clientes. Sus herramientas aún no están conectadas.";
+    if(/queja|consulta|atención|cliente|servicio/.test(q)) return "NANI tiene a cargo la atención al cliente: consultas, solicitudes, quejas y seguimiento. En esta versión solo mostramos su función prevista.";
+    if(/tendencia|popular|horario|crecimiento|comercial/.test(q)) return "MEMO analizará tendencias, productos populares, horarios y oportunidades de crecimiento. Todavía no tiene datos reales para analizar.";
+    if(/error|fallo|técnico|tecnico|problema/.test(q)) return "JHOA está previsto para diagnóstico técnico y análisis de incidencias. Preparará posibles correcciones, pero no aplicará cambios sensibles sin autorización.";
+    if(/supervisión|supervision|alerta|revisión|revision/.test(q)) return "DARI supervisará tareas, resultados y alertas, y escalará a Lucy los asuntos que necesiten intervención humana.";
+    if(/agente|equipo|quién|quien/.test(q)) return "El equipo previsto tiene nueve agentes: Lucy coordina; LUZ lleva finanzas; JOTE, inventario; KIKE, operación; XEL, marketing; NANI, atención al cliente; MEMO, inteligencia comercial; JHOA, diagnóstico técnico; y DARI, supervisión operativa. Ninguno ejecuta tareas autónomas todavía.";
+    return "Te he leído. En esta maqueta puedo explicarte los módulos y las responsabilidades del equipo ORVIA. Aún no tengo conexión con inteligencia artificial ni acceso a datos reales, así que no puedo ejecutar esa solicitud todavía.";
+  }
   $("#lucy-toggle").addEventListener("click",()=>$("#lucy-panel").classList.toggle("open"));
   $("#lucy-close").addEventListener("click",()=>$("#lucy-panel").classList.remove("open"));
   $("#lucy-form").addEventListener("submit",e=>{
     e.preventDefault();const input=$("#lucy-input");const message=input.value.trim();if(!message)return;
     const box=$("#lucy-messages");const user=document.createElement("div");user.className="lucy-message user";user.textContent=message;box.append(user);
-    const reply=document.createElement("div");reply.className="lucy-message";reply.textContent="He recibido tu mensaje en esta maqueta. Mi conexión de inteligencia artificial todavía no está habilitada, así que no puedo ejecutar tareas ni consultar datos reales. Puedo mostrarte el alcance previsto de ORVIA cuando conectemos el motor de Lucy.";box.append(reply);input.value="";box.scrollTop=box.scrollHeight;
+    const reply=document.createElement("div");reply.className="lucy-message";reply.textContent=lucyDemoReply(message);box.append(reply);input.value="";box.scrollTop=box.scrollHeight;
   });
   $("#today-label").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   renderAgents();
