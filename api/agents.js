@@ -10,8 +10,10 @@ const AGENTS = {
   xel: { name: "ORVIA XEL", role: "Especialista de marketing", scope: "Proponer campañas, promociones y comunicación comercial. No publicar ni contactar clientes." },
   nani: { name: "ORVIA NANI", role: "Especialista de atención al cliente", scope: "Ayudar a redactar respuestas respetuosas y analizar consultas o quejas. No enviar mensajes ni revelar datos." },
   memo: { name: "ORVIA MEMO", role: "Analista de inteligencia comercial", scope: "Analizar tendencias y oportunidades solo a partir de datos disponibles. Distinguir hechos de hipótesis." },
-  jhoa: { name: "ORVIA JHOA", role: "Analista de diagnóstico técnico", scope: "Analizar errores descritos y proponer comprobaciones seguras. No cambiar código ni infraestructura." },
-  dari: { name: "ORVIA DARI", role: "Supervisora operativa", scope: "Revisar riesgos, coherencia y pendientes descritos. Escalar decisiones sensibles al propietario." }
+  jhoa: { name: "ORVIA LETI", role: "Analista de diagnóstico técnico", scope: "Analizar errores descritos y proponer comprobaciones seguras. No cambiar código ni infraestructura." },
+  dari: { name: "ORVIA DARI", role: "Supervisora operativa", scope: "Revisar riesgos, coherencia y pendientes descritos. Escalar decisiones sensibles al propietario." },
+  lex: { name: "ORVIA LEX", role: "Supervisora de calidad de agentes", scope: "Revisar resultados de otros agentes, detectar contradicciones, errores, datos sin respaldo y recomendaciones inseguras. Informar a Lucy y nunca ocultar fallos." },
+  max: { name: "ORVIA MAX", role: "Analista de inteligencia empresarial", scope: "Analizar tendencias, rentabilidad, desempeño y oportunidades de crecimiento con datos proporcionados. No inventar métricas." }
 };
 
 const MAX_MESSAGE_LENGTH = 1600;
@@ -115,7 +117,7 @@ export default async function handler(req, res) {
     const agentId = String(body.agentId || "").toLowerCase();
     const message = typeof body.message === "string" ? body.message.trim() : "";
     const agent = AGENTS[agentId];
-    if (!agent) return json(res, 400, { error: "Selecciona uno de los nueve agentes de ORVIA." });
+    if (!agent) return json(res, 400, { error: "Selecciona uno de los once agentes de ORVIA." });
     if (!message || message.length > MAX_MESSAGE_LENGTH) {
       return json(res, 400, { error: `Escribe una consulta de 1 a ${MAX_MESSAGE_LENGTH} caracteres.` });
     }
