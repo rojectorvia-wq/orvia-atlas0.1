@@ -3,12 +3,12 @@
   const $ = (s) => document.querySelector(s);
   const storeKey = "orvia.nebula.v1";
   const agents = [
-    ["ORVIA LUCY","Directora general","Coordina el equipo, recibe solicitudes, presenta informes y solicita autorización humana para decisiones sensibles."],
-    ["ORVIA LUZ","Directora financiera","Analiza ingresos, gastos, costos, márgenes y rentabilidad del restaurante."],
-    ["ORVIA JOTE","Jefe de inventario","Controla ingredientes, existencias, desperdicios y necesidades de abastecimiento."],
-    ["ORVIA KIKE","Gerente operativo","Supervisa pedidos, preparación, cocina y operación diaria del restaurante."],
-    ["ORVIA XEL","Director de marketing","Propone promociones, campañas y publicidad para atraer clientes."],
-    ["ORVIA NANI","Directora de atención al cliente","Gestiona consultas, solicitudes, quejas y seguimiento de la experiencia del cliente."],
+    ["ORVIA LUCY","Directora general","Coordina el equipo, recibe solicitudes, presenta informes y solicita autorización humana para decisiones sensibles.","lucy"],
+    ["ORVIA LUZ","Directora financiera","Analiza ingresos, gastos, costos, márgenes y rentabilidad del restaurante.","luz"],
+    ["ORVIA JOTE","Jefe de inventario","Controla ingredientes, existencias, desperdicios y necesidades de abastecimiento.","jote"],
+    ["ORVIA KIKE","Gerente operativo","Supervisa pedidos, preparación, cocina y operación diaria del restaurante.","kike"],
+    ["ORVIA XEL","Director de marketing","Propone promociones, campañas y publicidad para atraer clientes.","xel"],
+    ["ORVIA NANI","Directora de atención al cliente","Gestiona consultas, solicitudes, quejas y seguimiento de la experiencia del cliente.","nani"],
     ["ORVIA MEMO","Director de inteligencia comercial","Analiza tendencias, productos populares, horarios y oportunidades de crecimiento."],
     ["ORVIA JHOA","Diagnóstico técnico","Analiza errores, revisa incidencias y prepara posibles correcciones; los cambios sensibles requieren autorización."],
     ["ORVIA DARI","Supervisión operativa","Revisa tareas, resultados y alertas; escala a Lucy los asuntos que requieren intervención humana."]
@@ -74,7 +74,7 @@
     $("#all-orders").innerHTML = orders.length ? '<table class="order-table"><thead><tr><th>PEDIDO</th><th>CLIENTE</th><th>DETALLE</th><th>VALOR</th><th>ESTADO</th></tr></thead><tbody>' + orders.slice().sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).map(o => '<tr><td><strong>#'+escapeHtml(o.id)+'</strong><br><small>'+new Date(o.createdAt).toLocaleString("es-CO")+'</small></td><td>'+escapeHtml(o.customer)+'</td><td>'+escapeHtml(o.items)+'</td><td>'+money(o.amount)+'</td><td><select data-order-status="'+escapeHtml(o.id)+'" aria-label="Estado del pedido '+escapeHtml(o.id)+'">'+["Nuevo","Preparando","Listo","Entregado"].map(s=>'<option '+(o.status===s?'selected':'')+'>'+s+'</option>').join("")+'</select></td></tr>').join("") + '</tbody></table>' : '<div class="empty">No hay pedidos que coincidan con la búsqueda.</div>';
   }
   function renderAgents() {
-    $("#agents-grid").innerHTML = agents.map((agent,i) => '<article class="agent-card"><div class="agent-top"><div class="agent-icon">'+String(i+1).padStart(2,"0")+'</div><span class="agent-state">Diseño</span></div><h3>'+escapeHtml(agent[0])+'</h3><b class="agent-role">'+escapeHtml(agent[1])+'</b><p>'+escapeHtml(agent[2])+'</p><small>Sin ejecución autónoma · No conectado</small></article>').join("");
+    $("#agents-grid").innerHTML = agents.map((agent,i) => '<article class="agent-card"><div class="agent-top"><div class="agent-icon">'+String(i+1).padStart(2,"0")+'</div><span class="agent-state">En preparación</span></div><h3>'+escapeHtml(agent[0])+'</h3><b class="agent-role">'+escapeHtml(agent[1])+'</b><p>'+escapeHtml(agent[2])+'</p><small>Consulta asistida · Sin acciones autónomas</small><button class="text-button agent-ask" type="button" data-agent-id="'+escapeHtml(agent[3])+'">Consultar agente →</button></article>').join("");
   }
   function renderActivity() {
     $("#activity-list").innerHTML = state.activity.length ? state.activity.map(a => '<div class="activity-item"><i class="activity-dot"></i><div><b>'+escapeHtml(a.title)+'</b><p>'+escapeHtml(a.detail)+'</p><time>'+new Date(a.at).toLocaleString("es-CO")+'</time></div></div>').join("") : '<div class="empty">Todavía no hay actividad registrada.</div>';
@@ -140,6 +140,8 @@
   let clerkInstance=null;
   let clerkLoaded=false;
   let authLoading=false;
+  let activeRestaurantId=null;
+  let workspaceLoading=false;
   async function loadClerk(){
     if(clerkLoaded && clerkInstance) return clerkInstance;
     if(authLoading) {
@@ -172,6 +174,23 @@
       return clerkInstance;
     } finally { authLoading=false; }
   }
+  async function initializeWorkspace(){
+    if(workspaceLoading || activeRestaurantId || !clerkInstance) return;
+    workspaceLoading=true;
+    try{
+      const token=await clerkInstance.getToken();
+      const response=await fetch("/api/onboarding",{headers:{Authorization:"Bearer "+token,Accept:"application/json"},cache:"no-store"});
+      const data=await response.json();
+      if(!response.ok) throw new Error(data.error || "No se pudo cargar el espacio del restaurante.");
+      if(Array.isArray(data.restaurants) && data.restaurants.length){
+        activeRestaurantId=data.restaurants[0].id;
+        $(".workspace b").textContent=data.restaurants[0].name;
+        $(".workspace small").textContent="Espacio conectado · "+data.restaurants[0].role;
+      }else{
+        $("#workspace-dialog").showModal();
+      }
+    }finally{workspaceLoading=false;}
+  }
   function activateAuthenticatedView(user){
     const displayName=user.fullName || user.firstName || user.primaryEmailAddress?.emailAddress || "Usuario ORVIA";
     $("#auth-user-label").textContent=displayName;
@@ -180,6 +199,7 @@
     $("#welcome-screen").classList.add("hidden");
     $(".app-shell").classList.remove("hidden");
     notify("Sesión iniciada. Tu cuenta está autenticada.");
+    initializeWorkspace().catch(error=>notify(error.message || "No se pudo conectar el espacio."));
   }
   function deactivateAuthenticatedView(){
     $("#auth-user-label").textContent="Sin sesión";
@@ -205,6 +225,23 @@
       mount.innerHTML='<div class="auth-error" role="alert">'+escapeHtml(error.message || "No se pudo preparar el acceso.")+'</div><p class="muted small">La autenticación real requiere configurar la clave pública de Clerk en Vercel Preview. No compartas claves privadas en el chat.</p>';
     }
   }
+  $("#workspace-form").addEventListener("submit",async event=>{
+    event.preventDefault();
+    const form=new FormData(event.currentTarget);
+    const name=String(form.get("name")||"").trim();
+    try{
+      const token=await clerkInstance.getToken();
+      const response=await fetch("/api/onboarding",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({name})});
+      const data=await response.json();
+      if(!response.ok) throw new Error(data.error || "No se pudo crear el espacio.");
+      activeRestaurantId=data.restaurant.id;
+      $(".workspace b").textContent=data.restaurant.name;
+      $(".workspace small").textContent="Espacio conectado · propietario";
+      $("#workspace-dialog").close();
+      event.currentTarget.reset();
+      notify("Restaurante registrado correctamente.");
+    }catch(error){notify(error.message || "No se pudo crear el restaurante.");}
+  });
   $("#show-login").addEventListener("click",()=>openAuth("login"));
   $("#show-register").addEventListener("click",()=>openAuth("register"));
   $("#close-auth").addEventListener("click",()=>$("#auth-dialog").close());
@@ -228,10 +265,25 @@
   }
   $("#lucy-toggle").addEventListener("click",()=>$("#lucy-panel").classList.toggle("open"));
   $("#lucy-close").addEventListener("click",()=>$("#lucy-panel").classList.remove("open"));
-  $("#lucy-form").addEventListener("submit",e=>{
-    e.preventDefault();const input=$("#lucy-input");const message=input.value.trim();if(!message)return;
-    const box=$("#lucy-messages");const user=document.createElement("div");user.className="lucy-message user";user.textContent=message;box.append(user);
-    const reply=document.createElement("div");reply.className="lucy-message";reply.textContent=lucyDemoReply(message);box.append(reply);input.value="";box.scrollTop=box.scrollHeight;
+  $("#lucy-form").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const input=$("#lucy-input");const message=input.value.trim();if(!message)return;
+    const box=$("#lucy-messages");const userBubble=document.createElement("div");userBubble.className="lucy-message user";userBubble.textContent=message;box.append(userBubble);
+    const reply=document.createElement("div");reply.className="lucy-message";reply.textContent="Preparando consulta…";box.append(reply);input.value="";box.scrollTop=box.scrollHeight;
+    if(!activeRestaurantId){reply.textContent="Primero debes conectar o registrar el restaurante. Si no aparece el formulario, revisa la conexión con la base de datos.";return;}
+    try{
+      const token=await clerkInstance.getToken();
+      const response=await fetch("/api/agents",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({restaurantId:activeRestaurantId,agentId:$("#lucy-agent-select").value,message})});
+      const data=await response.json();
+      reply.textContent=response.ok ? data.answer : (data.error || "No se pudo completar la consulta.");
+    }catch(error){reply.textContent="No se pudo conectar con el agente. Inténtalo más tarde."}
+    box.scrollTop=box.scrollHeight;
+  });
+  $("#agents-grid").addEventListener("click",event=>{
+    const button=event.target.closest("[data-agent-id]");if(!button)return;
+    $("#lucy-agent-select").value=button.dataset.agentId;
+    $("#lucy-panel").classList.add("open");
+    $("#lucy-input").focus();
   });
   $("#today-label").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   renderAgents();
