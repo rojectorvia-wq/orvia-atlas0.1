@@ -135,12 +135,29 @@
     notify("Registro local limpiado.");
   });
   function renderAll() { renderOverview(); renderOrders(); renderActivity(); }
-  $("#enter-demo").addEventListener("click",()=>openAuth("login"));
+  $("#enter-demo").addEventListener("click",()=>enterDemoMode());
   let authMode="login";
   let clerkInstance=null;
   let clerkLoaded=false;
   let authLoading=false;
-  let activeRestaurantId=null;
+  let activeRestaurantId="demo-restaurant";
+  const DEMO_MODE=true;
+  function enterDemoMode(){
+    $("#welcome-screen").classList.add("hidden");
+    $(".app-shell").classList.remove("hidden");
+    notify("Estás explorando la demostración interactiva de ORVIA.");
+  }
+  function demoAgentReply(agentId,message){
+    const names={lucy:"LUCY",luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"JHOA",dari:"DARI"};
+    const tips={luz:"Revisaría ventas, costos y margen por producto antes de recomendar cambios de precio.",jote:"Conviene comparar existencias actuales con el consumo promedio y definir alertas de reposición.",kike:"Analizaría tiempos de preparación, pedidos pendientes y distribución de tareas del turno.",xel:"Propondría una promoción medible y probaría su resultado antes de ampliar la campaña.",nani:"Clasificaría la consulta del cliente, respondería con empatía y registraría el motivo para detectar patrones.",memo:"Compararía productos más solicitados, franjas horarias y tendencias de ventas disponibles.",jhoa:"Revisaría el estado del sistema, reproduciría el inconveniente y documentaría el diagnóstico.",dari:"Verificaría la coherencia de los datos, los riesgos y qué decisiones necesitan autorización.",lucy:"Coordinaría a los especialistas adecuados y resumiría sus hallazgos en un plan priorizado."};
+    return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\n"+names[agentId]+": "+(tips[agentId]||tips.lucy)+"\\n\\nSolicitud recibida: "+message+"\\n\\nEsta respuesta es ilustrativa y usa datos ficticios; no consulta ni modifica sistemas reales.";
+  }
+  function demoTeamReply(message){
+    const selected=["luz","jote","kike"].filter((id)=>/venta|ingreso|costo|precio|dinero|finanz|inventario|stock|ingrediente|pedido|cocina|operaci|turno/i.test(message));
+    const team=[...new Set(selected.length?selected:["luz","kike","memo"])];
+    const labels={luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"JHOA"};
+    return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\nLUCY coordinaría a: "+team.map(id=>labels[id]).join(", ")+".\\n\\n"+team.map(id=>labels[id]+": "+(id==="luz"?"Revisaría indicadores financieros y márgenes.":id==="jote"?"Comprobaría existencias y necesidades de reposición.":"Analizaría el flujo operativo y los tiempos del servicio.")).join("\\n\\n")+"\\n\\nDARI: Revisaría riesgos, coherencia y decisiones que necesitan aprobación.\\n\\nLUCY: Integraría los resultados y propondría los siguientes pasos.\\n\\nNo se ejecutó ninguna acción. Los resultados son ficticios y sirven para mostrar el flujo de trabajo.";
+  }
   let workspaceLoading=false;
   async function loadClerk(){
     if(clerkLoaded && clerkInstance) return clerkInstance;
@@ -244,10 +261,8 @@
       notify("Restaurante registrado correctamente.");
     }catch(error){notify(error.message || "No se pudo crear el restaurante.");}
   });
-  $("#show-login").addEventListener("click",()=>openAuth("login"));
-  $("#show-register").addEventListener("click",()=>openAuth("register"));
   $("#close-auth").addEventListener("click",()=>$("#auth-dialog").close());
-  $("#auth-account-button").addEventListener("click",async()=>{
+  $("#auth-account-button")?.addEventListener("click",async()=>{
     if(!clerkInstance || !clerkInstance.user){notify("Estás en modo demostración.");return;}
     if(confirm("¿Quieres cerrar tu sesión de ORVIA?")) await clerkInstance.signOut();
   });
@@ -273,6 +288,7 @@
     if(!message){notify("Escribe primero qué necesitas analizar.");input.focus();return;}
     const box=$("#lucy-messages");const userBubble=document.createElement("div");userBubble.className="lucy-message user";userBubble.textContent=message;box.append(userBubble);
     const reply=document.createElement("div");reply.className="lucy-message";reply.textContent="Lucy está coordinando a los especialistas y a DARI…";box.append(reply);input.value="";
+    if(DEMO_MODE){reply.textContent=demoTeamReply(message);box.scrollTop=box.scrollHeight;return;}
     if(!activeRestaurantId){reply.textContent="Primero debes conectar o registrar el restaurante.";return;}
     try{
       const token=await clerkInstance.getToken();
@@ -289,6 +305,7 @@
     const input=$("#lucy-input");const message=input.value.trim();if(!message)return;
     const box=$("#lucy-messages");const userBubble=document.createElement("div");userBubble.className="lucy-message user";userBubble.textContent=message;box.append(userBubble);
     const reply=document.createElement("div");reply.className="lucy-message";reply.textContent="Preparando consulta…";box.append(reply);input.value="";box.scrollTop=box.scrollHeight;
+    if(DEMO_MODE){reply.textContent=demoAgentReply($("#lucy-agent-select").value,message);box.scrollTop=box.scrollHeight;return;}
     if(!activeRestaurantId){reply.textContent="Primero debes conectar o registrar el restaurante. Si no aparece el formulario, revisa la conexión con la base de datos.";return;}
     try{
       const token=await clerkInstance.getToken();
@@ -307,5 +324,5 @@
   $("#today-label").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   renderAgents();
   renderAll();
-  loadClerk().catch(() => {});
+  if(DEMO_MODE) enterDemoMode();
 })();
