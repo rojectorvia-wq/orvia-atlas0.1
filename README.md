@@ -1,6 +1,12 @@
-# ORVIA 0.2 — Nébula
+# ORVIA 0.3 — Knowledge
 
 **ORVIA** significa **Organización, Rendimiento, Ventas, Inteligencia y Automatización**. Plataforma de gestión e inteligencia operativa para restaurantes.
+
+## ORVIA KNOWLEDGE 0.3
+
+Se incorpora `knowledge.js`, una biblioteca local de **1.008 preguntas e intenciones** organizada en ocho áreas: inventario, finanzas, marketing, operaciones y pedidos, clientes y atención, personal y administración, analítica y estrategia, e higiene/seguridad/tecnología. Lucy recupera referencias por coincidencia semántica ligera y construye respuestas orientativas usando el estado local de pedidos y los datos ficticios del inventario.
+
+**Alcance actual:** esta biblioteca no es un modelo entrenado ni un motor de IA generativa. Las 1.008 entradas son preguntas y variaciones indexables; las respuestas se construyen con reglas y guías operativas. La proyección de ventas se abstiene de dar cifras cuando faltan series históricas. No se conectan acciones reales ni se envían pedidos, pagos o campañas.
 
 ## Estado de esta rama
 
