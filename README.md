@@ -23,13 +23,13 @@ La interfaz web estática existente sigue siendo una demostración local: sus pe
 Variables del entorno Preview de Vercel:
 - `CLERK_SECRET_KEY` (solo servidor)
 - `CLERK_PUBLISHABLE_KEY` (clave pública de Clerk; se entrega al navegador mediante `/api/auth-config`)
-- `DATABASE_URL` (o `POSTGRES_URL`)\n- `AI_GATEWAY_MODEL` (ID exacto de modelo existente en el catálogo de AI Gateway)\n- `VERCEL_OIDC_TOKEN` (preferido en despliegues Vercel; lo proporciona Vercel) o `AI_GATEWAY_API_KEY` (alternativa secreta configurada directamente en Vercel)
+- `ORVIA_PREVIEW_DATABASE_URL` (obligatoria para Preview: conexión Neon aislada, distinta de producción)\n- `DATABASE_URL` (o `POSTGRES_URL`, solo para producción/local; Preview no usa estas variables como alternativa)\n- `AI_GATEWAY_MODEL` (ID exacto de modelo existente en el catálogo de AI Gateway)\n- `VERCEL_OIDC_TOKEN` (preferido en despliegues Vercel; lo proporciona Vercel) o `AI_GATEWAY_API_KEY` (alternativa secreta configurada directamente en Vercel)
 
 Las claves deben configurarse en Vercel, nunca guardarse en Git ni compartirse en el chat. Las integraciones instaladas en el equipo deben vincularse explícitamente a este proyecto para que Vercel genere las variables correspondientes.
 
 ### Base de datos
 
-Ejecuta `db/schema.sql` en el SQL Editor de la base de datos Neon vinculada al entorno Preview. La migración crea restaurantes, membresías, pedidos, auditoría, registro de agentes y tareas. Los endpoints comprueban la membresía en el servidor para aislar los datos por restaurante.
+Ejecuta `db/schema.sql` únicamente en la base Neon de desarrollo aislada que uses para Preview. No ejecutes esta migración en la base de producción. El backend bloquea escrituras en Preview si no existe `ORVIA_PREVIEW_DATABASE_URL`; no utiliza las credenciales compartidas de producción como alternativa. La migración crea restaurantes, membresías, pedidos, auditoría, registro de agentes y tareas. Los endpoints comprueban la membresía en el servidor para aislar los datos por restaurante.
 
 ### Autenticación
 
