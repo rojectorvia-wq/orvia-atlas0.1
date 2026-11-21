@@ -14,3 +14,5 @@
 @media(max-width:600px){.auth-user-label{display:none}.auth-modal{padding:17px}}
 
 .app-shell.hidden{display:none}
+
+.agent-select-label{display:block;padding:9px 12px 0;color:#9eb2cc;font-size:10px}.agent-select-label select{display:block;width:100%;margin-top:6px;background:#091321;border:1px solid #2a405e;border-radius:7px;padding:8px;color:#eef4ff;font:inherit;font-size:10px}.agent-ask{display:inline-block;margin-top:12px;padding:0;background:none;border:0;color:#8dbdff;font-size:10px;cursor:pointer}.agent-ask:hover{color:#fff}
