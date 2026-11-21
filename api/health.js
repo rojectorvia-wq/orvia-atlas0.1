@@ -1,4 +1,5 @@
 import { db } from "./_lib/db.js";
+import { getVercelOidcToken } from "@vercel/oidc";
 import { json, methodNotAllowed } from "./_lib/http.js";
 
 const EXPECTED_AGENT_COUNT = 11;
@@ -10,7 +11,10 @@ export default async function handler(req, res) {
   const databaseConfigured = process.env.VERCEL_ENV === "preview"
     ? Boolean(process.env.ORVIA_PREVIEW_DATABASE_URL)
     : Boolean(process.env.DATABASE_URL || process.env.POSTGRES_URL);
-  const aiGatewayConfigured = Boolean((process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN) && process.env.AI_GATEWAY_MODEL);
+  let oidcAvailable = false;
+  try { oidcAvailable = Boolean(await getVercelOidcToken()); }
+  catch { oidcAvailable = Boolean(process.env.VERCEL_OIDC_TOKEN); }
+  const aiGatewayConfigured = Boolean((process.env.AI_GATEWAY_API_KEY || oidcAvailable) && process.env.AI_GATEWAY_MODEL);
   const searchConfigured = Boolean(process.env.TAVILY_API_KEY);
   const database = {
     configured: databaseConfigured,
