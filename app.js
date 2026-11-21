@@ -435,6 +435,10 @@
     renderFinance();renderInventory();renderMarketing();
     ["customers","purchases","staff","restaurant","analytics","settings"].forEach(renderSimpleModule);
   }
+  const previousAgentReply=demoAgentReply;
+  demoAgentReply=function(id,message){pulseAgent(id,"Respondió una consulta individual");return previousAgentReply(id,message);};
+  const previousTeamReply=demoTeamReply;
+  demoTeamReply=function(message){runAgentCycle();return previousTeamReply(message);};
   const originalShowView=showView;
   showView=function(name){
     originalShowView(name);
