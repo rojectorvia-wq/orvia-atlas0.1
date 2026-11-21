@@ -9,9 +9,9 @@
     ["ORVIA KIKE","Gerente operativo","Supervisa pedidos, preparación, cocina y operación diaria del restaurante.","kike"],
     ["ORVIA XEL","Director de marketing","Propone promociones, campañas y publicidad para atraer clientes.","xel"],
     ["ORVIA NANI","Directora de atención al cliente","Gestiona consultas, solicitudes, quejas y seguimiento de la experiencia del cliente.","nani"],
-    ["ORVIA MEMO","Director de inteligencia comercial","Analiza tendencias, productos populares, horarios y oportunidades de crecimiento."],
-    ["ORVIA JHOA","Diagnóstico técnico","Analiza errores, revisa incidencias y prepara posibles correcciones; los cambios sensibles requieren autorización."],
-    ["ORVIA DARI","Supervisión operativa","Revisa tareas, resultados y alertas; escala a Lucy los asuntos que requieren intervención humana."]
+    ["ORVIA MEMO","Director de inteligencia comercial","Analiza tendencias, productos populares, horarios y oportunidades de crecimiento.","memo"],
+    ["ORVIA JHOA","Diagnóstico técnico","Analiza errores, revisa incidencias y prepara posibles correcciones; los cambios sensibles requieren autorización.","jhoa"],
+    ["ORVIA DARI","Supervisión operativa","Revisa tareas, resultados y alertas; escala a Lucy los asuntos que requieren intervención humana.","dari"]
   ];
   const state = loadState();
   let toastTimer;
@@ -202,6 +202,8 @@
     initializeWorkspace().catch(error=>notify(error.message || "No se pudo conectar el espacio."));
   }
   function deactivateAuthenticatedView(){
+    activeRestaurantId=null;
+    workspaceLoading=false;
     $("#auth-user-label").textContent="Sin sesión";
     $("#auth-account-button").textContent="U";
     $(".app-shell").classList.add("hidden");
