@@ -11,7 +11,7 @@
 <body>
   <section class="welcome-screen" id="welcome-screen">
     <nav class="welcome-nav"><a class="brand" href="#"><span class="brand-mark">O</span><span><strong>ORVIA</strong><small>RESTAURANT INTELLIGENCE</small></span></a><div><span class="local-pill"><i></i> Demo interactiva</span></div></nav>
-    <div class="hero-wrap"><div class="eyebrow">INTELIGENCIA PARA RESTAURANTES</div><h1>Tu negocio, con una visión más clara.</h1><p>Organización, Rendimiento, Ventas, Inteligencia y Automatización en una sola plataforma.</p><blockquote>Que cada decisión te acerque a la mejor versión de tu negocio.</blockquote><button class="button primary hero-cta" id="enter-demo">Iniciar sesión para continuar →</button><small class="prototype-note">ORVIA 0.2 — NÉBULA · ENTORNO DE DEMOSTRACIÓN</small></div>
+    <div class="hero-wrap"><div class="eyebrow">INTELIGENCIA PARA RESTAURANTES</div><h1>Tu negocio, con una visión más clara.</h1><p>Organización, Rendimiento, Ventas, Inteligencia y Automatización en una sola plataforma.</p><blockquote>Que cada decisión te acerque a la mejor versión de tu negocio.</blockquote><button class="button primary hero-cta" id="enter-demo">Entrar a la demostración →</button><small class="prototype-note">ORVIA 0.2 — NÉBULA · ENTORNO DE DEMOSTRACIÓN</small></div>
     <div class="hero-foot"><span>Operación</span><span>Inteligencia</span><span>Automatización</span><span>Supervisión</span></div>
   </section>
   <dialog id="workspace-dialog" class="modal"><form id="workspace-form"><div class="modal-head"><div><div class="eyebrow">CONFIGURACIÓN INICIAL</div><h2>Registra tu restaurante</h2></div></div><p class="muted small">Este espacio privado permitirá separar los datos y las tareas de tu negocio.</p><label>Nombre del restaurante<input name="name" required minlength="2" maxlength="100" placeholder="Ej. Restaurante Orvia"></label><div class="modal-actions"><button class="button primary" type="submit">Crear espacio</button></div></form></dialog>
@@ -19,7 +19,7 @@
   <div class="app-shell hidden">
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#" aria-label="ORVIA inicio"><span class="brand-mark">O</span><span><strong>ORVIA</strong><small>RESTAURANT INTELLIGENCE</small></span></a>
-      <div class="workspace"><span class="workspace-dot"></span><span><b>Espacio de demostración</b><small>Configuración inicial pendiente</small></span></div>
+      <div class="workspace"><span class="workspace-dot"></span><span><b>Bistró Bahía Azul</b><small>Restaurante ficticio · datos de demostración</small></span></div>
       <nav class="nav" aria-label="Navegación principal">
         <button class="nav-link active" data-view="overview"><span>▦</span> Resumen</button>
         <button class="nav-link" data-view="orders"><span>▤</span> Pedidos <em id="nav-order-count">0</em></button>
@@ -42,7 +42,7 @@
           <div class="date-chip" id="today-label"></div>
         </div>
         <div class="notice"><span>ⓘ</span><p><b>Modo demostración.</b> Estás explorando ORVIA con información ficticia. Las conversaciones de los agentes son simulaciones de la maqueta; no se ejecutan operaciones reales.</p></div>
-        <div class="section-heading"><div><h2>Vista general</h2><p>Actividad registrada en este dispositivo</p></div><button class="button primary" id="new-order-top">＋ Nuevo pedido</button></div>
+        <div class="section-heading"><div><h2>Vista general</h2><p>Restaurante ficticio · actividad de ejemplo</p></div><button class="button primary" id="new-order-top">＋ Nuevo pedido</button></div>
         <div class="stats-grid">
           <article class="stat-card"><span>VENTAS REGISTRADAS</span><strong id="sales-total">$ 0</strong><small class="stat-foot">Suma de pedidos guardados</small></article>
           <article class="stat-card"><span>PEDIDOS DEL DÍA</span><strong id="orders-total">0</strong><small class="stat-foot">Pedidos creados hoy</small></article>
@@ -51,7 +51,7 @@
         </div>
         <div class="content-grid">
           <section class="panel"><div class="panel-heading"><div><h3>Pedidos recientes</h3><p>Seguimiento operativo</p></div><button class="text-button" data-go="orders">Ver todos →</button></div><div id="recent-orders" class="order-list"></div></section>
-          <section class="panel agent-summary"><div class="panel-heading"><div><h3>Equipo ORVIA</h3><p>Arquitectura objetivo: nueve agentes</p></div><button class="text-button" data-go="agents">Ver equipo →</button></div><div class="agent-count"><strong>09</strong><span>agentes previstos<br>en la arquitectura</span></div><div class="progress-track"><i></i></div><p class="muted small">Estado actual: estructura por implementar. No se muestran agentes como activos hasta que tengan ejecución y pruebas reales.</p></section>
+          <section class="panel agent-summary"><div class="panel-heading"><div><h3>Equipo ORVIA</h3><p>Equipo de nueve agentes · modo demostración</p></div><button class="text-button" data-go="agents">Ver equipo →</button></div><div class="agent-count"><strong>09</strong><span>agentes previstos<br>en la arquitectura</span></div><div class="progress-track"><i></i></div><p class="muted small">Demostración guiada: puedes consultar a cada especialista y ver cómo Lucy coordinaría al equipo. Las respuestas son simuladas.</p></section>
         </div>
       </section>
 
@@ -63,7 +63,7 @@
 
       <section class="view" id="view-agents">
         <div class="page-heading"><div><div class="eyebrow">INTELIGENCIA Y AUTOMATIZACIÓN</div><h1>Centro de agentes</h1><p>Nueve especialistas coordinados bajo supervisión y permisos.</p></div></div>
-        <div class="notice"><span>ⓘ</span><p>Esta pantalla define el equipo objetivo. Los agentes todavía no ejecutan tareas ni se comunican entre sí. Cada uno pasará a estado operativo únicamente después de integrar su motor, herramientas, controles y pruebas.</p></div>
+        <div class="notice"><span>ⓘ</span><p>Esta pantalla define el equipo objetivo. Modo demostración: consulta a cada especialista y observa el flujo de coordinación. Las respuestas son simuladas y no realizan cambios reales.</p></div>
         <div class="agents-grid" id="agents-grid"></div>
       </section>
 
@@ -84,7 +84,7 @@
       <div class="modal-actions"><button type="button" class="button subtle" id="cancel-dialog">Cancelar</button><button class="button primary" type="submit">Guardar pedido</button></div>
     </form>
   </dialog>
-  <aside class="lucy-widget" id="lucy-widget"><button class="lucy-toggle" id="lucy-toggle"><span class="lucy-orb">L</span><span><b>Hablar con Lucy</b><small>Coordinación del equipo en pruebas</small></span><span class="lucy-chevron">⌃</span></button><div class="lucy-panel" id="lucy-panel"><div class="lucy-head"><div><b>ORVIA LUCY</b><small>Coordinación · motor sujeto a configuración</small></div><button id="lucy-close" aria-label="Cerrar chat">×</button></div><label class="agent-select-label" for="lucy-agent-select">Consultar a<select id="lucy-agent-select"><option value="lucy">LUCY · Coordinación</option><option value="luz">LUZ · Finanzas</option><option value="jote">JOTE · Inventario</option><option value="kike">KIKE · Operaciones</option><option value="xel">XEL · Marketing</option><option value="nani">NANI · Atención al cliente</option><option value="memo">MEMO · Inteligencia comercial</option><option value="jhoa">JHOA · Diagnóstico técnico</option><option value="dari">DARI · Supervisión</option></select></label><button type="button" class="button primary" id="team-orchestrate">Coordinar equipo ORVIA</button><div class="lucy-messages" id="lucy-messages"><div class="lucy-message">Hola. Soy Lucy. Selecciona cualquiera de los nueve especialistas para consultar su función. Las respuestas con IA se habilitarán cuando el motor esté configurado y la base de datos esté conectada.</div></div><form id="lucy-form" class="lucy-compose"><input id="lucy-input" maxlength="500" placeholder="Escribe a Lucy..." aria-label="Mensaje para Lucy"><button type="submit">Enviar</button></form></div></aside>
+  <aside class="lucy-widget" id="lucy-widget"><button class="lucy-toggle" id="lucy-toggle"><span class="lucy-orb">L</span><span><b>Hablar con Lucy</b><small>Coordinación del equipo en pruebas</small></span><span class="lucy-chevron">⌃</span></button><div class="lucy-panel" id="lucy-panel"><div class="lucy-head"><div><b>ORVIA LUCY</b><small>Coordinación · demostración interactiva</small></div><button id="lucy-close" aria-label="Cerrar chat">×</button></div><label class="agent-select-label" for="lucy-agent-select">Consultar a<select id="lucy-agent-select"><option value="lucy">LUCY · Coordinación</option><option value="luz">LUZ · Finanzas</option><option value="jote">JOTE · Inventario</option><option value="kike">KIKE · Operaciones</option><option value="xel">XEL · Marketing</option><option value="nani">NANI · Atención al cliente</option><option value="memo">MEMO · Inteligencia comercial</option><option value="jhoa">JHOA · Diagnóstico técnico</option><option value="dari">DARI · Supervisión</option></select></label><button type="button" class="button primary" id="team-orchestrate">Coordinar equipo ORVIA</button><div class="lucy-messages" id="lucy-messages"><div class="lucy-message">¡Hola! Soy Lucy, coordinadora de Bistró Bahía Azul. Puedes preguntarme por ventas, inventario, pedidos, clientes o marketing. En esta maqueta te mostraré cómo colaboraría el equipo.</div></div><form id="lucy-form" class="lucy-compose"><input id="lucy-input" maxlength="500" placeholder="Escribe a Lucy..." aria-label="Mensaje para Lucy"><button type="submit">Enviar</button></form></div></aside>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./app.js"></script>
 </body>
