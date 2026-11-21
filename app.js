@@ -165,10 +165,7 @@
       await clerkInstance.load({publishableKey:config.publishableKey});
       clerkInstance.addListener(({user})=>{
         if(user) activateAuthenticatedView(user);
-        else {
-          $("#auth-user-label").textContent="Modo demostración";
-          $("#auth-account-button").textContent="U";
-        }
+        else deactivateAuthenticatedView();
       });
       clerkLoaded=true;
       if(clerkInstance.user) activateAuthenticatedView(clerkInstance.user);
@@ -181,7 +178,15 @@
     $("#auth-account-button").textContent=(displayName.trim()[0] || "U").toUpperCase();
     $("#auth-dialog").close();
     $("#welcome-screen").classList.add("hidden");
+    $(".app-shell").classList.remove("hidden");
     notify("Sesión iniciada. Tu cuenta está autenticada.");
+  }
+  function deactivateAuthenticatedView(){
+    $("#auth-user-label").textContent="Sin sesión";
+    $("#auth-account-button").textContent="U";
+    $(".app-shell").classList.add("hidden");
+    $("#welcome-screen").classList.remove("hidden");
+    $("#lucy-panel").classList.remove("open");
   }
   async function openAuth(mode){
     authMode=mode;
