@@ -16,3 +16,19 @@
 .app-shell.hidden{display:none}
 
 .agent-select-label{display:block;padding:9px 12px 0;color:#9eb2cc;font-size:10px}.agent-select-label select{display:block;width:100%;margin-top:6px;background:#091321;border:1px solid #2a405e;border-radius:7px;padding:8px;color:#eef4ff;font:inherit;font-size:10px}.agent-ask{display:inline-block;margin-top:12px;padding:0;background:none;border:0;color:#8dbdff;font-size:10px;cursor:pointer}.agent-ask:hover{color:#fff}
+
+
+/* ORVIA Nébula — módulos ampliados */
+.nav{max-height:calc(100vh - 220px);overflow-y:auto;padding-right:3px}
+.module-content{display:grid;gap:15px}
+.module-content .stats-grid{margin-bottom:0}
+.agent-live-panel{margin-top:16px}
+.agent-working{border-color:#3988ff;box-shadow:0 0 0 1px #3988ff33,0 8px 28px #1459a322}
+.agent-working .agent-icon{animation:agentGlow 1.5s ease-in-out infinite}
+.agent-state-live{color:#75e4bf;background:#123b35}
+.live-dot{background:#3dd6a0;box-shadow:0 0 12px #3dd6a0;animation:agentBlink 1s ease-in-out infinite}
+@keyframes agentGlow{50%{box-shadow:0 0 18px #3988ff88;transform:translateY(-2px)}}
+@keyframes agentBlink{50%{opacity:.35;transform:scale(.75)}}
+.auth-user-label{color:#9aabc1;font-size:10px}
+@media(max-width:1050px){.sidebar{width:220px}.main{margin-left:220px}.view{padding:26px}.agents-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.sidebar{transform:translateX(-100%);transition:transform .2s;width:270px}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.topbar{padding:0 16px}.mobile-menu{display:block;background:transparent;border:0;color:#dce9fb;font-size:21px}.crumb{margin-right:auto;margin-left:12px}.top-actions{gap:8px}.top-actions .local-pill{display:none}.view{padding:22px 15px}.welcome,.page-heading{align-items:flex-start;flex-direction:column}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.content-grid{grid-template-columns:1fr}.agents-grid{grid-template-columns:1fr}.toolbar{flex-direction:column}.toolbar select{width:100%}.section-heading{gap:10px;align-items:flex-end}.agent-live-panel{padding:14px}}
