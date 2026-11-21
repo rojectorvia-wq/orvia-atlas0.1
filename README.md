@@ -89,7 +89,7 @@ Cada entrega debe tener número y nombre. Esta entrega es **ORVIA 0.5 — Autopi
 - **MAX** aporta análisis empresarial sobre los datos que se le proporcionen.
 - La maqueta acelera la cadencia de la simulación: el ciclo de cocina avanza cada 4,5 segundos y genera pedidos ficticios cada 18 segundos. El ciclo visual de agentes se distribuye más rápido.
 - Se añade **Enseñarle a Lucy** como función opcional de la maqueta; no es necesaria para el conocimiento base que se entrega desde el desarrollo. Los aportes se guardan como pendientes y solo entran a la biblioteca local tras aprobación manual. Se almacenan en el navegador de este dispositivo; no entrenan un modelo externo ni se sincronizan con otros equipos.
-- La biblioteca base se amplía a 1.440 preguntas e intenciones indexadas en catorce áreas gastronómicas y empresariales. Son preguntas e intenciones de referencia, no hechos verificados ni datos propietarios de cadenas. Los nuevos aportes aprobados se incorporan como conocimiento local adicional.
+- La biblioteca base se amplía a 1.440 preguntas e intenciones indexadas en catorce áreas gastronómicas y empresariales. Son preguntas e intenciones de referencia, no hechos verificados ni datos propietarios de cadenas.
 - Se mantiene el modo demostración. No se publican promociones, no se contacta a clientes y no se ejecutan operaciones reales.
 - La migración de `db/schema.sql` debe ejecutarse únicamente en la base aislada de Preview para registrar los once agentes. No ejecutar en producción.
 - El futuro conector con el software personal queda como integración pendiente; no hay webhook activo ni envío automático de incidentes todavía.
@@ -99,7 +99,7 @@ La rama `orvia-0.6-impulso` es de Preview/desarrollo. No se fusiona con `main` n
 
 ## ORVIA 0.6 — Impulso: Lucy, conocimiento y comunicación
 
-- La biblioteca local pasa a 1.440 preguntas e intenciones de referencia en catorce áreas, con nuevas categorías de gastronomía internacional, técnicas culinarias, diseño de menú, modelos de cadenas, hospitalidad y abastecimiento sostenible.
+- La biblioteca local pasa a 1.440 preguntas e intenciones de referencia en catorce áreas, con nuevas categorías de gastronomía internacional, técnicas culinarias, diseño de menú, modelos de cadenas, hospitalidad y abastecimiento sostenible. El propietario no necesita alimentar esta biblioteca manualmente: sus contenidos base se amplían desde el desarrollo.
 - Lucy responde con una voz formal, natural, fluida y ejecutiva; evita fórmulas robóticas, explica el criterio de sus recomendaciones y reconoce los datos que faltan.
 - Los prompts del motor de coordinación y de consultas individuales instruyen a los agentes para comunicarse en español profesional y conversacional. LEX mantiene su auditoría de calidad.
 - Esta ampliación no significa que Lucy conozca todos los restaurantes del mundo ni sus datos internos o actuales. La biblioteca contiene guías e intenciones generales; los datos particulares y vigentes deben verificarse con fuentes autorizadas.
