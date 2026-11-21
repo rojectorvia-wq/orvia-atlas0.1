@@ -603,6 +603,7 @@
       const item=pending.splice(index,1)[0];
       approved.unshift({...item,approvedAt:new Date().toISOString()});
       writeKnowledge(knowledgePendingKey,pending);writeKnowledge(knowledgeApprovedKey,approved);
+      window.ORVIA_KNOWLEDGE?.refreshUserKnowledge?.();
       renderKnowledgeBoard();record("LUCY · conocimiento aprobado por el usuario",item.question);
       notify("Conocimiento aprobado para la biblioteca local de Lucy.");
     }else if(remove){
@@ -613,7 +614,7 @@
   $("#knowledge-approved").addEventListener("click",event=>{
     const button=event.target.closest("[data-knowledge-revoke]");if(!button)return;
     const approved=readKnowledge(knowledgeApprovedKey);approved.splice(Number(button.dataset.knowledgeRevoke),1);
-    writeKnowledge(knowledgeApprovedKey,approved);renderKnowledgeBoard();notify("Conocimiento retirado de la biblioteca local.");
+    writeKnowledge(knowledgeApprovedKey,approved);window.ORVIA_KNOWLEDGE?.refreshUserKnowledge?.();renderKnowledgeBoard();notify("Conocimiento retirado de la biblioteca local.");
   });
   renderKnowledgeBoard();
   $("#today-label").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
