@@ -10,8 +10,10 @@
     ["ORVIA XEL","Director de marketing","Propone promociones, campañas y publicidad para atraer clientes.","xel"],
     ["ORVIA NANI","Directora de atención al cliente","Gestiona consultas, solicitudes, quejas y seguimiento de la experiencia del cliente.","nani"],
     ["ORVIA MEMO","Director de inteligencia comercial","Analiza tendencias, productos populares, horarios y oportunidades de crecimiento.","memo"],
-    ["ORVIA JHOA","Diagnóstico técnico","Analiza errores, revisa incidencias y prepara posibles correcciones; los cambios sensibles requieren autorización.","jhoa"],
-    ["ORVIA DARI","Supervisión operativa","Revisa tareas, resultados y alertas; escala a Lucy los asuntos que requieren intervención humana.","dari"]
+    ["ORVIA LETI","Diagnóstico técnico","Analiza errores, revisa incidencias y prepara posibles correcciones; los cambios sensibles requieren autorización.","jhoa"],
+    ["ORVIA DARI","Supervisión operativa","Revisa tareas, resultados y alertas; escala a Lucy los asuntos que requieren intervención humana.","dari"],
+    ["ORVIA LEX","Control de calidad de agentes","Verifica resultados, detecta inconsistencias y registra incidentes para Lucy.","lex"],
+    ["ORVIA MAX","Inteligencia empresarial","Analiza ventas, rentabilidad, tendencias y oportunidades de crecimiento con datos disponibles.","max"]
   ];
   const state = loadState();
   let toastTimer;
@@ -171,15 +173,15 @@
     notify("Bienvenido a Bistró Bahía Azul, nuestro restaurante de demostración.");
   }
   function demoAgentReply(agentId,message){
-    const names={lucy:"LUCY",luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"JHOA",dari:"DARI"};
-    const tips={luz:"Revisaría ventas, costos y margen por producto antes de recomendar cambios de precio.",jote:"Conviene comparar existencias actuales con el consumo promedio y definir alertas de reposición.",kike:"Analizaría tiempos de preparación, pedidos pendientes y distribución de tareas del turno.",xel:"Propondría una promoción medible y probaría su resultado antes de ampliar la campaña.",nani:"Clasificaría la consulta del cliente, respondería con empatía y registraría el motivo para detectar patrones.",memo:"Compararía productos más solicitados, franjas horarias y tendencias de ventas disponibles.",jhoa:"Revisaría el estado del sistema, reproduciría el inconveniente y documentaría el diagnóstico.",dari:"Verificaría la coherencia de los datos, los riesgos y qué decisiones necesitan autorización.",lucy:"Coordinaría a los especialistas adecuados y resumiría sus hallazgos en un plan priorizado."};
+    const names={lucy:"LUCY",luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"LETI",dari:"DARI",lex:"LEX",max:"MAX"};
+    const tips={luz:"Revisaría ventas, costos y margen por producto antes de recomendar cambios de precio.",jote:"Conviene comparar existencias actuales con el consumo promedio y definir alertas de reposición.",kike:"Analizaría tiempos de preparación, pedidos pendientes y distribución de tareas del turno.",xel:"Propondría una promoción medible y probaría su resultado antes de ampliar la campaña.",nani:"Clasificaría la consulta del cliente, respondería con empatía y registraría el motivo para detectar patrones.",memo:"Compararía productos más solicitados, franjas horarias y tendencias de ventas disponibles.",jhoa:"Revisaría el estado del sistema, reproduciría el inconveniente y documentaría el diagnóstico.",lex:"Validaría la coherencia de los resultados, señalaría errores y los escalaría a Lucy.",max:"Analizaría ventas, márgenes y oportunidades de crecimiento con los datos disponibles.",dari:"Verificaría la coherencia de los datos, los riesgos y qué decisiones necesitan autorización.",lucy:"Coordinaría a los especialistas adecuados y resumiría sus hallazgos en un plan priorizado."};
     return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\n"+names[agentId]+": "+(tips[agentId]||tips.lucy)+"\\n\\nSolicitud recibida: "+message+"\\n\\nEsta respuesta es una simulación con información ficticia de Bistró Bahía Azul; no consulta ni modifica sistemas reales.";
   }
   function demoTeamReply(message){
     const selected=["luz","jote","kike"].filter((id)=>/venta|ingreso|costo|precio|dinero|finanz|inventario|stock|ingrediente|pedido|cocina|operaci|turno/i.test(message));
     const team=[...new Set(selected.length?selected:["luz","kike","memo"])];
     const labels={luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"JHOA"};
-    return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\nLUCY coordinaría a: "+team.map(id=>labels[id]).join(", ")+".\\n\\n"+team.map(id=>labels[id]+": "+(id==="luz"?"Revisaría indicadores financieros y márgenes.":id==="jote"?"Comprobaría existencias y necesidades de reposición.":"Analizaría el flujo operativo y los tiempos del servicio.")).join("\\n\\n")+"\\n\\nDARI: Revisaría riesgos, coherencia y decisiones que necesitan aprobación.\\n\\nLUCY: Integraría los resultados y propondría los siguientes pasos.\\n\\nNo se ejecutó ninguna acción. Los resultados son ficticios y muestran cómo trabajaría el equipo en Bistró Bahía Azul.";
+    return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\nLUCY coordinaría a: "+team.map(id=>labels[id]).join(", ")+".\\n\\n"+team.map(id=>labels[id]+": "+(id==="luz"?"Revisaría indicadores financieros y márgenes.":id==="jote"?"Comprobaría existencias y necesidades de reposición.":"Analizaría el flujo operativo y los tiempos del servicio.")).join("\\n\\n")+"\\n\\nLEX: Revisaría coherencia, errores y resultados de los agentes.\\n\\nDARI: Revisaría riesgos operativos y decisiones que necesitan aprobación.\\n\\nLUCY: Integraría los resultados y propondría los siguientes pasos.\\n\\nNo se ejecutó ninguna acción. Los resultados son ficticios y muestran cómo trabajaría el equipo en Bistró Bahía Azul.";
   }
   let workspaceLoading=false;
   async function loadClerk(){
@@ -300,7 +302,7 @@
     if(/tendencia|popular|horario|crecimiento|comercial/.test(q)) return "MEMO analizará tendencias, productos populares, horarios y oportunidades de crecimiento. Todavía no tiene datos reales para analizar.";
     if(/error|fallo|técnico|tecnico|problema/.test(q)) return "JHOA está previsto para diagnóstico técnico y análisis de incidencias. Preparará posibles correcciones, pero no aplicará cambios sensibles sin autorización.";
     if(/supervisión|supervision|alerta|revisión|revision/.test(q)) return "DARI supervisará tareas, resultados y alertas, y escalará a Lucy los asuntos que necesiten intervención humana.";
-    if(/agente|equipo|quién|quien/.test(q)) return "El equipo previsto tiene nueve agentes: Lucy coordina; LUZ lleva finanzas; JOTE, inventario; KIKE, operación; XEL, marketing; NANI, atención al cliente; MEMO, inteligencia comercial; JHOA, diagnóstico técnico; y DARI, supervisión operativa. Ninguno ejecuta tareas autónomas todavía.";
+    if(/agente|equipo|quién|quien/.test(q)) return "El equipo previsto tiene once agentes: Lucy coordina; LUZ lleva finanzas; JOTE, inventario; KIKE, operación; XEL, marketing; NANI, atención al cliente; MEMO, inteligencia comercial; LETI (antes JHOA), diagnóstico técnico; DARI, supervisión operativa; LEX, control de calidad; y MAX, inteligencia empresarial. La simulación no representa ejecución real de operaciones.";
     return "Te he leído. En esta maqueta puedo explicarte los módulos y las responsabilidades del equipo ORVIA. Aún no tengo conexión con inteligencia artificial ni acceso a datos reales, así que no puedo ejecutar esa solicitud todavía.";
   }
   $("#lucy-toggle").addEventListener("click",()=>$("#lucy-panel").classList.toggle("open"));
@@ -365,7 +367,7 @@
     main.append(section);
   });
   const agentRuntime = Object.fromEntries(agents.map(a=>[a[3],{status:"En espera",task:"Disponible para una tarea de demostración",runs:0}]));
-  const agentSequence = ["lucy","luz","jote","kike","xel","nani","memo","jhoa","dari"];
+  const agentSequence = ["lucy","luz","jote","kike","xel","nani","memo","jhoa","dari","lex","max"];
   let pulseIndex=0;
   let autopilotStarted=false;
   let autopilotStepTimer=null;
@@ -431,10 +433,10 @@
     $("#toggle-autopilot").addEventListener("click",()=>autopilotStarted?stopDemoAutopilot():startDemoAutopilot());
   }
   function runAgentCycle(){
-    const tasks=["Coordina el turno y distribuye tareas","Calcula el resumen financiero ilustrativo","Comprueba ingredientes y alertas de stock","Revisa pedidos y tiempos de preparación","Prepara una propuesta de promoción","Clasifica una consulta de cliente ficticia","Analiza productos y horarios populares","Comprueba el estado técnico de la maqueta","Supervisa resultados y señala aprobaciones necesarias"];
-    agentSequence.forEach((id,i)=>setTimeout(()=>pulseAgent(id,tasks[i]),i*420));
-    record("LUCY · Ciclo de equipo iniciado","Nueve agentes recorren tareas demostrativas en secuencia.");
-    notify("Ciclo de demostración de nueve agentes iniciado.");
+    const tasks=["Coordina el turno y distribuye tareas","Calcula el resumen financiero ilustrativo","Comprueba ingredientes y alertas de stock","Revisa pedidos y tiempos de preparación","Prepara una propuesta de promoción","Clasifica una consulta de cliente ficticia","Analiza productos y horarios populares","Comprueba el estado técnico de la maqueta","Supervisa resultados y señala aprobaciones necesarias","Audita respuestas y resultados de los agentes","Analiza oportunidades de crecimiento del restaurante"];
+    agentSequence.forEach((id,i)=>setTimeout(()=>pulseAgent(id,tasks[i]),i*260));
+    record("LUCY · Ciclo de equipo iniciado","Once agentes recorren tareas demostrativas en secuencia.");
+    notify("Ciclo de demostración de once agentes iniciado.");
   }
   function consumeDemoIngredients(order){
     const text=String(order.items||"").toLowerCase();
@@ -505,8 +507,8 @@
     record("LUCY · autopiloto iniciado","ORVIA coordina pedidos ficticios, preparación, inventario y entrega en modo demostración.");
     createAutopilotOrder();
     advanceDemoKitchen();
-    autopilotStepTimer=setInterval(advanceDemoKitchen,6500);
-    autopilotOrderTimer=setInterval(createAutopilotOrder,24000);
+    autopilotStepTimer=setInterval(advanceDemoKitchen,4500);
+    autopilotOrderTimer=setInterval(createAutopilotOrder,18000);
     notify("Autopiloto del restaurante iniciado. Todo ocurre con datos ficticios.");
   }
   function stopDemoAutopilot(){
@@ -541,7 +543,7 @@
   renderExtraModules();
   const originalEnterDemo=enterDemoMode;
   enterDemoMode=function(){originalEnterDemo();runAgentCycle();startDemoAutopilot();};
-  setInterval(()=>{pulseIndex=(pulseIndex+1)%agentSequence.length;const id=agentSequence[pulseIndex];if(agentRuntime[id].status!=="Trabajando"){agentRuntime[id].status="Trabajando";agentRuntime[id].task="Revisión periódica de demostración";renderAgents();setTimeout(()=>{agentRuntime[id].status="En espera";renderAgents();},1700);}},6500);
+  setInterval(()=>{pulseIndex=(pulseIndex+1)%agentSequence.length;const id=agentSequence[pulseIndex];if(agentRuntime[id].status!=="Trabajando"){agentRuntime[id].status="Trabajando";agentRuntime[id].task="Revisión periódica de demostración";renderAgents();setTimeout(()=>{agentRuntime[id].status="En espera";renderAgents();},1700);}},4200);
 
   $("#today-label").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   renderAgents();
