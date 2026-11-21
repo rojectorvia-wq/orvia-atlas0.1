@@ -166,8 +166,9 @@
   let clerkLoaded=false;
   let authLoading=false;
   let activeRestaurantId="demo-restaurant";
-  const DEMO_MODE=true;
+  let DEMO_MODE=false;
   function enterDemoMode(){
+    DEMO_MODE=true;
     $("#welcome-screen").classList.add("hidden");
     $(".app-shell").classList.remove("hidden");
     notify("Bienvenido a Bistró Bahía Azul, nuestro restaurante de demostración.");
@@ -263,6 +264,7 @@
     }finally{workspaceLoading=false;}
   }
   function activateAuthenticatedView(user){
+    DEMO_MODE=false;
     const displayName=user.fullName || user.firstName || user.primaryEmailAddress?.emailAddress || "Usuario ORVIA";
     $("#auth-user-label").textContent=displayName;
     $("#auth-account-button").textContent=(displayName.trim()[0] || "U").toUpperCase();
@@ -316,6 +318,8 @@
     }catch(error){notify(error.message || "No se pudo crear el restaurante.");}
   });
   $("#close-auth").addEventListener("click",()=>$("#auth-dialog").close());
+  $("#welcome-login")?.addEventListener("click",()=>openAuth("login"));
+  $("#welcome-register")?.addEventListener("click",()=>openAuth("register"));
   $("#auth-account-button")?.addEventListener("click",async()=>{
     if(!clerkInstance || !clerkInstance.user){notify("Estás en modo demostración.");return;}
     if(confirm("¿Quieres cerrar tu sesión de ORVIA?")) await clerkInstance.signOut();
