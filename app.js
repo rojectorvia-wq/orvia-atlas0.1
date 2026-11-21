@@ -574,49 +574,6 @@
   enterDemoMode=function(){originalEnterDemo();runAgentCycle();startDemoAutopilot();};
   setInterval(()=>{pulseIndex=(pulseIndex+1)%agentSequence.length;const id=agentSequence[pulseIndex];if(agentRuntime[id].status!=="Trabajando"){agentRuntime[id].status="Trabajando";agentRuntime[id].task="Revisión periódica de demostración";renderAgents();setTimeout(()=>{agentRuntime[id].status="En espera";renderAgents();},1700);}},4200);
 
-  const knowledgePendingKey="orvia.knowledge.pending.v1";
-  const knowledgeApprovedKey="orvia.knowledge.approved.v1";
-  const readKnowledge=(key)=>{try{const value=JSON.parse(localStorage.getItem(key)||"[]");return Array.isArray(value)?value:[];}catch{return [];}};
-  const writeKnowledge=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));}catch{notify("No se pudo guardar la biblioteca en este navegador.");}};
-  function renderKnowledgeBoard(){
-    const pending=readKnowledge(knowledgePendingKey),approved=readKnowledge(knowledgeApprovedKey);
-    $("#knowledge-pending").innerHTML=pending.length?pending.map((x,i)=>'<div class="order-row"><div><b>'+escapeHtml(x.question)+'</b><small>'+escapeHtml(x.answer)+'<br>Fuente: '+escapeHtml(x.source||"No indicada")+'</small></div><div class="order-right"><button class="button primary" data-knowledge-approve="'+i+'">Aprobar</button><button class="button subtle" data-knowledge-delete="'+i+'">Eliminar</button></div></div>').join(""):'<div class="empty">No hay conocimientos pendientes de revisión.</div>';
-    $("#knowledge-approved-count").textContent=approved.length+" conocimientos propios aprobados";
-    $("#knowledge-approved").innerHTML=approved.length?approved.map((x,i)=>'<div class="order-row"><div><b>'+escapeHtml(x.question)+'</b><small>'+escapeHtml(x.answer)+'</small></div><div class="order-right"><button class="button subtle" data-knowledge-revoke="'+i+'">Retirar</button></div></div>').join(""):'<div class="empty">Aún no has aprobado conocimientos propios.</div>';
-  }
-  $("#knowledge-form").addEventListener("submit",event=>{
-    event.preventDefault();
-    const form=new FormData(event.currentTarget);
-    const question=String(form.get("question")||"").trim(),answer=String(form.get("answer")||"").trim(),source=String(form.get("source")||"").trim();
-    if(question.length<5||answer.length<15){notify("Añade una pregunta y una respuesta más completas.");return;}
-    const pending=readKnowledge(knowledgePendingKey);
-    pending.unshift({question,answer,source,createdAt:new Date().toISOString()});
-    writeKnowledge(knowledgePendingKey,pending);
-    event.currentTarget.reset();renderKnowledgeBoard();record("LUCY · conocimiento enviado a revisión",question);
-    notify("Guardado como pendiente. Revísalo antes de aprobarlo.");
-  });
-  $("#knowledge-pending").addEventListener("click",event=>{
-    const approve=event.target.closest("[data-knowledge-approve]"),remove=event.target.closest("[data-knowledge-delete]");
-    if(approve){
-      const pending=readKnowledge(knowledgePendingKey),approved=readKnowledge(knowledgeApprovedKey),index=Number(approve.dataset.knowledgeApprove);
-      if(!pending[index])return;
-      const item=pending.splice(index,1)[0];
-      approved.unshift({...item,approvedAt:new Date().toISOString()});
-      writeKnowledge(knowledgePendingKey,pending);writeKnowledge(knowledgeApprovedKey,approved);
-      window.ORVIA_KNOWLEDGE?.refreshUserKnowledge?.();
-      renderKnowledgeBoard();record("LUCY · conocimiento aprobado por el usuario",item.question);
-      notify("Conocimiento aprobado para la biblioteca local de Lucy.");
-    }else if(remove){
-      const pending=readKnowledge(knowledgePendingKey);pending.splice(Number(remove.dataset.knowledgeDelete),1);
-      writeKnowledge(knowledgePendingKey,pending);renderKnowledgeBoard();notify("Elemento pendiente eliminado.");
-    }
-  });
-  $("#knowledge-approved").addEventListener("click",event=>{
-    const button=event.target.closest("[data-knowledge-revoke]");if(!button)return;
-    const approved=readKnowledge(knowledgeApprovedKey);approved.splice(Number(button.dataset.knowledgeRevoke),1);
-    writeKnowledge(knowledgeApprovedKey,approved);window.ORVIA_KNOWLEDGE?.refreshUserKnowledge?.();renderKnowledgeBoard();notify("Conocimiento retirado de la biblioteca local.");
-  });
-  renderKnowledgeBoard();
   $("#today-label").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   renderAgents();
   renderAll();
