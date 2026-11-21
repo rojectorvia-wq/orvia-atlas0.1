@@ -165,7 +165,7 @@
   let clerkInstance=null;
   let clerkLoaded=false;
   let authLoading=false;
-  let activeRestaurantId="demo-restaurant";
+  let activeRestaurantId=null;
   let DEMO_MODE=false;
   function enterDemoMode(){
     DEMO_MODE=true;
