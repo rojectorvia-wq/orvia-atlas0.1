@@ -12,6 +12,12 @@ for (const category of categories) for (const topic of category.questions) for (
  const question=i===0?topic:variants[i]+base.charAt(0).toLowerCase()+base.slice(1);
  entries.push({id:"KB-"+String(entries.length+1).padStart(4,"0"),category:category.name,agent:category.agent,question,topic:base,scope:category.scope});
 }
+try {
+ const approved=JSON.parse(localStorage.getItem("orvia.knowledge.approved.v1")||"[]");
+ if(Array.isArray(approved)) approved.forEach((item,index)=>{
+  if(item && typeof item.question==="string" && typeof item.answer==="string") entries.push({id:"USER-KB-"+(index+1),category:"Conocimiento aprobado por el propietario",agent:"LUCY",question:item.question,topic:item.question,scope:"Aporte revisado por el usuario",customAnswer:item.answer,source:item.source||"No indicada"});
+ });
+} catch {}
 const $=s=>document.querySelector(s);
 const money=n=>new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(n);
 const add=(text,cls="lucy-message")=>{const box=$("#lucy-messages");const el=document.createElement("div");el.className=cls;el.textContent=text;box.append(el);box.scrollTop=box.scrollHeight;return el;};
@@ -54,6 +60,10 @@ function answer(q,team=false){
  }
  if(/pedido|cocina|operacion|demora|turno/.test(n)){
   out+="REVISIÓN DE KIKE\nPriorizar pedidos por hora prometida y tiempo restante, comunicar demoras con honestidad, verificar modificaciones/alergias antes de preparar y coordinar cocina con servicio. La maqueta no registra tiempos reales de preparación.\n\n";
+ }
+ const customMatches=found.filter(x=>x.e.customAnswer);
+ if(customMatches.length){
+  out+="CONOCIMIENTO APORTADO Y APROBADO POR EL PROPIETARIO\n"+customMatches.slice(0,2).map(x=>"• "+x.e.customAnswer+" (Fuente: "+x.e.source+")").join("\n")+"\n\n";
  }
  if(found.length){
   out+="REFERENCIAS DE LA BIBLIOTECA\n"+found.slice(0,3).map(x=>"• "+x.e.topic+" ("+x.e.category+" · "+x.e.agent+")").join("\n")+"\n\n";
