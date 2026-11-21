@@ -17,16 +17,6 @@ for (const category of categories) for (const topic of category.questions) for (
  const question=i===0?topic:variants[i]+base.charAt(0).toLowerCase()+base.slice(1);
  entries.push({id:"KB-"+String(entries.length+1).padStart(4,"0"),category:category.name,agent:category.agent,question,topic:base,scope:category.scope});
 }
-function refreshUserKnowledge(){
- entries.splice(0,entries.length,...entries.filter(e=>!String(e.id||"").startsWith("USER-KB-")));
- try {
-  const approved=JSON.parse(localStorage.getItem("orvia.knowledge.approved.v1")||"[]");
-  if(Array.isArray(approved)) approved.forEach((item,index)=>{
-   if(item && typeof item.question==="string" && typeof item.answer==="string") entries.push({id:"USER-KB-"+(index+1),category:"Conocimiento aprobado por el propietario",agent:"LUCY",question:item.question,topic:item.question,scope:"Aporte revisado por el usuario",customAnswer:item.answer,source:item.source||"No indicada"});
-  });
- } catch {}
-}
-refreshUserKnowledge();
 const $=s=>document.querySelector(s);
 const money=n=>new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(n);
 const add=(text,cls="lucy-message")=>{const box=$("#lucy-messages");const el=document.createElement("div");el.className=cls;el.textContent=text;box.append(el);box.scrollTop=box.scrollHeight;return el;};
@@ -73,8 +63,6 @@ function answer(q,team=false){
  if(found.length){
   out+="Como referencias para profundizar, la biblioteca reúne temas como "+found.slice(0,4).map(x=>x.e.topic.toLowerCase()).join("; ")+". ";
  }
- const customMatches=found.filter(x=>x.e.customAnswer);
- if(customMatches.length) out+="También encontré aportes aprobados para este espacio: "+customMatches.slice(0,2).map(x=>x.e.customAnswer+" (fuente: "+x.e.source+")").join(" ");
  if(!found.length && !/inventario|stock|venta|marketing|cliente|cocina|gastronomia|menu|menú|finanz|promocion/.test(n)){
   out+="Puedo ayudarte con gastronomía internacional, técnicas culinarias, diseño de menú, operaciones, compras, finanzas, marketing, hospitalidad y gestión empresarial. Si la respuesta depende de datos particulares del restaurante, necesitaré esos datos para no asumirlos. ";
  }
@@ -98,5 +86,5 @@ $("#team-orchestrate")?.addEventListener("click",e=>{
  add(message,"lucy-message user");input.value="";handle(message,true);
 },true);
 const badge=document.createElement("div");badge.className="knowledge-badge";badge.textContent=entries.length.toLocaleString("es-CO")+" preguntas e intenciones disponibles";$("#lucy-panel")?.append(badge);
-window.ORVIA_KNOWLEDGE={count:entries.length,refreshUserKnowledge,search:(q)=>retrieve(q).slice(0,10).map(x=>({id:x.e.id,question:x.e.question,category:x.e.category,agent:x.e.agent,score:x.score})),answer};
+window.ORVIA_KNOWLEDGE={count:entries.length,search:(q)=>retrieve(q).slice(0,10).map(x=>({id:x.e.id,question:x.e.question,category:x.e.category,agent:x.e.agent,score:x.score})),answer};
 })();
