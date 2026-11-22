@@ -10,6 +10,8 @@ on:
       - feat/orvia-security-architecture-0.1
   pull_request:
     branches:
+      - main
+      - feat/orvia-security-architecture-0.1
       - orvia-0.2-nebula
       - orvia-0.4-autonomia-preview
       - orvia-0.5-autopiloto
