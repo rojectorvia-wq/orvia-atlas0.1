@@ -115,6 +115,7 @@ export function createModelReservationService({ repository }) {
       }
       return repository.reconcileUnknownAtomically({
         restaurantId, reservationId, providerOutcome, actualMicrousd,
+        confirmedNotSent: providerOutcome === "not_processed",
         policy: providerOutcome === "processed" ? settleBudget : releaseBudget,
         transition: transitionReservation
       });
