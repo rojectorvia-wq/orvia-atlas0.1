@@ -16,6 +16,14 @@ La ruta `api/agents.js` ejecuta `generateAgentReply()` directamente contra Verce
 
 Por tanto, los límites de `api/orchestrate.js` no cubren todas las entradas al proveedor. La existencia del estimador monetario tampoco equivale a una barrera de gasto: `evaluateRestaurantCostLimit` todavía no está conectado al flujo de ninguna de las dos rutas.
 
+## Avance de implementación en la rama de trabajo
+
+En el commit `4653a608c215e233f175f89c555f267cfbaa5f30`, `api/agents.js` ya utiliza el límite local de una llamada por solicitud, el máximo de 520 tokens de salida, y el registro normalizado de uso por agente. Guarda el resumen de presupuesto y consumo en `agent_tasks.result`, sin almacenar prompts dentro del ledger. El límite de caracteres se aplica antes de enviar el prompt al Gateway.
+
+La validación GitHub Actions run #92 ejecutó `npm run check`: sintaxis correcta y 18 pruebas aprobadas, 0 fallidas.
+
+Esto solo cierra la brecha de límites por solicitud y trazabilidad de uso. No conecta el presupuesto mensual monetario a `api/agents.js` ni a `api/orchestrate.js`, no realiza reservas de saldo compartido y no evita por sí solo que varias solicitudes simultáneas excedan un presupuesto mensual. El ledger en `agent_tasks.result` sigue siendo telemetría, no un libro contable autoritativo.
+
 ## Corrección requerida antes de integrar
 
 1. Inventariar todas las rutas y funciones que llaman al AI Gateway o a proveedores externos facturables.
