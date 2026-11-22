@@ -126,7 +126,14 @@ export function createPostgresModelReservationRepository({ withTransaction }) {
           if (!sameRequest) {
             return { allowed: false, conflict: true, reason: "IDEMPOTENCY_KEY_REUSED" };
           }
-          return { allowed: true, duplicate: true, reservation: duplicate };
+          // Never authorize a second provider send for an existing idempotency key.
+          // The caller may inspect the original reservation/task to recover its outcome.
+          return {
+            allowed: false,
+            duplicate: true,
+            reason: "IDEMPOTENT_RESERVATION_EXISTS",
+            reservation: duplicate
+          };
         }
 
         const decision = input.policy({
