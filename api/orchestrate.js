@@ -3,6 +3,7 @@ import { getVercelOidcToken } from "@vercel/oidc";
 import { db } from "./_lib/db.js";
 import { json, methodNotAllowed } from "./_lib/http.js";
 import { researchWeb } from "./_lib/research.js";
+import { buildOrderContext } from "./_lib/order-context.mjs";
 
 const TEAM = {
   lucy: { name: "ORVIA LUCY", role: "Directora general y coordinadora", scope: "Integra el trabajo del equipo y entrega decisiones priorizadas." },
@@ -164,15 +165,9 @@ export default async function handler(req, res) {
     const recent = await sql`SELECT count(*)::int AS total FROM agent_tasks WHERE restaurant_id = ${restaurantId} AND requested_by = ${user.userId} AND task_type = 'team_orchestration' AND created_at > now() - (${WINDOW_MINUTES} * interval '1 minute')`;
     if ((recent[0]?.total || 0) >= RATE_LIMIT) return json(res, 429, { code: "TEAM_RATE_LIMIT", error: "Alcanzaste el límite de coordinaciones. Espera unos minutos." });
 
-    const [summaryRows, itemRows] = await Promise.all([
-      sql`SELECT status, count(*)::int AS total, COALESCE(sum(amount_cop) FILTER (WHERE status = 'Entregado'),0)::bigint AS delivered_cop FROM orders WHERE restaurant_id = ${restaurantId} GROUP BY status ORDER BY status`,
-      sql`SELECT items, count(*)::int AS orders FROM orders WHERE restaurant_id = ${restaurantId} GROUP BY items ORDER BY orders DESC LIMIT 8`
-    ]);
-    const snapshot = {
-      orderStatusSummary: summaryRows.map(row => ({ status: row.status, orders: row.total, deliveredSalesCOP: String(row.delivered_cop) })),
-      frequentOrderDescriptions: itemRows.map(row => ({ description: row.items, orders: row.orders })),
-      note: "Snapshot agregado de pedidos. No incluye nombres, teléfonos ni datos personales de clientes. La maqueta guarda algunos pedidos solo en el navegador, por lo que podrían no aparecer aquí."
-    };
+    const summaryRows = await sql`SELECT status, count(*)::int AS total, COALESCE(sum(amount_cop) FILTER (WHERE status = 'Entregado'),0)::bigint AS delivered_cop FROM orders WHERE restaurant_id = ${restaurantId} GROUP BY status ORDER BY status`;
+    // `items` is currently free text. Never send it or customer fields to a model.
+    const snapshot = buildOrderContext(summaryRows);
 
     let priorKnowledge = [];
     const tsQuery = knowledgeQuery(message);
