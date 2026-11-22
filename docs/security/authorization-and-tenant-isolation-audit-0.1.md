@@ -80,6 +80,17 @@ Revisión estática de `db/schema.sql`, `api/orders.js`, `api/onboarding.js`, `a
 
 **Estado de pruebas:** Las pruebas de concurrencia consultadas utilizan un repositorio en memoria serializado para modelar el contrato. Las pruebas del repositorio PostgreSQL utilizan un harness simulado que responde a consultas; no son pruebas contra Neon/PostgreSQL real. No se debe describir este control como validado en producción.
 
+
+### ORVIA-SEC-009 — Repositorio público y controles de protección de ramas no confirmados
+**Prioridad:** Media (exposición de propiedad intelectual / integridad del proceso de cambios)  
+**Evidencia:** La metadata del repositorio indica `visibility: public` y `private: false`. La consulta de rulesets devolvió una lista vacía. La API de GitHub rechazó la lectura de branch protection con HTTP 403 para `main` y para la rama de seguridad, por lo que no fue posible verificar si existen protecciones clásicas configuradas.
+
+**Impacto:** El código y la documentación del repositorio son legibles públicamente. Esto no concede acceso a secretos, a la base de datos ni permiso para escribir en el repositorio. La ausencia de rulesets consultables significa que no se observan reglasets; no permite concluir por sí sola que cualquier usuario pueda modificar ramas. La protección clásica de ramas quedó sin verificar.
+
+**Recomendación:** El propietario debe decidir si el repositorio debe ser privado. Antes de cambiar visibilidad, revisar posibles dependencias públicas, forks, colaboradores, automatizaciones y exposición histórica de secretos. Configurar protección de `main` y ramas de release con PR obligatorio, revisiones requeridas, checks exitosos, bloqueo de force-push y borrado, y restricciones de bypass. Confirmar estos ajustes desde la cuenta con permisos administrativos.
+
+**Estado:** Visibilidad pública confirmada; rulesets consultados sin resultados; branch protection no verificable con el acceso de integración disponible. No se modificó la visibilidad ni la configuración de ramas.
+
 ## Controles positivos observados
 - Las rutas de pedidos y agentes verifican el token Clerk y comprueban membresía del restaurante.
 - Las consultas revisadas de pedidos y coordinación de agentes filtran por `restaurant_id`.
