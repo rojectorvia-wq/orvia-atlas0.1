@@ -7,20 +7,17 @@
 export function sanitizeResearchQuery(value) {
   return String(value || "")
     .normalize("NFKC")
-    .replace(/https?:\\/\\/[^\\s]+/gi, " ")
-    .replace(/\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b/gi, " ")
-    .replace(/\\b(?:bearer|api[_ -]?key|secret|password|contraseña|token)\\s*[:=]?\\s*[^\\s,;]+/gi, " ")
-    .replace(/\\bsk-[A-Za-z0-9_-]{12,}\\b/g, " ")
-    .replace(/\\beyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\b/g, " ")
-    .replace(/(?:\\+?\\d[\\d\\s().-]{7,}\\d)/g, " ")
-    .replace(/\\s+/g, " ")
+    .replace(/https?:\/\/[^\s]+/gi, " ")
+    .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, " ")
+    .replace(/\b(?:bearer|api[_ -]?key|secret|password|contraseña|token)\s*[:=]?\s*[^\s,;]+/gi, " ")
+    .replace(/\bsk-[A-Za-z0-9_-]{12,}\b/g, " ")
+    .replace(/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, " ")
+    .replace(/(?:\+?\d[\d\s().-]{7,}\d)/g, " ")
+    .replace(/\s+/g, " ")
     .trim()
     .slice(0, 300);
 }
 
-// Búsqueda externa opcional para complementar la biblioteca de ORVIA.
-// Requiere TAVILY_API_KEY en el entorno Preview. Los resultados son pistas,
-// no hechos verificados: se entregan al modelo como fuentes no confiables.
 export function shouldResearch(message) {
   const q = String(message || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   return /\b(actual|actualizado|actualmente|hoy|este ano|2026|ultima|ultimo|reciente|vigente|normativa|regulacion|ley|resolucion|precio actual|cuanto cuesta|cadena|franquicia|restaurante [a-z]|mcdonald|starbucks|kfc|dominos|subway|tendencia|fuente|investiga|consulta|busca|verifica|cita|referencia)\b/.test(q)
@@ -32,6 +29,10 @@ export async function researchWeb(message, decision = null) {
   const needsSearch = decision?.needsResearch === true || (!decision && shouldResearch(message));
   if (!apiKey || !needsSearch) {
     return { attempted: false, available: Boolean(apiKey), reason: apiKey ? "No se detectó necesidad clara de información externa." : "Falta configurar TAVILY_API_KEY en Preview.", sources: [] };
+  }
+  const query = sanitizeResearchQuery(decision?.query || message);
+  if (query.length < 3) {
+    return { attempted: false, available: true, reason: "La consulta no contiene términos suficientes después de retirar datos sensibles.", sources: [] };
   }
   const query = sanitizeResearchQuery(decision?.query || message);
   if (query.length < 3) {
