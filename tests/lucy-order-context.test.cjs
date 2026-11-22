@@ -1,6 +1,6 @@
-import test from "node:test";
-import assert from "node:assert/strict";
-import { buildOrderContext } from "../api/_lib/order-context.js";
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const { buildOrderContext } = await import("../api/_lib/order-context.mjs");
 
 test("incluye solo estados permitidos y agregados numéricos", () => {
   const result = buildOrderContext([
