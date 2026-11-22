@@ -15,7 +15,7 @@ on:
       - orvia-0.6-impulso
 
 jobs:
-  syntax:
+  validation:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,5 +26,5 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --ignore-scripts --no-audit --no-fund
-      - name: Check JavaScript syntax
+      - name: Run syntax checks and unit tests
         run: npm run check
