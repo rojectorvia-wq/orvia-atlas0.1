@@ -50,3 +50,12 @@ La transición desde `unknown` a `settled` o `released` ahora exige el resultado
 La propuesta SQL ya no impone un CHECK que exija que `spent_microusd + reserved_microusd` permanezca siempre bajo el límite. Esa condición podía rechazar una liquidación legítima cuando el proveedor cobrara más que la reserva, impidiendo registrar el gasto real. La reserva previa sigue comprobando el saldo disponible; después de una liquidación con exceso, el sistema conserva el importe real y bloquea nuevas reservas hasta que se revise o restablezca el presupuesto.
 
 Se añadió una prueba de política que liquida un exceso, comprueba que el gasto real se conserva y verifica que una reserva posterior se deniega. Esto sigue siendo una prueba unitaria; no sustituye una prueba PostgreSQL.
+
+## Pruebas simuladas de concurrencia e idempotencia
+
+Se añadió `tests/lucy-model-reservation-concurrency.test.mjs`, que utiliza un repositorio en memoria con una sección crítica serializada para comprobar dos invariantes del contrato:
+
+- Dos reservas concurrentes distintas no pueden consumir dos veces el mismo saldo disponible.
+- Dos intentos concurrentes con la misma clave de idempotencia devuelven la reserva original y no duplican el saldo reservado.
+
+Estas pruebas verifican el servicio contra un doble de prueba serializado. **No prueban PostgreSQL, `SELECT FOR UPDATE`, aislamiento entre conexiones, reintentos de transacciones ni concurrencia entre instancias serverless.** Esas validaciones siguen pendientes para una futura prueba de integración aislada.
