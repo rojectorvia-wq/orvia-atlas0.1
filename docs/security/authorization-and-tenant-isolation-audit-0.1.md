@@ -35,6 +35,15 @@ Revisión estática de `db/schema.sql`, `api/orders.js`, `api/onboarding.js`, `a
 
 **Recomendación:** Mantener una respuesta pública mínima (por ejemplo, estado general y versión no sensible) y reservar diagnósticos detallados para una ruta autenticada o un mecanismo de monitorización privado. Verificar antes si algún monitor externo depende del contrato actual.
 
+
+### ORVIA-SEC-004 — Onboarding sin límite de creación por usuario
+**Prioridad:** Media (abuso de recursos / disponibilidad)  
+**Evidencia:** `api/onboarding.js` permite que cualquier usuario autenticado envíe solicitudes POST repetidas. Cada solicitud válida crea un restaurante, una membresía `owner` y un evento de actividad en una transacción. En el handler revisado no aparece un límite por usuario ni una cuota de creación.
+
+**Impacto:** Una cuenta autenticada podría crear muchos restaurantes de prueba o basura y aumentar el consumo de base de datos y la carga administrativa. No se observó una vía para crear restaurantes a nombre de otro usuario.
+
+**Recomendación:** Definir una cuota razonable de creación por usuario y una política para solicitudes repetidas. Preferir un límite persistente y atómico en la base de datos o un servicio de rate limiting compartido; un contador en memoria por instancia no es suficiente en un despliegue serverless. Añadir métricas y una respuesta 429 sin revelar detalles internos. La cuota exacta debe definirse según el modelo comercial y los casos legítimos de usuarios que administran varios restaurantes.
+
 ## Controles positivos observados
 - Las rutas de pedidos y agentes verifican el token Clerk y comprueban membresía del restaurante.
 - Las consultas revisadas de pedidos y coordinación de agentes filtran por `restaurant_id`.
