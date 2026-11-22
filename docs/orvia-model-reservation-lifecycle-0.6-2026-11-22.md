@@ -44,3 +44,9 @@ El adaptador debe implementar estas operaciones atómicas:
 La transición desde `unknown` a `settled` o `released` ahora exige el resultado explícito del proveedor. Un timeout no es evidencia de que no hubo procesamiento.
 
 **No existe todavía un adaptador Neon/PostgreSQL implementado.** El servicio falla si no se inyecta un repositorio que cumpla el contrato. Las pruebas usan un repositorio simulado y solo verifican validación/delegación; no demuestran atomicidad real, aislamiento, bloqueo ni concurrencia en PostgreSQL.
+
+## Invariante de liquidación y exceso real
+
+La propuesta SQL ya no impone un CHECK que exija que `spent_microusd + reserved_microusd` permanezca siempre bajo el límite. Esa condición podía rechazar una liquidación legítima cuando el proveedor cobrara más que la reserva, impidiendo registrar el gasto real. La reserva previa sigue comprobando el saldo disponible; después de una liquidación con exceso, el sistema conserva el importe real y bloquea nuevas reservas hasta que se revise o restablezca el presupuesto.
+
+Se añadió una prueba de política que liquida un exceso, comprueba que el gasto real se conserva y verifica que una reserva posterior se deniega. Esto sigue siendo una prueba unitaria; no sustituye una prueba PostgreSQL.
