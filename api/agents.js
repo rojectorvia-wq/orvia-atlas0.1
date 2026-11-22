@@ -152,14 +152,24 @@ export default async function handler(req, res) {
       });
     }
 
-    const recent = await sql`SELECT count(*)::int AS total FROM agent_tasks WHERE restaurant_id = ${restaurantId} AND requested_by = ${user.userId} AND created_at > now() - (${RATE_WINDOW_MINUTES} * interval '1 minute')`;
-    if ((recent[0]?.total || 0) >= RATE_LIMIT) {
-      return json(res, 429, { code: "AGENT_RATE_LIMIT", error: "Alcanzaste el límite temporal de consultas. Espera unos minutos." });
-    }
-
     const modelBudget = createModelBudget({ maxCalls: 1 });
     const modelUsage = createModelUsageLedger();
-    const inserted = await sql`INSERT INTO agent_tasks (restaurant_id, agent_id, requested_by, task_type, input, status) VALUES (${restaurantId}, ${agentId}, ${user.userId}, 'analysis', ${JSON.stringify({ message })}::jsonb, 'running') RETURNING id`;
+    // Serialize per-user/per-restaurant admission and insert the task atomically.
+    const admission = await sql.transaction([
+      sql`SELECT pg_advisory_xact_lock(hashtextextended(${restaurantId + ":" + user.userId + ":agent"}, 0))`,
+      sql`INSERT INTO agent_tasks (restaurant_id, agent_id, requested_by, task_type, input, status)
+        SELECT ${restaurantId}, ${agentId}, ${user.userId}, 'analysis',
+          ${JSON.stringify({ message })}::jsonb, 'running'
+        WHERE (SELECT count(*) FROM agent_tasks
+          WHERE restaurant_id = ${restaurantId} AND requested_by = ${user.userId}
+          AND task_type = 'analysis'
+          AND created_at > now() - (${RATE_WINDOW_MINUTES} * interval '1 minute')) < ${RATE_LIMIT}
+        RETURNING id`
+    ]);
+    const inserted = admission[1] || [];
+    if (!inserted.length) {
+      return json(res, 429, { code: "AGENT_RATE_LIMIT", error: "Alcanzaste el límite temporal de consultas. Espera unos minutos." });
+    }
     const taskId = inserted[0]?.id;
     try {
       const research = agentId === "lucy" ? await researchWeb(message) : { attempted: false, available: Boolean(process.env.TAVILY_API_KEY), reason: "La investigación web se gestiona desde Lucy.", sources: [] };
