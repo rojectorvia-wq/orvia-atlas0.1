@@ -31,8 +31,10 @@ CREATE TABLE IF NOT EXISTS public.restaurant_model_budgets (
       spent_microusd <= 9007199254740991 AND
       reserved_microusd <= 9007199254740991
     ),
-  CONSTRAINT restaurant_model_budgets_within_limit
-    CHECK (spent_microusd <= limit_microusd - reserved_microusd),
+  -- No se impone aquí spent + reserved <= limit: una liquidación real
+  -- puede superar la reserva. Ese exceso debe registrarse sin truncarlo;
+  -- la política de aplicación bloqueará reservas nuevas mientras el saldo
+  -- disponible sea cero o negativo.
   CONSTRAINT restaurant_model_budgets_status_valid
     CHECK (status IN ('active', 'paused', 'closed')),
   CONSTRAINT restaurant_model_budgets_restaurant_period_unique
