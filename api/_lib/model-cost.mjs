@@ -23,7 +23,7 @@ function decimalFraction(value) {
   return { numerator: digits, denominator: 10n ** BigInt(scale) };
 }
 
-function costMicrousd(tokens, rateUsdPerMillion) {
+function calculateCostMicrousd(tokens, rateUsdPerMillion) {
   const fraction = decimalFraction(rateUsdPerMillion);
   if (!fraction) return null;
   const numerator = BigInt(tokens) * fraction.numerator;
@@ -45,8 +45,8 @@ export function estimateModelCostUsd({ usage, ratesUsdPerMillion }) {
     return { known: false, costUsd: null, costMicrousd: null, reason: "PRICING_OR_USAGE_UNKNOWN" };
   }
 
-  const input = costMicrousd(usage.prompt_tokens, ratesUsdPerMillion.input);
-  const output = costMicrousd(usage.completion_tokens, ratesUsdPerMillion.output);
+  const input = calculateCostMicrousd(usage.prompt_tokens, ratesUsdPerMillion.input);
+  const output = calculateCostMicrousd(usage.completion_tokens, ratesUsdPerMillion.output);
   if (input === null || output === null || input > Number.MAX_SAFE_INTEGER - output) {
     return { known: false, costUsd: null, costMicrousd: null, reason: "COST_OUT_OF_RANGE" };
   }
