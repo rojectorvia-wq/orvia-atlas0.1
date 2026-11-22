@@ -15,25 +15,36 @@ export function createNodePostgresTransactionRunner({ pool }) {
     if (typeof work !== "function") throw new TypeError("transaction work must be a function");
     const client = await pool.connect();
     let began = false;
+    let beginAttempted = false;
+    let commitAttempted = false;
+    let discardError;
+
     try {
+      beginAttempted = true;
       await client.query("BEGIN");
       began = true;
       const result = await work(client);
+      commitAttempted = true;
       await client.query("COMMIT");
       began = false;
       return result;
     } catch (error) {
+      // A failed BEGIN or COMMIT can leave the connection's transaction state
+      // uncertain. Discard it rather than returning it to the reusable pool.
+      if ((beginAttempted && !began) || commitAttempted) discardError = error;
+
       if (began) {
         try {
           await client.query("ROLLBACK");
-        } catch {
-          // Preserve the original operation/commit error. The pool should
-          // discard a broken connection according to node-postgres behavior.
+        } catch (rollbackError) {
+          // Preserve the original error while telling pg.Pool to discard this
+          // connection because its transaction state could not be recovered.
+          discardError = rollbackError;
         }
       }
       throw error;
     } finally {
-      client.release();
+      client.release(discardError);
     }
   };
 }
