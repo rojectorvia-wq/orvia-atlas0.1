@@ -91,6 +91,17 @@ Revisión estática de `db/schema.sql`, `api/orders.js`, `api/onboarding.js`, `a
 
 **Estado:** Visibilidad pública confirmada; rulesets consultados sin resultados; branch protection no verificable con el acceso de integración disponible. No se modificó la visibilidad ni la configuración de ramas.
 
+
+### ORVIA-SEC-010 — CI aún no fija las GitHub Actions por SHA
+**Prioridad:** Media (cadena de suministro de software)  
+**Evidencia:** `.github/workflows/orvia-preview-checks.yml` referencia `actions/checkout@v4` y `actions/setup-node@v4` mediante tags mutables, no commits SHA completos. El workflow instala dependencias con `--ignore-scripts`, ejecuta `npm audit --omit=dev --audit-level=high` y `npm run check`. En el árbol revisado solo aparecen ese workflow y `.github/dependabot.yml`; no se encontró un workflow de CodeQL ni una configuración de escaneo de secretos versionada. Las opciones de seguridad configuradas directamente en GitHub no pudieron verificarse con el acceso disponible.
+
+**Impacto:** Un tag de Action puede cambiar de destino, por lo que no ofrece la misma reproducibilidad que fijar un SHA revisado. El análisis de dependencias y las pruebas no sustituyen análisis estático de seguridad ni detección de secretos.
+
+**Recomendación:** Fijar cada Action externa a un SHA completo verificado y mantener Dependabot para actualizaciones. Añadir análisis estático y escaneo de secretos, con reglas para evitar publicar credenciales y un procedimiento de rotación si se detecta una. Verificar también los controles de seguridad habilitados en GitHub desde una cuenta administradora.
+
+**Estado:** Hallazgo de configuración del workflow; no se cambiaron acciones ni ajustes de GitHub.
+
 ## Controles positivos observados
 - Las rutas de pedidos y agentes verifican el token Clerk y comprueban membresía del restaurante.
 - Las consultas revisadas de pedidos y coordinación de agentes filtran por `restaurant_id`.
