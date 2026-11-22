@@ -65,9 +65,9 @@ export function settleBudget({ spentMicrousd, reservedMicrousd, reservationMicro
   if (reservation > reserved) throw new RangeError("reservation exceeds reserved balance");
   const nextSpentMicrousd = add(spent, actual, "spentMicrousd");
   const nextReservedMicrousd = reserved - reservation;
-  if (nextReservedMicrousd > limit) {
-    throw new RangeError("remaining reservations exceed budget limit");
-  }
+  // Preserve a confirmed real charge even if other outstanding reservations
+  // now exceed the remaining monthly budget. reserveBudget() will fail closed
+  // on subsequent requests until the balance is reconciled.
   return {
     nextSpentMicrousd,
     nextReservedMicrousd,
