@@ -277,7 +277,7 @@
   function deactivateAuthenticatedView(){
     activeRestaurantId=null;
     workspaceLoading=false;
-    $("#auth-user-label").textContent="Sin sesión";
+    $(".auth-user-label").textContent="Sin sesión";
     $("#auth-account-button").textContent="U";
     $(".app-shell").classList.add("hidden");
     $("#welcome-screen").classList.remove("hidden");
