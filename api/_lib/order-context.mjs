@@ -7,7 +7,7 @@ function nonNegativeInteger(value) {
 
 function nonNegativeAmount(value) {
   const text = String(value ?? "0");
-  return /^\\d{1,18}$/.test(text) ? text : "0";
+  return /^[0-9]{1,18}$/.test(text) ? text : "0";
 }
 
 /** Build minimal model context from aggregate order data only. */
