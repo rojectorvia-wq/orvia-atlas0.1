@@ -266,7 +266,7 @@
   function activateAuthenticatedView(user){
     DEMO_MODE=false;
     const displayName=user.fullName || user.firstName || user.primaryEmailAddress?.emailAddress || "Usuario ORVIA";
-    $("#auth-user-label").textContent=displayName;
+    $(".auth-user-label").textContent=displayName;
     $("#auth-account-button").textContent=(displayName.trim()[0] || "U").toUpperCase();
     $("#auth-dialog").close();
     $("#welcome-screen").classList.add("hidden");
