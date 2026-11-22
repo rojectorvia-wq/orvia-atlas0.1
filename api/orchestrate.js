@@ -161,9 +161,6 @@ export default async function handler(req, res) {
     const access = await sql`SELECT role FROM restaurant_members WHERE restaurant_id = ${restaurantId} AND clerk_user_id = ${user.userId} LIMIT 1`;
     if (!access.length) return json(res, 403, { error: "No tienes acceso a este restaurante." });
 
-    const recent = await sql`SELECT count(*)::int AS total FROM agent_tasks WHERE restaurant_id = ${restaurantId} AND requested_by = ${user.userId} AND task_type = 'team_orchestration' AND created_at > now() - (${WINDOW_MINUTES} * interval '1 minute')`;
-    if ((recent[0]?.total || 0) >= RATE_LIMIT) return json(res, 429, { code: "TEAM_RATE_LIMIT", error: "Alcanzaste el límite de coordinaciones. Espera unos minutos." });
-
     const [summaryRows, itemRows] = await Promise.all([
       sql`SELECT status, count(*)::int AS total, COALESCE(sum(amount_cop) FILTER (WHERE status = 'Entregado'),0)::bigint AS delivered_cop FROM orders WHERE restaurant_id = ${restaurantId} GROUP BY status ORDER BY status`,
       sql`SELECT items, count(*)::int AS orders FROM orders WHERE restaurant_id = ${restaurantId} GROUP BY items ORDER BY orders DESC LIMIT 8`
@@ -185,13 +182,28 @@ export default async function handler(req, res) {
       } catch { /* La migración de conocimiento puede estar pendiente en Preview. */ }
     }
 
-    const researchDecision = await decideResearchNeed({ token, model, message });
-    const research = await researchWeb(message, researchDecision);
-    const researchContext = research.sources.length ? research.sources : [];
     const selected = chooseTeam(message);
-    const created = await sql`INSERT INTO agent_tasks (restaurant_id, agent_id, requested_by, task_type, input, status) VALUES (${restaurantId}, 'lucy', ${user.userId}, 'team_orchestration', ${JSON.stringify({ message, selectedAgents: selected })}::jsonb, 'running') RETURNING id`;
+    const reservation = await sql.transaction([
+      sql`SELECT pg_advisory_xact_lock(hashtextextended(${restaurantId + ":" + user.userId}, 0))`,
+      sql`INSERT INTO agent_tasks (restaurant_id, agent_id, requested_by, task_type, input, status)
+        SELECT ${restaurantId}, 'lucy', ${user.userId}, 'team_orchestration',
+          ${JSON.stringify({ message, selectedAgents: selected })}::jsonb, 'running'
+        WHERE (SELECT count(*) FROM agent_tasks
+          WHERE restaurant_id = ${restaurantId} AND requested_by = ${user.userId}
+          AND task_type = 'team_orchestration'
+          AND created_at > now() - (${WINDOW_MINUTES} * interval '1 minute')) < ${RATE_LIMIT}
+        RETURNING id`
+    ]);
+    const created = reservation[1] || [];
+    if (!created.length) return json(res, 429, { code: "TEAM_RATE_LIMIT", error: "Alcanzaste el límite de coordinaciones. Espera unos minutos." });
     const taskId = created[0].id;
+    let researchDecision;
+    let research;
+    let researchContext = [];
     try {
+      researchDecision = await decideResearchNeed({ token, model, message });
+      research = await researchWeb(message, researchDecision);
+      researchContext = research.sources.length ? research.sources : [];
       const specialistResults = await Promise.all(selected.map(async id => {
         const agent = TEAM[id];
         const result = await askModel({
