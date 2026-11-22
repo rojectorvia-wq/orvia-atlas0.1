@@ -33,7 +33,7 @@ test("allows a call within remaining budget", () => {
     monthlyBudgetUsd: 1, spentUsd: 0.8
   });
   assert.equal(decision.allowed, true);
-  assert.equal(decision.remainingUsd, 0.2);
+  assert.ok(Math.abs(decision.remainingUsd - 0.2) < 1e-12);
 });
 
 test("fails closed when budget state is invalid or unknown", () => {
