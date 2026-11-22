@@ -5,7 +5,7 @@ import { json, methodNotAllowed } from "./_lib/http.js";
 import { researchWeb } from "./_lib/research.js";
 import { buildOrderContext } from "./_lib/order-context.mjs";
 import { createModelBudget } from "./_lib/model-budget.mjs";
-import { createModelUsageLedger } from "./_lib/model-usage.mjs";
+import { createModelUsageLedger, normalizeModelUsage } from "./_lib/model-usage.mjs";
 
 const TEAM = {
   lucy: { name: "ORVIA LUCY", role: "Directora general y coordinadora", scope: "Integra el trabajo del equipo y entrega decisiones priorizadas." },
@@ -86,7 +86,7 @@ async function askModel({ token, model, system, user, budget, usageLedger, agent
     const payload = await response.json();
     const answer = payload?.choices?.[0]?.message?.content;
     if (typeof answer !== "string" || !answer.trim()) throw new Error("EMPTY_MODEL_RESPONSE");
-    const usage = payload.usage || null;
+    const usage = normalizeModelUsage(payload.usage);
     usageLedger?.record({ agentId, stage, status: "completed", durationMs: Date.now() - startedAt, maxOutputTokens: reservation.maxOutputTokens, usage });
     return { answer: answer.trim().slice(0, 5000), usage };
   } catch (error) {
