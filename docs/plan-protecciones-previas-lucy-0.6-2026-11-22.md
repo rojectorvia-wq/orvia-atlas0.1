@@ -16,7 +16,8 @@ La orquestación construye un snapshot de pedidos usando `orders.items`. El cód
 
 ### Diseño requerido
 
-- Definir un contrato para `orders.items` (estructura de producto, cantidad y opciones permitidas).
+- Decidir una migración futura hacia un formato estructurado de ítems (producto, cantidad y opciones permitidas), después de identificar compatibilidad con la interfaz actual.
+- Mientras `items` siga siendo texto libre, no enviarlo al modelo ni usarlo para inferir ventas por producto. El snapshot puede conservar únicamente agregados no sensibles, como conteos y sumas ya calculadas en servidor.
 - Crear una función pura que convierta cada pedido en un resumen de catálogo permitido.
 - Rechazar o descartar campos inesperados; no enviar texto libre arbitrario al modelo.
 - Aplicar límites de longitud, cantidad de ítems y caracteres.
