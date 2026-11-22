@@ -86,3 +86,32 @@ No implementar ni activar hasta que estén aprobados: modelo de cobro, proveedor
 
 ## Alcance de este documento
 Solo describe una arquitectura futura. No crea tablas, no cambia datos, no ejecuta SQL, no configura proveedores, no llama modelos y no habilita facturación ni producción.
+
+
+## Compatibilidad revisada con el esquema actual de desarrollo
+
+Inspección de solo lectura realizada en Neon, proyecto `Orvia`, rama `orvia-dev-nebula`, base `neondb` (22 de noviembre de 2026):
+- `public.restaurants.id` es UUID y es la clave primaria de restaurantes.
+- `public.agent_tasks.restaurant_id` es UUID y tiene FK a `public.restaurants(id)` con `ON DELETE CASCADE`.
+- `public.agent_tasks.result` ya es JSONB nullable y se usa para guardar resultados/ledger; no hace falta agregar columnas para el resumen de uso por llamada.
+- `public.restaurant_members` identifica membresía mediante `restaurant_id` UUID y `clerk_user_id` text; los roles existentes son owner, manager y staff.
+- La rama de desarrollo contiene tablas de aplicación; esta inspección no ejecutó escrituras ni alteró datos. No se inspeccionó ni modificó producción.
+
+### Ajustes al diseño propuesto
+1. `restaurant_model_budgets.restaurant_id` debe referenciar `public.restaurants(id)`; decidir si el borrado del restaurante debe restringirse o conservar el historial económico. No copiar automáticamente el `ON DELETE CASCADE` de otras tablas, porque podría borrar evidencia contable.
+2. Las reservas deben tener FK a presupuesto y restaurante, además de `UNIQUE(idempotency_key)` con alcance explícito (por ejemplo, por restaurante y periodo).
+3. Usar `BIGINT` para micro-USD con CHECKs de no negatividad y límites de rango; validar sumas para evitar overflow antes de actualizar saldos.
+4. Para que una llamada de modelo sea autorizada, el endpoint debe comprobar membresía Clerk y rol permitido en el servidor; nunca aceptar `restaurant_id`, presupuesto, tarifas ni coste real como valores confiables enviados por el navegador.
+5. `agent_tasks.result` puede conservar un resumen mínimo de uso, pero no debe convertirse en la fuente contable autoritativa. La reserva y liquidación deben quedar en tablas económicas separadas, con claves y estados auditables.
+
+### Estrategia de prueba concurrente real
+La prueba de dos solicitudes simultáneas no se puede demostrar con una función JavaScript pura ni con una única llamada SQL secuencial. Requiere dos conexiones independientes contra una base aislada:
+- Preparar un presupuesto de prueba con saldo suficiente para exactamente una de dos reservas iguales.
+- Abrir dos sesiones en paralelo y ejecutar la misma operación de reserva.
+- Verificar que una transacción confirma y la otra rechaza; el total reservado nunca supera el límite.
+- Repetir con la misma clave de idempotencia y verificar que no se duplica la reserva.
+- Forzar rollback antes de confirmar y comprobar que el saldo reservado no cambia.
+- Simular resultado ambiguo después del envío y comprobar que la reserva queda `unknown`, no liberada.
+- Al terminar, borrar únicamente fixtures creados por la prueba dentro de la rama desechable; nunca limpiar tablas compartidas ni tocar producción.
+
+La herramienta de inspección disponible confirmó el esquema, pero no ofrece por sí sola una prueba de dos sesiones concurrentes. Antes de cualquier prueba con escrituras, se debe preparar una rama de prueba desechable y revisar explícitamente su destino y limpieza. No ejecutar estas pruebas en `orvia-dev-nebula` compartida ni en producción.
