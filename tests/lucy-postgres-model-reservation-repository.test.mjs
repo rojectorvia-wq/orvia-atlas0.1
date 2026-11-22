@@ -114,3 +114,26 @@ test("ambiguous reservations are not released without provider-confirmed non-pro
   });
   assert.deepEqual(result, { released: false, reason: "RESERVATION_NOT_RELEASABLE" });
 });
+
+test("an exact idempotency duplicate is returned but never authorizes a second provider send", async () => {
+  const existing = {
+    id: "reservation-existing", provider: "gateway", model_id: "model-a",
+    rate_card_version: "rates-v1", reserved_microusd: "200", status: "reserved"
+  };
+  const h = harness((sql) => {
+    if (sql.includes("FROM public.restaurant_model_budgets")) return { rows: [budget] };
+    if (sql.includes("FROM public.model_cost_reservations")) return { rows: [existing] };
+    throw new Error("duplicate request must not write");
+  });
+  const result = await h.repository.reserveAtomically({
+    restaurantId: "restaurant-1", budgetId: "budget-1",
+    idempotencyKey: "request-1", provider: "gateway",
+    modelId: "model-a", rateCardVersion: "rates-v1",
+    amountMicrousd: 200, policy: reserveBudget
+  });
+  assert.equal(result.allowed, false);
+  assert.equal(result.duplicate, true);
+  assert.equal(result.reason, "IDEMPOTENT_RESERVATION_EXISTS");
+  assert.equal(result.reservation.id, "reservation-existing");
+  assert.equal(h.calls.length, 2);
+});
