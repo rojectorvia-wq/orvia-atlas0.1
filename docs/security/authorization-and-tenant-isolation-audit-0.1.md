@@ -17,7 +17,7 @@ Revisión estática de `db/schema.sql`, `api/orders.js`, `api/onboarding.js`, `a
 
 **Impacto:** Un miembro válido con rol `staff` puede realizar las mismas operaciones de creación y cambio de estado que un `owner` o `manager` a través de la API. Esto es una brecha de privilegio interno, no una vía demostrada para que un usuario ajeno al restaurante acceda.
 
-**Recomendación:** Definir y aprobar una matriz RBAC antes de modificar el comportamiento. Como propuesta inicial para revisión: `owner` y `manager` pueden crear y actualizar pedidos; `staff` puede consultar y, si el negocio lo requiere, actualizar estados operativos, pero no realizar acciones administrativas. Aplicar la decisión en el servidor, nunca confiar solo en ocultar controles del frontend. Añadir pruebas para cada rol y cada método.
+**Recomendación:** Definir y aprobar una matriz RBAC antes de modificar el comportamiento. Se preparó `docs/security/rbac-orders-policy-proposal-0.1.md` con una matriz propuesta para `owner`, `manager` y `staff`, reglas de implementación y decisiones funcionales pendientes. La propuesta no está activa. Aplicar la decisión en el servidor, nunca confiar solo en ocultar controles del frontend. Añadir pruebas para cada rol y cada método.
 
 ### ORVIA-SEC-002 — No se observan políticas Row-Level Security (RLS) en el esquema versionado
 **Prioridad:** Alta (defensa en profundidad de aislamiento multi-tenant)  
@@ -110,7 +110,7 @@ Revisión estática de `db/schema.sql`, `api/orders.js`, `api/onboarding.js`, `a
 - Las tablas tenant-scoped revisadas tienen claves foráneas hacia `restaurants`.
 
 ## Plan de remediación recomendado
-1. Acordar matriz de permisos owner/manager/staff.
+1. Revisar y aprobar la propuesta `docs/security/rbac-orders-policy-proposal-0.1.md` para owner/manager/staff.
 2. Implementar autorización RBAC en el servidor y pruebas unitarias/integración por rol.
 3. Identificar el rol efectivo de conexión Neon y diseñar RLS compatible con el backend.
 4. Preparar migración RLS y pruebas de aislamiento con dos tenants; no ejecutarla sin aprobación.
