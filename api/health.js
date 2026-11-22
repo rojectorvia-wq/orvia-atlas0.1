@@ -1,6 +1,7 @@
 import { db } from "./_lib/db.js";
 import { getVercelOidcToken } from "@vercel/oidc";
 import { json, methodNotAllowed } from "./_lib/http.js";
+import { publicHealthPayload } from "./_lib/health-response.mjs";
 
 const EXPECTED_AGENT_COUNT = 11;
 
@@ -62,23 +63,7 @@ export default async function handler(req, res) {
     && database.knowledgeMemoryReady
     && agentRegistryReady
     && aiGatewayConfigured;
-  return json(res, ready ? 200 : 503, {
-    service: "ORVIA API",
-    version: "0.6.0",
-    status: ready ? "online" : "degraded",
-    integrations: {
-      clerkConfigured,
-      databaseConfigured,
-      aiGatewayConfigured,
-      searchConfigured
-    },
-    database,
-    agents: {
-      registered: registeredAgents,
-      expected: EXPECTED_AGENT_COUNT,
-      registryReady: agentRegistryReady,
-      executionEnabled: aiGatewayConfigured && database.reachable && database.schemaReady && agentRegistryReady,
-      autonomousActions: false
-    }
-  });
+  // Keep public probes deliberately generic; detailed diagnostics belong in a
+  // separately authenticated operational endpoint.
+  return json(res, ready ? 200 : 503, publicHealthPayload(ready));
 }
