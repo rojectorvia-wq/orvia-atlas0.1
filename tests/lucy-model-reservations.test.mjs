@@ -67,6 +67,28 @@ test("settles actual spend and surfaces overruns without hiding them", () => {
   );
 });
 
+test("records an overrun and blocks later reservations instead of hiding real spend", () => {
+  const settled = settleBudget({
+    limitMicrousd: 500,
+    spentMicrousd: 100,
+    reservedMicrousd: 200,
+    reservationMicrousd: 150,
+    actualMicrousd: 450
+  });
+  assert.equal(settled.nextSpentMicrousd, 550);
+  assert.equal(settled.overBudget, true);
+
+  const next = reserveBudget({
+    limitMicrousd: 500,
+    spentMicrousd: settled.nextSpentMicrousd,
+    reservedMicrousd: settled.nextReservedMicrousd,
+    amountMicrousd: 1,
+    budgetStatus: "active"
+  });
+  assert.equal(next.allowed, false);
+  assert.equal(next.reason, "BUDGET_STATE_INCONSISTENT");
+});
+
 test("rejects settlement that would overflow safe integer accounting", () => {
   assert.throws(() => settleBudget({
     limitMicrousd: Number.MAX_SAFE_INTEGER,
