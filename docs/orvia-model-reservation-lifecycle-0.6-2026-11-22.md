@@ -28,3 +28,19 @@ Definir reglas verificables para reservar, liquidar y liberar importes expresado
 La suite `tests/lucy-model-reservations.test.mjs` cubre disponibilidad, presupuesto pausado, importes inválidos, liquidación con exceso, overflow, liberación condicionada y transiciones de estado.
 
 La ejecución de CI del último commit queda pendiente de confirmación. No interpretar la existencia de los tests como prueba de concurrencia PostgreSQL o de integración real.
+
+
+## Capa de servicio y contrato de repositorio
+
+Se añadió `api/_lib/model-reservation-service.mjs`. Valida identidad, clave de idempotencia, modelo, versión de tarifas e importes antes de delegar en un repositorio inyectado.
+
+El adaptador debe implementar estas operaciones atómicas:
+- `reserveAtomically`: bloquear presupuesto, comprobar clave idempotente, validar disponibilidad, insertar reserva e incrementar `reserved_microusd` en una sola transacción.
+- `settleAtomically`: bloquear presupuesto/reserva, impedir doble liquidación y mover reserva a gasto real en una sola transacción.
+- `releaseAtomically`: liberar solo cuando el proveedor no recibió la solicitud, con transición única.
+- `markUnknownAtomically`: marcar incertidumbre conservando el importe reservado.
+- `reconcileUnknownAtomically`: resolver únicamente con resultado autoritativo del proveedor (`processed` o `not_processed`).
+
+La transición desde `unknown` a `settled` o `released` ahora exige el resultado explícito del proveedor. Un timeout no es evidencia de que no hubo procesamiento.
+
+**No existe todavía un adaptador Neon/PostgreSQL implementado.** El servicio falla si no se inyecta un repositorio que cumpla el contrato. Las pruebas usan un repositorio simulado y solo verifican validación/delegación; no demuestran atomicidad real, aislamiento, bloqueo ni concurrencia en PostgreSQL.
