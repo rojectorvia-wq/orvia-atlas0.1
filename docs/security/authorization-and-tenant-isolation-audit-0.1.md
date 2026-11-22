@@ -44,6 +44,31 @@ Revisión estática de `db/schema.sql`, `api/orders.js`, `api/onboarding.js`, `a
 
 **Recomendación:** Definir una cuota razonable de creación por usuario y una política para solicitudes repetidas. Preferir un límite persistente y atómico en la base de datos o un servicio de rate limiting compartido; un contador en memoria por instancia no es suficiente en un despliegue serverless. Añadir métricas y una respuesta 429 sin revelar detalles internos. La cuota exacta debe definirse según el modelo comercial y los casos legítimos de usuarios que administran varios restaurantes.
 
+
+### ORVIA-SEC-005 — Mensaje completo puede enviarse al proveedor de búsqueda externa
+**Prioridad:** Media (privacidad / minimización de datos)  
+**Evidencia:** `api/_lib/research.js` construye el campo `query` con `decision.query || message`, limitado a 500 caracteres. En `api/agents.js`, Lucy llama a `researchWeb(message)`; en `api/orchestrate.js`, el mensaje o la consulta decidida por el modelo puede enviarse a Tavily. No se observa una capa previa que detecte o elimine datos personales, credenciales o información confidencial.
+
+**Impacto:** Si el usuario incluye información personal o confidencial en una pregunta que activa investigación, parte de ese texto podría transmitirse a un tercero. La revisión de código no establece qué retención o uso realiza el proveedor; eso depende de sus términos y configuración.
+
+**Recomendación:** Antes de enviar búsquedas, construir una consulta mínima derivada de entidades y términos necesarios, excluir datos personales, credenciales y texto libre innecesario, y advertir en la política de privacidad qué proveedores externos procesan consultas. Añadir pruebas con correos, teléfonos y cadenas con apariencia de secretos para verificar que no salen en la consulta. No asumir que truncar a 500 caracteres anonimiza el contenido.
+
+### ORVIA-SEC-006 — Sin política visible de retención para tareas y actividad
+**Prioridad:** Media (privacidad / ciclo de vida de datos)  
+**Evidencia:** `db/schema.sql` define `agent_tasks.input`, `agent_tasks.result` y `activity_log.detail`, pero no se observa una política de retención, expiración, purga o anonimización. Los endpoints almacenan mensajes de usuario y resultados de agentes en tareas.
+
+**Impacto:** Los mensajes y resultados podrían permanecer indefinidamente, aumentando el volumen de información almacenada y el impacto potencial de una exposición futura. No se comprobó cuánto tiempo existen los registros en una base desplegada.
+
+**Recomendación:** Definir plazos por categoría, necesidades legales y operativas, acceso restringido, borrado verificable y excepciones para auditoría. Diseñar un proceso de purga controlado con pruebas y aprobación; no borrar registros existentes sin política aprobada.
+
+### ORVIA-SEC-007 — Presupuestos de modelo por solicitud, no cuotas globales persistentes
+**Prioridad:** Media (abuso de recursos / costes)  
+**Evidencia:** `api/_lib/model-budget.mjs` mantiene contadores en memoria para una sola solicitud. `api/agents.js` y `api/orchestrate.js` aplican además límites de admisión persistidos en `agent_tasks`, por usuario/restaurante y ventana temporal.
+
+**Impacto:** Los límites por solicitud acotan una ejecución individual, pero no constituyen por sí solos un presupuesto diario o mensual global por cuenta, restaurante o plataforma. La cuota de admisión persistente reduce frecuencia, pero no reemplaza una política de gasto y alertas.
+
+**Recomendación:** Definir presupuestos compartidos y persistentes por restaurante/usuario, topes diarios y mensuales, alertas, comportamiento al agotarse el presupuesto y controles del lado del proveedor. Implementar con transacciones atómicas y pruebas de concurrencia; no depender de memoria de una instancia serverless.
+
 ## Controles positivos observados
 - Las rutas de pedidos y agentes verifican el token Clerk y comprueban membresía del restaurante.
 - Las consultas revisadas de pedidos y coordinación de agentes filtran por `restaurant_id`.
