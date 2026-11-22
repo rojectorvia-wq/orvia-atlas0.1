@@ -3,6 +3,8 @@ import { getVercelOidcToken } from "@vercel/oidc";
 import { db } from "./_lib/db.js";
 import { json, methodNotAllowed } from "./_lib/http.js";
 import { researchWeb } from "./_lib/research.js";
+import { createModelBudget } from "./_lib/model-budget.mjs";
+import { createModelUsageLedger, normalizeModelUsage } from "./_lib/model-usage.mjs";
 
 const AGENTS = {
   lucy: { name: "ORVIA LUCY", role: "Directora general y coordinadora", scope: "Comprender la solicitud, organizar prioridades y orientar al propietario." },
@@ -19,7 +21,7 @@ const AGENTS = {
 };
 
 const MAX_MESSAGE_LENGTH = 1600;
-const MAX_OUTPUT_TOKENS = 650;
+const MAX_OUTPUT_TOKENS = 520;
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MINUTES = 10;
 
@@ -42,7 +44,9 @@ async function gatewayAuth() {
   catch { return process.env.VERCEL_OIDC_TOKEN || ""; }
 }
 
-async function generateAgentReply({ token, model, agent, message }) {
+async function generateAgentReply({ token, model, agent, message, budget, usageLedger }) {
+  const reservation = budget.reserve({ system: [agent.name, agent.role, agent.scope].join('\n'), user: message, maxOutputTokens: MAX_OUTPUT_TOKENS });
+  const startedAt = Date.now();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20000);
   try {
@@ -72,7 +76,7 @@ async function generateAgentReply({ token, model, agent, message }) {
           },
           { role: "user", content: message }
         ],
-        max_tokens: MAX_OUTPUT_TOKENS
+        max_tokens: reservation.maxOutputTokens
       }),
       signal: controller.signal
     });
@@ -84,18 +88,19 @@ async function generateAgentReply({ token, model, agent, message }) {
     const payload = await response.json();
     const answer = payload?.choices?.[0]?.message?.content;
     if (typeof answer !== "string" || !answer.trim()) throw new Error("AI_GATEWAY_EMPTY_RESPONSE");
-    const usage = payload.usage && typeof payload.usage === "object" ? {
-      promptTokens: Number(payload.usage.prompt_tokens) || 0,
-      completionTokens: Number(payload.usage.completion_tokens) || 0,
-      totalTokens: Number(payload.usage.total_tokens) || 0
-    } : null;
+    const usage = normalizeModelUsage(payload.usage);
+    usageLedger.record({ agentId: agent.name, stage: "individual_agent", status: "completed", durationMs: Date.now() - startedAt, maxOutputTokens: reservation.maxOutputTokens, usage });
     return { answer: answer.trim().slice(0, 8000), usage };
+  } catch (error) {
+    usageLedger.record({ agentId: agent.name, stage: "individual_agent", status: "failed", durationMs: Date.now() - startedAt, maxOutputTokens: reservation.maxOutputTokens, errorCode: error && error.code ? error.code : (error && error.gatewayStatus ? "GATEWAY_" + error.gatewayStatus : (error && error.name ? error.name : "MODEL_CALL_FAILED")) });
+    throw error;
   } finally {
     clearTimeout(timeout);
   }
 }
 
 function safeGatewayError(error) {
+  if (error?.code === "MODEL_BUDGET_EXCEEDED") return { status: 429, code: "MODEL_BUDGET_EXCEEDED", message: "La consulta supera los límites de uso permitidos." };
   if (error?.name === "AbortError") return { status: 504, code: "AI_TIMEOUT", message: "El agente tardó demasiado. Inténtalo de nuevo." };
   if (error?.gatewayStatus === 401 || error?.gatewayStatus === 403) return { status: 503, code: "AI_AUTH_UNAVAILABLE", message: "El motor de inteligencia no está autorizado en este entorno." };
   if (error?.gatewayStatus === 402) return { status: 503, code: "AI_CREDITS_UNAVAILABLE", message: "El servicio de inteligencia no tiene créditos disponibles." };
@@ -150,6 +155,8 @@ export default async function handler(req, res) {
       return json(res, 429, { code: "AGENT_RATE_LIMIT", error: "Alcanzaste el límite temporal de consultas. Espera unos minutos." });
     }
 
+    const modelBudget = createModelBudget({ maxCalls: 1 });
+    const modelUsage = createModelUsageLedger();
     const inserted = await sql`INSERT INTO agent_tasks (restaurant_id, agent_id, requested_by, task_type, input, status) VALUES (${restaurantId}, ${agentId}, ${user.userId}, 'analysis', ${JSON.stringify({ message })}::jsonb, 'running') RETURNING id`;
     const taskId = inserted[0]?.id;
     try {
@@ -169,13 +176,13 @@ export default async function handler(req, res) {
       const prompt = agentId === "lucy"
         ? JSON.stringify({ consulta: message, conocimientoPrevioAprobado: priorKnowledge, fuentesExternas: research.sources })
         : message;
-      const result = await generateAgentReply({ token, model, agent, message: prompt });
-      await sql`UPDATE agent_tasks SET status = 'completed', result = ${JSON.stringify({ answer: result.answer, usage: result.usage })}::jsonb, updated_at = now() WHERE id = ${taskId} AND restaurant_id = ${restaurantId}`;
+      const result = await generateAgentReply({ token, model, agent, message: prompt, budget: modelBudget, usageLedger: modelUsage });
+      await sql`UPDATE agent_tasks SET status = 'completed', result = ${JSON.stringify({ answer: result.answer, usage: result.usage, modelBudget: modelBudget.snapshot(), modelUsage: modelUsage.snapshot(), modelUsageSummary: modelUsage.summary() })}::jsonb, updated_at = now() WHERE id = ${taskId} AND restaurant_id = ${restaurantId}`;
       await sql`INSERT INTO activity_log (restaurant_id, actor_user_id, event_type, detail) VALUES (${restaurantId}, ${user.userId}, 'agent.analysis.completed', ${JSON.stringify({ agentId, taskId })}::jsonb)`;
       return json(res, 200, { taskId, agentId, agentName: agent.name, status: "completed", answer: result.answer, usage: result.usage, research: { attempted: research.attempted, available: research.available, reason: research.reason, sources: research.sources.map(({ title, url, publishedDate }) => ({ title, url, publishedDate })), priorKnowledgeUsed: priorKnowledge.length }, actionsExecuted: false });
     } catch (error) {
       const safe = safeGatewayError(error);
-      await sql`UPDATE agent_tasks SET status = 'failed', error_code = ${safe.code}, updated_at = now() WHERE id = ${taskId} AND restaurant_id = ${restaurantId}`;
+      await sql`UPDATE agent_tasks SET status = 'failed', error_code = ${safe.code}, result = ${JSON.stringify({ modelBudget: modelBudget.snapshot(), modelUsage: modelUsage.snapshot(), modelUsageSummary: modelUsage.summary() })}::jsonb, updated_at = now() WHERE id = ${taskId} AND restaurant_id = ${restaurantId}`;
       return json(res, safe.status, { taskId, code: safe.code, error: safe.message, actionsExecuted: false });
     }
   } catch (error) {
