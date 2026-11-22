@@ -33,7 +33,7 @@ Revisión estática de `db/schema.sql`, `api/orders.js`, `api/onboarding.js`, `a
 
 **Impacto:** No revela credenciales ni cadenas de conexión, pero facilita a terceros conocer qué integraciones están configuradas y qué componentes están disponibles.
 
-**Recomendación:** Mantener una respuesta pública mínima (por ejemplo, estado general y versión no sensible) y reservar diagnósticos detallados para una ruta autenticada o un mecanismo de monitorización privado. Verificar antes si algún monitor externo depende del contrato actual.
+**Remediación parcial implementada:** `api/health.js` ahora devuelve únicamente `service` y un estado general (`online`/`degraded`) mediante `api/_lib/health-response.mjs`. Las banderas de integración, detalles de base de datos y conteos de agentes ya no forman parte del JSON público. Se añadieron pruebas unitarias del payload. **Pendiente:** confirmar que los monitores externos no dependan del contrato anterior y diseñar una ruta diagnóstica autenticada si hace falta.
 
 
 ### ORVIA-SEC-004 — Onboarding sin límite de creación por usuario
@@ -51,7 +51,7 @@ Revisión estática de `db/schema.sql`, `api/orders.js`, `api/onboarding.js`, `a
 
 **Impacto:** Si el usuario incluye información personal o confidencial en una pregunta que activa investigación, parte de ese texto podría transmitirse a un tercero. La revisión de código no establece qué retención o uso realiza el proveedor; eso depende de sus términos y configuración.
 
-**Recomendación:** Antes de enviar búsquedas, construir una consulta mínima derivada de entidades y términos necesarios, excluir datos personales, credenciales y texto libre innecesario, y advertir en la política de privacidad qué proveedores externos procesan consultas. Añadir pruebas con correos, teléfonos y cadenas con apariencia de secretos para verificar que no salen en la consulta. No asumir que truncar a 500 caracteres anonimiza el contenido.
+**Remediación parcial implementada:** `sanitizeResearchQuery()` limpia antes de la llamada patrones habituales de URLs, correos, números telefónicos, credenciales etiquetadas, claves `sk-` y JWT con forma habitual; además limita la consulta a 300 caracteres. Si quedan menos de tres caracteres, no se llama al proveedor. Se añadieron pruebas unitarias para estos casos. **Límites:** esto es minimización por patrones, no anonimización ni detección completa de datos sensibles; no detecta todos los nombres, direcciones, identificadores ni secretos no convencionales. Sigue pendiente la política de privacidad y una revisión de proveedores/retención.
 
 ### ORVIA-SEC-006 — Sin política visible de retención para tareas y actividad
 **Prioridad:** Media (privacidad / ciclo de vida de datos)  
@@ -114,8 +114,17 @@ Revisión estática de `db/schema.sql`, `api/orders.js`, `api/onboarding.js`, `a
 2. Implementar autorización RBAC en el servidor y pruebas unitarias/integración por rol.
 3. Identificar el rol efectivo de conexión Neon y diseñar RLS compatible con el backend.
 4. Preparar migración RLS y pruebas de aislamiento con dos tenants; no ejecutarla sin aprobación.
-5. Reducir la información pública de `/api/health` después de verificar dependencias de monitorización.
+5. Confirmar dependencias de monitorización tras la reducción de la respuesta pública de `/api/health`.
 6. Ejecutar pruebas en una base Preview aislada y revisar logs/errores antes de considerar cualquier despliegue.
+
+
+## Remediaciones parciales implementadas en la rama de seguridad
+- `api/_lib/research.js`: minimización por patrones y límite de 300 caracteres antes de transmitir consultas a Tavily.
+- `tests/research.test.mjs`: pruebas de correos, teléfonos, URLs, credenciales comunes, JWT y longitud.
+- `api/health.js` + `api/_lib/health-response.mjs`: el endpoint público solo devuelve servicio y estado general.
+- `tests/health-response.test.mjs`: pruebas que verifican que no se exponen los campos internos de integraciones, base de datos y agentes.
+- `package.json`: incorpora ambas suites al comando `npm run check`.
+- **Verificación local aislada:** 6 pruebas específicas pasaron (6/6). No se ejecutó la suite completa del repositorio ni un workflow de GitHub Actions; por tanto, el CI de la rama sigue sin verificación para estos commits.
 
 ## Estado
 Este documento registra hallazgos de auditoría estática. No aplica cambios a la base de datos, no modifica permisos reales, no altera producción y no afirma que ORVIA haya superado una auditoría independiente.
