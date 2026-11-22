@@ -69,6 +69,17 @@ Revisión estática de `db/schema.sql`, `api/orders.js`, `api/onboarding.js`, `a
 
 **Recomendación:** Definir presupuestos compartidos y persistentes por restaurante/usuario, topes diarios y mensuales, alertas, comportamiento al agotarse el presupuesto y controles del lado del proveedor. Implementar con transacciones atómicas y pruebas de concurrencia; no depender de memoria de una instancia serverless.
 
+
+### ORVIA-SEC-008 — Presupuesto persistente de IA diseñado, pero aún no conectado a las rutas
+**Prioridad:** Alta (control financiero / abuso de recursos)  
+**Evidencia:** Existen módulos para reservas persistentes (`model-reservation-service.mjs`, `model-reservations.mjs`, `postgres-model-reservation-repository.mjs`) y pruebas unitarias. Sin embargo, las rutas activas `api/agents.js` y `api/orchestrate.js` continúan usando `createModelBudget()`, un límite en memoria por solicitud. El repositorio PostgreSQL exige un ejecutor de transacciones con conexión dedicada y declara expresamente que no debe recibir la función HTTP de `neon()`. No se encontró conexión desde las rutas hacia el servicio de reservas ni una migración activa; el SQL de reservas está en `docs/sql/proposed_restaurant_model_cost_reservations_0.6.sql`.
+
+**Impacto:** La existencia de módulos y pruebas no significa que las solicitudes reales estén sujetas a una cuota mensual persistente. Las rutas activas tienen límites de admisión en `agent_tasks` y topes por ejecución, pero no aplican aún el saldo compartido de presupuesto de IA.
+
+**Recomendación:** Integrar el ciclo reservar → llamar proveedor → liquidar o marcar resultado desconocido → reconciliar, con idempotencia y transacciones PostgreSQL reales. Antes de conectarlo, verificar esquema, rol de aplicación, conexión/pool en Vercel, manejo de timeout ambiguo y pruebas concurrentes con PostgreSQL real. No activar una migración ni cambiar la conexión de producción sin revisión y autorización.
+
+**Estado de pruebas:** Las pruebas de concurrencia consultadas utilizan un repositorio en memoria serializado para modelar el contrato. Las pruebas del repositorio PostgreSQL utilizan un harness simulado que responde a consultas; no son pruebas contra Neon/PostgreSQL real. No se debe describir este control como validado en producción.
+
 ## Controles positivos observados
 - Las rutas de pedidos y agentes verifican el token Clerk y comprueban membresía del restaurante.
 - Las consultas revisadas de pedidos y coordinación de agentes filtran por `restaurant_id`.
