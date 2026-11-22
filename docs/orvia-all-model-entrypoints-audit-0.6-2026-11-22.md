@@ -18,9 +18,9 @@ Por tanto, los límites de `api/orchestrate.js` no cubren todas las entradas al 
 
 ## Avance de implementación en la rama de trabajo
 
-En el commit `4653a608c215e233f175f89c555f267cfbaa5f30`, `api/agents.js` ya utiliza el límite local de una llamada por solicitud, el máximo de 520 tokens de salida, y el registro normalizado de uso por agente. Guarda el resumen de presupuesto y consumo en `agent_tasks.result`, sin almacenar prompts dentro del ledger. El límite de caracteres se aplica antes de enviar el prompt al Gateway.
+En commits posteriores, `api/agents.js` utiliza el límite local de una llamada por solicitud, el máximo de 520 tokens de salida y el registro normalizado de uso por agente. Guarda el resumen de presupuesto y consumo en `agent_tasks.result`, sin almacenar prompts dentro del ledger. La reserva de caracteres usa ahora exactamente el mismo mensaje de sistema que se envía al Gateway (commit `fda3f96cf047f389f15c39eeeb0875f4760ab89f`).
 
-La validación GitHub Actions run #92 ejecutó `npm run check`: sintaxis correcta y 18 pruebas aprobadas, 0 fallidas.
+La validación GitHub Actions run #92 aprobó 18 pruebas en un commit anterior. El commit `fda3f96` y el posterior esquema SQL propuesto aún no tienen una ejecución de CI confirmada en el registro consultado.
 
 Esto solo cierra la brecha de límites por solicitud y trazabilidad de uso. No conecta el presupuesto mensual monetario a `api/agents.js` ni a `api/orchestrate.js`, no realiza reservas de saldo compartido y no evita por sí solo que varias solicitudes simultáneas excedan un presupuesto mensual. El ledger en `agent_tasks.result` sigue siendo telemetría, no un libro contable autoritativo.
 
@@ -41,3 +41,10 @@ La configuración leída del proyecto muestra Node.js 26.x y `framework: null`. 
 ## Límites de esta auditoría
 
 Este documento no implementa cambios de código, no modifica el esquema ni los datos de Neon, no toca secretos ni variables de entorno, no cambia facturación, no activa modelos, no ejecuta llamadas de IA y no despliega a producción.
+
+
+## Propuesta de esquema económico preparada
+
+Se añadió `docs/sql/proposed_restaurant_model_cost_reservations_0.6.sql` en el commit `47402fb4906bdc424d28ac328ae6461b62214caf`. Define tablas separadas para presupuestos por restaurante/periodo y reservas de coste, con importes enteros micro-USD, límites de rango, estados, idempotencia, claves foráneas restrictivas e índices de reconciliación.
+
+Es únicamente una propuesta versionada en Git: **no se ejecutó** contra Neon. Todavía no implementa la lógica transaccional de reserva/liquidación ni el catálogo de tarifas. El presupuesto mensual sigue desconectado de las rutas. No debe integrarse ni aplicarse sin revisión de seguridad, aprobación del titular adulto de las cuentas facturables y pruebas en una base aislada.
