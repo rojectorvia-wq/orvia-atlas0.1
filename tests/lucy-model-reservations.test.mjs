@@ -131,3 +131,27 @@ test("non-settled transitions cannot carry an actual cost", () => {
     actualMicrousd: 12
   }), /only valid when settling/);
 });
+
+test("settlement records confirmed spend even when other pending reservations now exceed the budget", () => {
+  const settled = settleBudget({
+    limitMicrousd: 500,
+    spentMicrousd: 100,
+    reservedMicrousd: 450,
+    reservationMicrousd: 100,
+    actualMicrousd: 300
+  });
+  assert.deepEqual(settled, {
+    nextSpentMicrousd: 400,
+    nextReservedMicrousd: 350,
+    overBudget: true,
+    reservationOverrun: true
+  });
+  const next = reserveBudget({
+    limitMicrousd: 500,
+    spentMicrousd: settled.nextSpentMicrousd,
+    reservedMicrousd: settled.nextReservedMicrousd,
+    amountMicrousd: 1,
+    budgetStatus: "active"
+  });
+  assert.equal(next.allowed, false);
+});
