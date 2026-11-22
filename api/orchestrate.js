@@ -194,10 +194,14 @@ export default async function handler(req, res) {
     if (!created.length) return json(res, 429, { code: "TEAM_RATE_LIMIT", error: "Alcanzaste el límite de coordinaciones. Espera unos minutos." });
     const taskId = created[0].id;
 
-    const researchDecision = await decideResearchNeed({ token, model, message });
-    const research = await researchWeb(message, researchDecision);
-    const researchContext = research.sources.length ? research.sources : [];
+    let researchDecision;
+    let research;
+    let researchContext = [];
     try {
+      // Keep research inside the guarded block so failures mark the reserved task as failed.
+      researchDecision = await decideResearchNeed({ token, model, message });
+      research = await researchWeb(message, researchDecision);
+      researchContext = research.sources.length ? research.sources : [];
       const specialistResults = await Promise.all(selected.map(async id => {
         const agent = TEAM[id];
         const result = await askModel({
