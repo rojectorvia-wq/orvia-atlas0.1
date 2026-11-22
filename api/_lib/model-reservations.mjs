@@ -65,6 +65,9 @@ export function settleBudget({ spentMicrousd, reservedMicrousd, reservationMicro
   if (reservation > reserved) throw new RangeError("reservation exceeds reserved balance");
   const nextSpentMicrousd = add(spent, actual, "spentMicrousd");
   const nextReservedMicrousd = reserved - reservation;
+  if (nextReservedMicrousd > limit) {
+    throw new RangeError("remaining reservations exceed budget limit");
+  }
   return {
     nextSpentMicrousd,
     nextReservedMicrousd,
@@ -93,11 +96,16 @@ const transitions = {
 };
 
 /** Enforces a one-way lifecycle; unknown stays reserved for reconciliation. */
-export function transitionReservation({ currentStatus, nextStatus, actualMicrousd }) {
+export function transitionReservation({ currentStatus, nextStatus, actualMicrousd, providerOutcome }) {
   if (!Object.hasOwn(transitions, currentStatus) || !Object.hasOwn(transitions, nextStatus)) {
     throw new TypeError("reservation status is invalid");
   }
-  if (!transitions[currentStatus].has(nextStatus)) {
+  const ordinaryTransition = transitions[currentStatus].has(nextStatus);
+  const confirmedReconciliation =
+    currentStatus === "unknown" &&
+    ((nextStatus === "settled" && providerOutcome === "processed") ||
+     (nextStatus === "released" && providerOutcome === "not_processed"));
+  if (!ordinaryTransition && !confirmedReconciliation) {
     throw new Error(`invalid reservation transition: ${currentStatus} -> ${nextStatus}`);
   }
   if (nextStatus === "settled") {
