@@ -216,7 +216,7 @@ export default async function handler(req, res) {
           user: reviewInput
         })
       ]);
-      const review = { answer: "VERA — Seguridad y prevención\\n" + veraReview.answer + "\n\nMAX — Calidad y pruebas\\n" + maxReview.answer };
+      const review = { answer: "VERA — Seguridad y prevención\n" + veraReview.answer + "\n\nMAX — Calidad y pruebas\n" + maxReview.answer };
 
       const knowledgeReview = await reviewResearchForKnowledge({ token, model, message, sources: researchContext, budget: modelBudget, usageLedger: modelUsage });
       let knowledgeSaved = false;
