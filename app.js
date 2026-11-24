@@ -356,7 +356,7 @@
       const response=await fetch("/api/orchestrate",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({restaurantId:activeRestaurantId,message})});
       const data=await response.json();
       if(!response.ok) throw new Error(data.error || "No se pudo coordinar al equipo.");
-      reply.textContent=data.answer+"\\n\\nEquipo participante: "+data.participatingAgents.join(", ")+".\\n\\nAuditoría LEX: "+(data.qualityReview||"No se recibió revisión de VERA y MAX.")+"\\n\\nNinguna acción externa o cambio de datos fue ejecutado.";
+      reply.textContent=data.answer+"\\n\\nEquipo participante: "+data.participatingAgents.join(", ")+".\\n\\nRevisión VERA y MAX: "+(data.qualityReview||"No se recibió revisión de VERA y MAX.")+"\\n\\nNinguna acción externa o cambio de datos fue ejecutado.";
       record("Equipo ORVIA coordinado","Participaron: "+data.participatingAgents.join(", "));
     }catch(error){reply.textContent=error.message || "No se pudo conectar con el equipo ORVIA.";}
     box.scrollTop=box.scrollHeight;
