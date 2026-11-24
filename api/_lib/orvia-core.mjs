@@ -15,7 +15,7 @@ export const ORVIA_AGENTS = Object.freeze({
 });
 
 const ROUTES = [
-  ["luz", /finanz|ingreso|venta|gasto|costo|precio|margen|rentabilidad|dinero|presupuesto|utilidad|cierre|caja/],
+  ["luz", /finanz|ingreso|\\bventas?\\b|gasto|costo|precio|margen|rentabilidad|dinero|presupuesto|utilidad|cierre|caja/],
   ["jote", /inventario|stock|existencia|ingrediente|insumo|desperdicio|merma|abastecimiento|proveedor|compra/],
   ["kike", /pedido|cocina|prepar|operaci|turno|demora|tiempo|servicio|producci|entrega/],
   ["xel", /marketing|publicidad|promoci|campana|redes|atraer|cliente nuevo|oferta/],
