@@ -46,20 +46,37 @@ La interfaz carga ClerkJS y presenta componentes de inicio de sesión y registro
 
 ## Equipo objetivo: once agentes
 
-Nombres definidos:
-- ORVIA LUCY
-- ORVIA LUZ
-- ORVIA JOTE
-- ORVIA KIKE
-- ORVIA XEL
-- ORVIA NANI
-- ORVIA MEMO
-- ORVIA LETI (ID interno jhoa)
-- ORVIA DARI
+## ORVIA AI CORE 0.7 — núcleo de coordinación
 
-Los agentes ocho y nueve son ORVIA LETI y ORVIA DARI, respectivamente. LETI conserva el rol de diagnóstico técnico; DARI mantiene la supervisión operativa. ORVIA LEX supervisa la calidad de los informes durante la coordinación y comunica su auditoría a Lucy. ORVIA MAX analiza tendencias y oportunidades empresariales.
+ORVIA AI CORE es la capa central de políticas, selección de especialistas, coordinación, seguridad y control de calidad. LUCY es la coordinadora conversacional del equipo; no es el cerebro central. El registro canónico vive en `api/_lib/orvia-core.mjs`, con reglas de enrutamiento y una política compartida para los agentes.
 
-La API ofrece consultas individuales y una coordinación multiagente en Preview. En `/api/orchestrate`, Lucy enruta la solicitud hacia hasta tres especialistas mediante reglas de selección, los consulta en paralelo, LEX audita los informes y Lucy entrega una síntesis con los hallazgos y la revisión de calidad. El endpoint lee solo agregados de pedidos, no nombres ni teléfonos de clientes. Se registran las tareas y eventos de auditoría. La coordinación requiere base de datos, autenticación, token de AI Gateway y modelo configurados; no se ha ejecutado aún una prueba de extremo a extremo con consumo de IA. No hay herramientas para modificar pedidos, inventario, dinero, cuentas o contactar clientes. La autonomía está limitada a análisis, delegación, revisión y síntesis; las acciones sensibles requieren aprobación humana.
+### Los once agentes
+
+1. **LUCY — Coordinación e inteligencia:** recibe solicitudes, coordina especialistas, gestiona alertas y sintetiza resultados.
+2. **LUZ — Finanzas:** movimientos, diferencias, cierres y resultados económicos.
+3. **JOTE — Inventario:** existencias, movimientos y necesidades de inventario.
+4. **KIKE — Pedidos y operaciones:** pedidos, preparación y funcionamiento operativo.
+5. **XEL — Oportunidades y promociones:** oportunidades comerciales y promociones.
+6. **NANI — Atención al cliente:** solicitudes, quejas y comunicación con clientes.
+7. **MEMO — Memoria y reportes:** historial autorizado, actividades e informes.
+8. **JHOA — Ingeniería y resolución de problemas:** diagnóstico técnico y propuestas de solución.
+9. **DARI — Supervisión y autonomía operativa:** supervisión de procesos, tareas, alertas y permisos.
+10. **VERA — Seguridad y prevención de errores:** revisión de riesgos, privacidad, permisos y prevención.
+11. **MAX — Calidad y pruebas:** consistencia, contradicciones, criterios de aceptación y planificación de pruebas.
+
+### Flujo de coordinación
+
+`POST /api/orchestrate` comprueba autenticación y membresía del restaurante, obtiene un resumen agregado de pedidos, selecciona hasta tres especialistas pertinentes y delega sus análisis en paralelo. Después realiza una revisión conjunta de VERA y MAX, permite a VERA validar resúmenes de investigación externa y LUCY prepara la respuesta final. Las tareas y el uso del modelo quedan registrados. La respuesta identifica a los agentes participantes.
+
+El flujo conserva límites de llamadas y tokens, control de frecuencia, timeout, aislamiento por restaurante y exclusión de nombres y teléfonos de clientes del contexto enviado al modelo. Los agentes no pueden cambiar pedidos, inventario, dinero, cuentas, infraestructura ni contactar clientes. Las acciones sensibles requieren aprobación humana.
+
+### Estado y límites
+
+La rama implementa el núcleo de coordinación y el registro de agentes; **no significa que los once agentes estén ya operativos en producción**. La llamada conjunta de VERA y MAX es una revisión del modelo con dos perspectivas y dos registros de tarea; no son dos procesos independientes ni una garantía de cero errores. MAX puede revisar resultados y proponer pruebas, mientras que las pruebas automatizadas reales deben ejecutarse en CI. La coordinación real requiere autenticación, base de datos aislada de Preview y AI Gateway configurados. No se ha validado aún una ejecución completa con modelo y base de datos conectados.
+
+Para bases existentes, aplicar `db/migrations/2026-11-24-orvia-ai-core-0.7.sql` únicamente en la base aislada de Preview/desarrollo después del esquema base. No ejecutar esta migración en producción.
+
+La API ofrece consultas individuales mediante `/api/agents` y coordinación multiagente mediante `/api/orchestrate`. No hay herramientas para modificar pedidos, inventario, dinero, cuentas o contactar clientes. La autonomía está limitada a análisis, delegación, revisión y síntesis; las acciones sensibles requieren aprobación humana.
 
 ## Presentación aprobada
 
