@@ -85,6 +85,6 @@ CREATE INDEX IF NOT EXISTS lucy_research_fts_idx
 INSERT INTO agent_registry (id, display_name) VALUES
  ('lucy','ORVIA LUCY'),('luz','ORVIA LUZ'),('jote','ORVIA JOTE'),
  ('kike','ORVIA KIKE'),('xel','ORVIA XEL'),('nani','ORVIA NANI'),
- ('memo','ORVIA MEMO'),('jhoa','ORVIA LETI'),('dari','ORVIA DARI'),
- ('lex','ORVIA LEX'),('max','ORVIA MAX')
+ ('memo','ORVIA MEMO'),('jhoa','ORVIA JHOA'),('dari','ORVIA DARI'),
+ ('vera','ORVIA VERA'),('max','ORVIA MAX')
 ON CONFLICT (id) DO UPDATE SET display_name = EXCLUDED.display_name;
