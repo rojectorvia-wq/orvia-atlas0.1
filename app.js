@@ -190,7 +190,7 @@
       ["nani",/queja|reclamo|cliente|atencion|resena|experiencia|fidelizar/],
       ["memo",/tendencia|producto|horario|analisis|datos|competencia|demanda/],
       ["jhoa",/error|fallo|tecnico|sistema|problema|incidencia/],
-      ["max",/crecimiento|oportunidad|estrategia empresarial|rentabilidad|expandir/],
+      ["memo",/crecimiento|oportunidad|estrategia empresarial|rentabilidad|expandir/],
       ["dari",/supervision|riesgo|control|revision|incidente/],
       ["vera",/seguridad|privacidad|permiso|vulnerabilidad|prevencion/],
       ["max",/calidad|prueba|test|consistencia|contradiccion/]
