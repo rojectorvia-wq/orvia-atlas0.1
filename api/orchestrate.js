@@ -106,7 +106,7 @@ async function reviewResearchForKnowledge({ token, model, message, sources, budg
     }
     return { approved: true, summary: parsed.summary.trim().slice(0, 5000), reason: String(parsed.reason || "Aprobado por VERA.") };
   } catch {
-    return { approved: false, reason: "No se pudo completar la validación estructurada de LEX." };
+    return { approved: false, reason: "No se pudo completar la validación estructurada de VERA." };
   }
 }
 
@@ -191,6 +191,7 @@ export default async function handler(req, res) {
           token, model, budget: modelBudget, usageLedger: modelUsage, agentId: id, stage: "specialist",
           system: [
             "Eres un agente especialista dentro de ORVIA. Trabajas como parte de un equipo coordinado por LUCY.",
+            buildCorePolicy(),
             `Identidad: ${agent.name}. Rol: ${agent.role}. Alcance: ${agent.scope}`,
             "Comunícate en español con tono formal, natural y conversacional, como un consultor gastronómico experimentado. Evita frases robóticas, etiquetas repetitivas y respuestas telegráficas.",
             "Explica con claridad el razonamiento y ofrece recomendaciones concretas. Usa listas solo cuando ayuden; si falta un dato decisivo, formula una única pregunta precisa.",
@@ -233,7 +234,8 @@ export default async function handler(req, res) {
       const final = await askModel({
         token, model, budget: modelBudget, usageLedger: modelUsage, agentId: "lucy", stage: "final_response",
         system: [
-          "Eres ORVIA LUCY, directora general y coordinadora de un restaurante. Hablas con el propietario en español formal, natural, fluido y ejecutivo; la conversación debe sentirse real, no como una respuesta automática.",
+          "Eres ORVIA LUCY, coordinadora de ORVIA AI CORE. Hablas con el propietario en español formal, natural, fluido y ejecutivo; la conversación debe sentirse real, no como una respuesta automática.",
+          buildCorePolicy(),
           "Escucha el contexto, responde directamente y demuestra criterio. Evita aperturas repetitivas como “solicitud recibida”, “he procesado tu petición” o “como IA”. No repitas la pregunta del propietario.",
           "Integra los informes de especialistas y las revisiones de seguridad de VERA y calidad de MAX en una respuesta única, práctica y priorizada. Explica qué está comprobado y qué requiere validación.",
           "Separa con naturalidad los hechos comprobados, las hipótesis y los datos que faltan. No finjas experiencia personal ni emociones. Si falta un dato decisivo, haz una sola pregunta concreta.",
@@ -248,7 +250,7 @@ export default async function handler(req, res) {
       await sql`INSERT INTO activity_log (restaurant_id, actor_user_id, event_type, detail) VALUES (${restaurantId}, ${user.userId}, 'agent.team.completed', ${JSON.stringify({ taskId, selectedAgents: selected })}::jsonb)`;
       return json(res, 200, {
         taskId, status: "completed", coordinator: TEAM.lucy.name,
-        participatingAgents: [...selected.map(id => TEAM[id].name), TEAM.vera.name, TEAM.lucy.name],
+        participatingAgents: [...selected.map(id => TEAM[id].name), TEAM.vera.name, TEAM.max.name, TEAM.lucy.name],
         specialistResults, qualityReviewTaskIds: reviewTasks.map(rows => rows[0].id), qualityReview: review.answer, answer: final.answer, research: { attempted: research.attempted, available: research.available, reason: research.reason, sources: research.sources.map(({ title, url, publishedDate }) => ({ title, url, publishedDate })), priorKnowledgeUsed: priorKnowledge.length, newKnowledgeSaved: knowledgeSaved, knowledgeReview: knowledgeReview.reason },
         modelUsage: modelUsage.snapshot(), modelUsageSummary: modelUsage.summary(),
         actionsExecuted: false, approvalRequiredForSensitiveActions: true
