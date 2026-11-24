@@ -15,6 +15,7 @@ on:
       - orvia-0.4-autonomia-preview
       - orvia-0.5-autopiloto
       - orvia-0.6-impulso
+      - feat/orvia-cost-guardrails-0.6
 
 jobs:
   validation:
