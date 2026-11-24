@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS agent_tasks (
 CREATE INDEX IF NOT EXISTS agent_tasks_restaurant_created_idx ON agent_tasks(restaurant_id, created_at DESC);
 
 
--- Memoria investigativa de LUCY: solo almacena resúmenes aprobados por LEX.
+-- Memoria investigativa de LUCY: solo almacena resúmenes aprobados por VERA. El nombre lex_review se conserva por compatibilidad histórica.
 -- Los registros siempre pertenecen a un restaurante y se consultan con su restaurant_id.
 CREATE TABLE IF NOT EXISTS lucy_research_knowledge (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS lucy_research_knowledge (
   sources JSONB NOT NULL DEFAULT '[]'::jsonb,
   lex_review TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'approved' CHECK (status IN ('approved','superseded')),
-  reviewed_by TEXT NOT NULL DEFAULT 'lex',
+  reviewed_by TEXT NOT NULL DEFAULT 'vera',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS lucy_research_restaurant_created_idx
