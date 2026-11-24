@@ -68,13 +68,13 @@ ORVIA AI CORE es la capa central de políticas, selección de especialistas, coo
 
 ### Flujo de coordinación
 
-`POST /api/orchestrate` comprueba autenticación y membresía del restaurante, obtiene un resumen agregado de pedidos, selecciona hasta tres especialistas pertinentes y delega sus análisis en paralelo. Después realiza una revisión conjunta de VERA y MAX, permite a VERA validar resúmenes de investigación externa y LUCY prepara la respuesta final. Las tareas y el uso del modelo quedan registrados. La respuesta identifica a los agentes participantes.
+`POST /api/orchestrate` comprueba autenticación y membresía del restaurante, obtiene un resumen agregado de pedidos, selecciona hasta tres especialistas pertinentes y delega sus análisis en paralelo. Después ejecuta revisiones independientes de VERA (seguridad) y MAX (calidad), permite a VERA validar resúmenes de investigación externa y LUCY prepara la respuesta final. Las tareas y el uso del modelo quedan registrados. La respuesta identifica a los agentes participantes.
 
 El flujo conserva límites de llamadas y tokens, control de frecuencia, timeout, aislamiento por restaurante y exclusión de nombres y teléfonos de clientes del contexto enviado al modelo. Los agentes no pueden cambiar pedidos, inventario, dinero, cuentas, infraestructura ni contactar clientes. Las acciones sensibles requieren aprobación humana.
 
 ### Estado y límites
 
-La rama implementa el núcleo de coordinación y el registro de agentes; **no significa que los once agentes estén ya operativos en producción**. La llamada conjunta de VERA y MAX es una revisión del modelo con dos perspectivas y dos registros de tarea; no son dos procesos independientes ni una garantía de cero errores. MAX puede revisar resultados y proponer pruebas, mientras que las pruebas automatizadas reales deben ejecutarse en CI. La coordinación real requiere autenticación, base de datos aislada de Preview y AI Gateway configurados. No se ha validado aún una ejecución completa con modelo y base de datos conectados.
+La rama implementa el núcleo de coordinación y el registro de agentes; **no significa que los once agentes estén ya operativos en producción**. VERA y MAX realizan llamadas independientes y generan registros separados; aun así, sus revisiones no garantizan cero errores. MAX puede revisar resultados y proponer pruebas, mientras que las pruebas automatizadas reales deben ejecutarse en CI. La coordinación real requiere autenticación, base de datos aislada de Preview y AI Gateway configurados. No se ha validado aún una ejecución completa con modelo y base de datos conectados.
 
 Para bases existentes, aplicar `db/migrations/2026-11-24-orvia-ai-core-0.7.sql` únicamente en la base aislada de Preview/desarrollo después del esquema base. No ejecutar esta migración en producción.
 
