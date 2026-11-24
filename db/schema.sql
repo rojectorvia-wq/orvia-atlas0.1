@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS agent_tasks (
 CREATE INDEX IF NOT EXISTS agent_tasks_restaurant_created_idx ON agent_tasks(restaurant_id, created_at DESC);
 
 
--- Memoria investigativa de LUCY: solo almacena resúmenes aprobados por LEX.
+-- Memoria investigativa de LUCY: solo almacena resúmenes aprobados por VERA. El nombre lex_review se conserva por compatibilidad histórica.
 -- Los registros siempre pertenecen a un restaurante y se consultan con su restaurant_id.
 CREATE TABLE IF NOT EXISTS lucy_research_knowledge (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS lucy_research_knowledge (
   sources JSONB NOT NULL DEFAULT '[]'::jsonb,
   lex_review TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'approved' CHECK (status IN ('approved','superseded')),
-  reviewed_by TEXT NOT NULL DEFAULT 'lex',
+  reviewed_by TEXT NOT NULL DEFAULT 'vera',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS lucy_research_restaurant_created_idx
@@ -85,6 +85,6 @@ CREATE INDEX IF NOT EXISTS lucy_research_fts_idx
 INSERT INTO agent_registry (id, display_name) VALUES
  ('lucy','ORVIA LUCY'),('luz','ORVIA LUZ'),('jote','ORVIA JOTE'),
  ('kike','ORVIA KIKE'),('xel','ORVIA XEL'),('nani','ORVIA NANI'),
- ('memo','ORVIA MEMO'),('jhoa','ORVIA LETI'),('dari','ORVIA DARI'),
- ('lex','ORVIA LEX'),('max','ORVIA MAX')
+ ('memo','ORVIA MEMO'),('jhoa','ORVIA JHOA'),('dari','ORVIA DARI'),
+ ('vera','ORVIA VERA'),('max','ORVIA MAX')
 ON CONFLICT (id) DO UPDATE SET display_name = EXCLUDED.display_name;

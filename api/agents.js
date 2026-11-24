@@ -5,20 +5,9 @@ import { json, methodNotAllowed } from "./_lib/http.js";
 import { researchWeb } from "./_lib/research.js";
 import { createModelBudget } from "./_lib/model-budget.mjs";
 import { createModelUsageLedger, normalizeModelUsage } from "./_lib/model-usage.mjs";
+import { ORVIA_AGENTS, buildCorePolicy } from "./_lib/orvia-core.mjs";
 
-const AGENTS = {
-  lucy: { name: "ORVIA LUCY", role: "Directora general y coordinadora", scope: "Comprender la solicitud, organizar prioridades y orientar al propietario." },
-  luz: { name: "ORVIA LUZ", role: "Analista financiera", scope: "Analizar ingresos, gastos, costos, márgenes y rentabilidad usando solo datos aportados. No inventar cifras." },
-  jote: { name: "ORVIA JOTE", role: "Especialista de inventario", scope: "Orientar sobre existencias, ingredientes, desperdicio, rotación y abastecimiento. No modificar inventario." },
-  kike: { name: "ORVIA KIKE", role: "Especialista de operaciones", scope: "Analizar pedidos, preparación, cocina, turnos y operación diaria. No cambiar estados ni ejecutar acciones." },
-  xel: { name: "ORVIA XEL", role: "Especialista de marketing", scope: "Proponer campañas, promociones y comunicación comercial. No publicar ni contactar clientes." },
-  nani: { name: "ORVIA NANI", role: "Especialista de atención al cliente", scope: "Ayudar a redactar respuestas respetuosas y analizar consultas o quejas. No enviar mensajes ni revelar datos." },
-  memo: { name: "ORVIA MEMO", role: "Analista de inteligencia comercial", scope: "Analizar tendencias y oportunidades solo a partir de datos disponibles. Distinguir hechos de hipótesis." },
-  jhoa: { name: "ORVIA LETI", role: "Analista de diagnóstico técnico", scope: "Analizar errores descritos y proponer comprobaciones seguras. No cambiar código ni infraestructura." },
-  dari: { name: "ORVIA DARI", role: "Supervisora operativa", scope: "Revisar riesgos, coherencia y pendientes descritos. Escalar decisiones sensibles al propietario." },
-  lex: { name: "ORVIA LEX", role: "Supervisora de calidad de agentes", scope: "Revisar resultados de otros agentes, detectar contradicciones, errores, datos sin respaldo y recomendaciones inseguras. Informar a Lucy y nunca ocultar fallos." },
-  max: { name: "ORVIA MAX", role: "Analista de inteligencia empresarial", scope: "Analizar tendencias, rentabilidad, desempeño y oportunidades de crecimiento con datos proporcionados. No inventar métricas." }
-};
+const AGENTS = ORVIA_AGENTS;
 
 const MAX_MESSAGE_LENGTH = 1600;
 const MAX_OUTPUT_TOKENS = 520;
@@ -47,6 +36,7 @@ async function gatewayAuth() {
 function buildAgentSystemPrompt(agent) {
   return [
     "Eres un agente especializado de ORVIA, una plataforma de inteligencia para restaurantes.",
+    buildCorePolicy(),
     `Identidad: ${agent.name}. Rol: ${agent.role}.`,
     `Alcance: ${agent.scope}`,
     "Responde en español con tono formal, natural, fluido y conversacional. Debes sonar como un especialista humano-profesional, no como un sistema automático.",
@@ -126,7 +116,7 @@ export default async function handler(req, res) {
     if (!access.length) return json(res, 403, { error: "No tienes acceso a este restaurante." });
 
     if (req.method === "GET") {
-      const agents = await sql`SELECT id, display_name AS name, status, capabilities, updated_at FROM agent_registry ORDER BY id`;
+      const agents = await sql`SELECT id, display_name AS name, status, capabilities, updated_at FROM agent_registry WHERE status <> 'paused' ORDER BY id`;
       return json(res, 200, {
         agents,
         executionEnabled: Boolean(await gatewayAuth() && process.env.AI_GATEWAY_MODEL),

@@ -7,12 +7,15 @@ on:
       - orvia-0.4-autonomia-preview
       - orvia-0.5-autopiloto
       - orvia-0.6-impulso
+      - feat/orvia-cost-guardrails-0.6
+      - feat/orvia-ai-core-0.7
   pull_request:
     branches:
       - orvia-0.2-nebula
       - orvia-0.4-autonomia-preview
       - orvia-0.5-autopiloto
       - orvia-0.6-impulso
+      - feat/orvia-cost-guardrails-0.6
 
 jobs:
   validation:
