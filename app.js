@@ -10,10 +10,10 @@
     ["ORVIA XEL","Director de marketing","Propone promociones, campañas y publicidad para atraer clientes.","xel"],
     ["ORVIA NANI","Directora de atención al cliente","Gestiona consultas, solicitudes, quejas y seguimiento de la experiencia del cliente.","nani"],
     ["ORVIA MEMO","Director de inteligencia comercial","Analiza tendencias, productos populares, horarios y oportunidades de crecimiento.","memo"],
-    ["ORVIA LETI","Diagnóstico técnico","Analiza errores, revisa incidencias y prepara posibles correcciones; los cambios sensibles requieren autorización.","jhoa"],
+    ["ORVIA JHOA","Ingeniería y resolución de problemas","Diagnostica fallos técnicos, analiza causas y propone soluciones verificables.","jhoa"],
     ["ORVIA DARI","Supervisión operativa","Revisa tareas, resultados y alertas; escala a Lucy los asuntos que requieren intervención humana.","dari"],
-    ["ORVIA LEX","Control de calidad de agentes","Verifica resultados, detecta inconsistencias y registra incidentes para Lucy.","lex"],
-    ["ORVIA MAX","Inteligencia empresarial","Analiza ventas, rentabilidad, tendencias y oportunidades de crecimiento con datos disponibles.","max"]
+    ["ORVIA VERA","Seguridad y prevención de errores","Revisa riesgos, privacidad, permisos y posibles fallos antes de recomendar acciones.","vera"],
+    ["ORVIA MAX","Calidad y pruebas","Comprueba consistencia, detecta contradicciones y define pruebas y criterios de aceptación.","max"]
   ];
   const state = loadState();
   let toastTimer;
@@ -175,8 +175,8 @@
   }
   function demoAgentReply(agentId,message){
     if(agentId==="lucy") return demoTeamReply(message);
-    const names={lucy:"LUCY",luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"LETI",dari:"DARI",lex:"LEX",max:"MAX"};
-    const tips={luz:"Revisaría ventas, costos y margen por producto antes de recomendar cambios de precio.",jote:"Conviene comparar existencias actuales con el consumo promedio y definir alertas de reposición.",kike:"Analizaría tiempos de preparación, pedidos pendientes y distribución de tareas del turno.",xel:"Propondría una promoción medible y probaría su resultado antes de ampliar la campaña.",nani:"Clasificaría la consulta del cliente, respondería con empatía y registraría el motivo para detectar patrones.",memo:"Compararía productos más solicitados, franjas horarias y tendencias de ventas disponibles.",jhoa:"Revisaría el estado del sistema, reproduciría el inconveniente y documentaría el diagnóstico.",lex:"Validaría la coherencia de los resultados, señalaría errores y los escalaría a Lucy.",max:"Analizaría ventas, márgenes y oportunidades de crecimiento con los datos disponibles.",dari:"Verificaría la coherencia de los datos, los riesgos y qué decisiones necesitan autorización.",lucy:"Coordinaría a los especialistas adecuados y resumiría sus hallazgos en un plan priorizado."};
+    const names={lucy:"LUCY",luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"JHOA",dari:"DARI",vera:"VERA",max:"MAX"};
+    const tips={luz:"Revisaría ventas, costos y margen por producto antes de recomendar cambios de precio.",jote:"Conviene comparar existencias actuales con el consumo promedio y definir alertas de reposición.",kike:"Analizaría tiempos de preparación, pedidos pendientes y distribución de tareas del turno.",xel:"Propondría una promoción medible y probaría su resultado antes de ampliar la campaña.",nani:"Clasificaría la consulta del cliente, respondería con empatía y registraría el motivo para detectar patrones.",memo:"Compararía productos más solicitados, franjas horarias y tendencias de ventas disponibles.",jhoa:"Revisaría el estado del sistema, reproduciría el inconveniente y documentaría el diagnóstico.",vera:"Revisaría riesgos de seguridad, privacidad, permisos y posibles fallos antes de recomendar una acción.",max:"Comprobaría la consistencia de los resultados, detectaría contradicciones y propondría pruebas verificables.",dari:"Verificaría la coherencia de los datos, los riesgos y qué decisiones necesitan autorización.",lucy:"Coordinaría a los especialistas adecuados y resumiría sus hallazgos en un plan priorizado."};
     return "【SIMULACIÓN DE DEMOSTRACIÓN】\\n\\n"+names[agentId]+": "+(tips[agentId]||tips.lucy)+"\\n\\nSolicitud recibida: "+message+"\\n\\nEsta respuesta es una simulación con información ficticia de Bistró Bahía Azul; no consulta ni modifica sistemas reales.";
   }
   function demoTeamReply(message){
@@ -191,11 +191,13 @@
       ["memo",/tendencia|producto|horario|analisis|datos|competencia|demanda/],
       ["jhoa",/error|fallo|tecnico|sistema|problema|incidencia/],
       ["max",/crecimiento|oportunidad|estrategia empresarial|rentabilidad|expandir/],
-      ["dari",/supervision|riesgo|control|revision|incidente/]
+      ["dari",/supervision|riesgo|control|revision|incidente/],
+      ["vera",/seguridad|privacidad|permiso|vulnerabilidad|prevencion/],
+      ["max",/calidad|prueba|test|consistencia|contradiccion/]
     ];
     for(const [id,pattern] of rules) if(pattern.test(q)) selected.add(id);
     if(!selected.size) ["memo","kike"].forEach(id=>selected.add(id));
-    const labels={luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"LETI",dari:"DARI",max:"MAX"};
+    const labels={luz:"LUZ",jote:"JOTE",kike:"KIKE",xel:"XEL",nani:"NANI",memo:"MEMO",jhoa:"JHOA",dari:"DARI",vera:"VERA",max:"MAX"};
     const advice={
       xel:"XEL propone: 1) elegir un producto atractivo con margen y stock comprobados; 2) lanzar una oferta sencilla en una franja de baja demanda; 3) publicar una pieza clara en Instagram y WhatsApp Business; 4) medir clientes nuevos, pedidos adicionales, costo por cliente y margen final. No recomiendo descuentos sin revisar costos.",
       luz:"LUZ revisaría el costo real del producto, margen de contribución, presupuesto máximo y punto de equilibrio antes de aprobar una promoción.",
@@ -203,13 +205,14 @@
       kike:"KIKE revisaría capacidad de cocina, tiempos de preparación, horarios y coordinación del personal antes de atraer más pedidos.",
       nani:"NANI prepararía respuestas para consultas frecuentes y un seguimiento respetuoso para convertir consultas en visitas, sin enviar mensajes sin autorización.",
       memo:"MEMO compararía días y horas de mayor y menor demanda, productos populares y tendencias. Se necesitan datos históricos para afirmar qué horario conviene.",
-      jhoa:"LETI revisaría incidencias técnicas descritas y documentaría una comprobación segura; no modificaría el sistema automáticamente.",
+      jhoa:"JHOA revisaría incidencias técnicas descritas y documentaría una comprobación segura; no modificaría el sistema automáticamente.",
       dari:"DARI revisaría riesgos operativos, tareas pendientes y decisiones que requieren aprobación.",
-      max:"MAX evaluaría oportunidades de crecimiento y compararía el resultado de la campaña con metas medibles, sin inventar ventas."
+      vera:"VERA revisaría seguridad, privacidad, permisos y riesgos de error antes de cualquier acción.",
+      max:"MAX comprobaría la consistencia de las recomendaciones y propondría pruebas para verificar sus resultados."
     };
     return "【ORVIA · COORDINACIÓN DE DEMOSTRACIÓN】\n\nLUCY: Entendí tu solicitud y asigné el análisis a "+[...selected].map(id=>labels[id]).join(", ")+".\n\n"+
       [...selected].map(id=>labels[id]+": "+advice[id]).join("\n\n")+
-      "\n\nLEX: Auditoría de calidad. Las recomendaciones son propuestas; deben contrastarse con costos, inventario y datos reales antes de aplicarse. No se detecta ni corrige un error de producción desde esta maqueta.\n\n"+
+      "\n\nVERA: Revisión de seguridad y riesgos. MAX: revisión de calidad y pruebas. Las recomendaciones deben contrastarse con datos reales; esta maqueta no garantiza ausencia de errores ni corrige sistemas en producción.\n\n"+
       "LUCY: Mi recomendación es empezar con una prueba pequeña, definir presupuesto y responsable, medir resultados y pedir tu aprobación antes de publicar o gastar.\n\n"+
       "Nota: respuesta simulada para Bistró Bahía Azul; no se publicaron campañas ni se contactó a clientes.";
   }
@@ -335,7 +338,7 @@
     if(/tendencia|popular|horario|crecimiento|comercial/.test(q)) return "MEMO analizará tendencias, productos populares, horarios y oportunidades de crecimiento. Todavía no tiene datos reales para analizar.";
     if(/error|fallo|técnico|tecnico|problema/.test(q)) return "JHOA está previsto para diagnóstico técnico y análisis de incidencias. Preparará posibles correcciones, pero no aplicará cambios sensibles sin autorización.";
     if(/supervisión|supervision|alerta|revisión|revision/.test(q)) return "DARI supervisará tareas, resultados y alertas, y escalará a Lucy los asuntos que necesiten intervención humana.";
-    if(/agente|equipo|quién|quien/.test(q)) return "El equipo previsto tiene once agentes: Lucy coordina; LUZ lleva finanzas; JOTE, inventario; KIKE, operación; XEL, marketing; NANI, atención al cliente; MEMO, inteligencia comercial; LETI (antes JHOA), diagnóstico técnico; DARI, supervisión operativa; LEX, control de calidad; y MAX, inteligencia empresarial. La simulación no representa ejecución real de operaciones.";
+    if(/agente|equipo|quién|quien/.test(q)) return "El equipo previsto tiene once agentes: Lucy coordina; LUZ lleva finanzas; JOTE, inventario; KIKE, operación; XEL, marketing; NANI, atención al cliente; MEMO, inteligencia comercial; JHOA, ingeniería y resolución de problemas; DARI, supervisión y autonomía operativa; VERA, seguridad y prevención de errores; y MAX, calidad y pruebas. La simulación no representa ejecución real de operaciones.";
     return "Te he leído. En esta maqueta puedo explicarte los módulos y las responsabilidades del equipo ORVIA. Aún no tengo conexión con inteligencia artificial ni acceso a datos reales, así que no puedo ejecutar esa solicitud todavía.";
   }
   $("#lucy-toggle").addEventListener("click",()=>$("#lucy-panel").classList.toggle("open"));
@@ -353,7 +356,7 @@
       const response=await fetch("/api/orchestrate",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({restaurantId:activeRestaurantId,message})});
       const data=await response.json();
       if(!response.ok) throw new Error(data.error || "No se pudo coordinar al equipo.");
-      reply.textContent=data.answer+"\\n\\nEquipo participante: "+data.participatingAgents.join(", ")+".\\n\\nAuditoría LEX: "+(data.qualityReview||"No se recibió revisión de calidad.")+"\\n\\nNinguna acción externa o cambio de datos fue ejecutado.";
+      reply.textContent=data.answer+"\\n\\nEquipo participante: "+data.participatingAgents.join(", ")+".\\n\\nAuditoría LEX: "+(data.qualityReview||"No se recibió revisión de VERA y MAX.")+"\\n\\nNinguna acción externa o cambio de datos fue ejecutado.";
       record("Equipo ORVIA coordinado","Participaron: "+data.participatingAgents.join(", "));
     }catch(error){reply.textContent=error.message || "No se pudo conectar con el equipo ORVIA.";}
     box.scrollTop=box.scrollHeight;
@@ -400,7 +403,7 @@
     main.append(section);
   });
   const agentRuntime = Object.fromEntries(agents.map(a=>[a[3],{status:"En espera",task:"Disponible para una tarea de demostración",runs:0}]));
-  const agentSequence = ["lucy","luz","jote","kike","xel","nani","memo","jhoa","dari","lex","max"];
+  const agentSequence = ["lucy","luz","jote","kike","xel","nani","memo","jhoa","dari","vera","max"];
   let pulseIndex=0;
   let autopilotStarted=false;
   let autopilotStepTimer=null;
