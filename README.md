@@ -1,4 +1,6 @@
-# ORVIA 0.6 — Impulso
+# ORVIA 0.7 — AI Core
+
+Esta rama continúa la base funcional de ORVIA 0.6 y añade el núcleo central de coordinación.
 
 **ORVIA** significa **Organización, Rendimiento, Ventas, Inteligencia y Automatización**. Plataforma de gestión e inteligencia operativa para restaurantes.
 
@@ -24,7 +26,7 @@ La interfaz web estática existente sigue siendo una demostración local: sus pe
 - `GET /api/orders?restaurantId=...`: consulta pedidos de un restaurante autorizado.
 - `POST /api/orders`: crea pedidos con validación de datos, control de membresía y registro de auditoría en una sola transacción.
 - `PATCH /api/orders`: actualiza el estado de un pedido con control de membresía y registra el cambio de forma atómica.
-- `GET /api/agents?restaurantId=...`: muestra el registro de los once agentes para un miembro autorizado.\n- `POST /api/agents`: ejecuta una consulta de análisis con el agente seleccionado mediante AI Gateway, registra la tarea y su resultado en `agent_tasks`, y deja auditoría. No permite ejecutar acciones sobre pedidos, inventario, dinero ni clientes.\n- `POST /api/orchestrate`: Lucy selecciona hasta tres especialistas según la solicitud, delega análisis en paralelo, LEX audita la calidad de los informes y Lucy sintetiza una respuesta. Usa un resumen agregado de pedidos sin nombres de clientes. Límite de dos coordinaciones por usuario y restaurante cada diez minutos.\n- `GET /api/onboarding`: devuelve los restaurantes a los que pertenece el usuario autenticado; `POST /api/onboarding` crea un espacio y su membresía de propietario.
+- `GET /api/agents?restaurantId=...`: muestra el registro de los once agentes para un miembro autorizado.\n- `POST /api/agents`: ejecuta una consulta de análisis con el agente seleccionado mediante AI Gateway, registra la tarea y su resultado en `agent_tasks`, y deja auditoría. No permite ejecutar acciones sobre pedidos, inventario, dinero ni clientes.\n- `POST /api/orchestrate`: ORVIA AI CORE selecciona hasta tres especialistas según la solicitud, delega análisis en paralelo, VERA y MAX revisan seguridad y calidad, y LUCY sintetiza una respuesta. Usa un resumen agregado de pedidos sin nombres de clientes. Límite de dos coordinaciones por usuario y restaurante cada diez minutos.\n- `GET /api/onboarding`: devuelve los restaurantes a los que pertenece el usuario autenticado; `POST /api/onboarding` crea un espacio y su membresía de propietario.
 
 ## Configuración requerida
 
@@ -102,9 +104,9 @@ Cada entrega debe tener número y nombre. Esta entrega es **ORVIA 0.6 — Impuls
 
 ## ORVIA 0.6 — Impulso: cambios de esta rama
 
-- El equipo visual pasa a once agentes. El nombre visible LETI cambia a **LETI**; se conserva el identificador técnico interno `jhoa` para evitar romper referencias existentes. **DARI no cambia**.
-- **LEX** audita los informes generados durante una coordinación multiagente y entrega su revisión a Lucy. No es un monitor continuo en segundo plano ni puede reparar código o ejecutar acciones por sí solo.
-- **MAX** aporta análisis empresarial sobre los datos que se le proporcionen.
+- El equipo canónico se compone de LUCY, LUZ, JOTE, KIKE, XEL, NANI, MEMO, JHOA, DARI, VERA y MAX. Se conserva el identificador técnico `jhoa` para el agente JHOA.
+- **VERA** revisa seguridad y riesgos; **MAX** revisa calidad, consistencia y criterios de prueba. Sus revisiones no son una garantía de cero errores ni un monitor continuo.
+- **MEMO** organiza memoria y reportes; **MAX** comprueba consistencia y prepara criterios de prueba.
 - La maqueta acelera la cadencia de la simulación: el ciclo de cocina avanza cada 4,5 segundos y genera pedidos ficticios cada 18 segundos. El ciclo visual de agentes se distribuye más rápido.
 - La biblioteca base se amplía a 1.440 preguntas e intenciones indexadas en catorce áreas gastronómicas y empresariales. Son preguntas e intenciones de referencia, no hechos verificados ni datos propietarios de cadenas.
 - Se mantiene el modo demostración. No se publican promociones, no se contacta a clientes y no se ejecutan operaciones reales.
@@ -118,7 +120,7 @@ La rama `orvia-0.6-impulso` es de Preview/desarrollo. No se fusiona con `main` n
 
 - La biblioteca local pasa a 1.440 preguntas e intenciones de referencia en catorce áreas, con nuevas categorías de gastronomía internacional, técnicas culinarias, diseño de menú, modelos de cadenas, hospitalidad y abastecimiento sostenible. El propietario no necesita alimentar esta biblioteca manualmente: sus contenidos base se amplían desde el desarrollo.
 - Lucy responde con una voz formal, natural, fluida y ejecutiva; evita fórmulas robóticas, explica el criterio de sus recomendaciones y reconoce los datos que faltan.
-- Los prompts del motor de coordinación y de consultas individuales instruyen a los agentes para comunicarse en español profesional y conversacional. LEX mantiene su auditoría de calidad.
+- Los prompts del motor de coordinación y de consultas individuales instruyen a los agentes para comunicarse en español profesional y conversacional. VERA y MAX revisan riesgos, calidad y consistencia.
 - Esta ampliación no significa que Lucy conozca todos los restaurantes del mundo ni sus datos internos o actuales. La biblioteca contiene guías e intenciones generales; los datos particulares y vigentes deben verificarse con fuentes autorizadas.
 
 
@@ -127,6 +129,6 @@ La rama `orvia-0.6-impulso` es de Preview/desarrollo. No se fusiona con `main` n
 - Se añade `api/_lib/research.js`, un módulo de búsqueda externa opcional mediante Tavily. En consultas que parecen requerir información actual, normativa, específica de cadenas o investigación solicitada, Lucy puede recuperar hasta cinco resultados.
 - Requiere configurar `TAVILY_API_KEY` como secreto del entorno Preview de Vercel. Si falta, Lucy sigue respondiendo con su conocimiento disponible y el backend informa que la búsqueda externa no está habilitada; no afirma haber investigado.
 - Las páginas recuperadas se entregan al modelo como contenido externo no confiable. Lucy debe contrastar la evidencia, ignorar instrucciones insertadas en páginas y citar título/URL cuando use información de ellas. La respuesta API devuelve metadatos de las fuentes.
-- Las investigaciones que LEX aprueba pueden guardarse como resúmenes breves con consulta, referencias y motivo de validación en `lucy_research_knowledge`, aislados por restaurante. Lucy puede recuperar hasta cuatro resúmenes pertinentes en futuras coordinaciones. No se copian páginas completas ni se entrena o modifica el modelo.
-- La validación automática de LEX es un filtro de calidad, no una garantía absoluta de verdad. Las respuestas deben seguir mostrando fuentes y advertir cuando la evidencia sea insuficiente o pueda haber cambiado.
+- Las investigaciones que VERA aprueba pueden guardarse como resúmenes breves con consulta, referencias y motivo de validación en `lucy_research_knowledge`, aislados por restaurante. Lucy puede recuperar hasta cuatro resúmenes pertinentes en futuras coordinaciones. No se copian páginas completas ni se entrena o modifica el modelo.
+- La validación automática de VERA es un filtro de evidencia, no una garantía absoluta de verdad. Las respuestas deben seguir mostrando fuentes y advertir cuando la evidencia sea insuficiente o pueda haber cambiado.
 - Para habilitar esta memoria, ejecutar `db/migrations/2026-11-21-lucy-research-knowledge.sql` en la base de datos aislada de Preview, después de `db/schema.sql`. No ejecutarla en producción.
